@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الحاذبية في الفيزياء - تجربة تفاعلية</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #f0f0f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 40px;
+            color: #4fc3f7;
+            text-shadow: 0 0 10px rgba(79, 195, 247, 0.5);
+        }
+
+        button#startBtn {
+            padding: 18px 40px;
+            font-size: 1.5rem;
+            background: #4fc3f7;
+            color: #1a1a2e;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(79, 195, 247, 0.4);
+            transition: all 0.3s ease;
+            font-weight: bold;
+            margin: 30px 0;
+        }
+
+        button#startBtn:hover {
+            transform: scale(1.05);
+            background: #00b0ff;
+            box-shadow: 0 12px 25px rgba(79, 195, 247, 0.6);
+        }
+
+        .carousel {
+            max-width: 900px;
+            margin: 40px auto;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.8s ease;
+            position: relative;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .carousel.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .slide {
+            display: none;
+            text-align: right;
+        }
+
+        .slide.active {
+            display: block;
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .slide h3 {
+            color: #4fc3f7;
+            font-size: 1.5rem;
+            margin: 20px 0;
+        }
+
+        .slide p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 30px;
+            color: #e0e0e0;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .nav-btn {
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            background: #2c5aa0;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: #1e4580;
+        }
+
+        .nav-btn:disabled {
+            background: #555;
+            cursor: not-allowed;
+        }
+
+        .footer {
+            margin-top: 60px;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        @media (max-width: 700px) {
+            h1 { font-size: 2rem; }
+            .slide img { height: 200px; }
+            .nav-btn { padding: 10px 20px; font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>الحاذبية في الفيزياء</h1>
+    <button id="startBtn">ابدأ استكشاف الحاذبية</button>
+
+    <div class="carousel" id="carousel">
+        <!-- الشرائح (Slides) -->
+        <div class="slide active" data-index="0">
+            <img src="https://i.imgur.com/8qRkZQj.png" alt="دقة عالية واتساق عالي">
+            <h3>الحالة المثالية: دقة عالية + اتساق عالي</h3>
+            <p>القياسات قريبة جدًا من القيمة الحقيقية، وكل مرة تُعاد فيها القياسة تكون قريبة من سابقتها. مثل رمي السهام جميعها في مركز الهدف — هذا ما نسعى إليه في التجارب العلمية.</p>
+        </div>
+
+        <div class="slide" data-index="1">
+            <img src="https://i.imgur.com/3WtLJUy.png" alt="دقة منخفضة واتساق عالي">
+            <h3>اتساق عالي لكن دقة منخفضة</h3>
+            <p>جميع القياسات متقاربة جدًا (اتساق عالي)، لكنها بعيدة عن القيمة الحقيقية. مثل رمي السهام في نفس المنطقة البعيدة عن المركز — الأداة خاطئة لكنها ثابتة.</p>
+        </div>
+
+        <div class="slide" data-index="2">
+            <img src="https://i.imgur.com/6mYvFVd.png" alt="دقة عالية واتساق منخفض">
+            <h3>دقة عالية لكن اتساق منخفض</h3>
+            <p>القياسات قريبة من القيمة الحقيقية، لكنها متفرقة وغير متسقة. مثل رمي السهام حول المركز بشكل عشوائي — متوسطها صحيح، لكن لا يمكن الوثوق بكل قياس.</p>
+        </div>
+
+        <div class="slide" data-index="3">
+            <img src="https://i.imgur.com/7GzNwKg.png" alt="دقة منخفضة واتساق منخفض">
+            <h3>الأسوأ: دقة منخفضة + اتساق منخفض</h3>
+            <p>القياسات بعيدة عن الحقيقة وغير متسقة. السهام مبعثرة في كل مكان — هذه النتائج غير موثوقة تمامًا ولا تصلح لأي تجربة علمية.</p>
+        </div>
+
+        <div class="nav-buttons">
+            <button class="nav-btn" id="prevBtn" disabled>السابق</button>
+            <button class="nav-btn" id="nextBtn">التالي</button>
+        </div>
+    </div>
+
+    <div class="footer">
+        &copy; 2025 تعليم الفيزياء — تجربة تفاعلية لفهم الدقة والاتساق
+    </div>
+
+    <script>
+        const startBtn = document.getElementById('startBtn');
+        const carousel = document.getElementById('carousel');
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        let currentSlide = 0;
+
+        startBtn.addEventListener('click', () => {
+            startBtn.style.display = 'none'; // إخفاء الزر بعد البدء
+            carousel.classList.add('show');
+            slides[0].classList.add('active'); // تفعيل أول شريحة
+        });
+
+        nextBtn.addEventListener('click', () => {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].classList.add('active');
+
+            prevBtn.disabled = false;
+            if (currentSlide === slides.length - 1) nextBtn.disabled = true;
+        });
+
+        prevBtn.addEventListener('click', () => {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+            slides[currentSlide].classList.add('active');
+
+            nextBtn.disabled = false;
+            if (currentSlide === 0) prevBtn.disabled = true;
+        });
+
+        // تفعيل/تعطيل الأزرار عند البداية
+        prevBtn.disabled = true;
+        nextBtn.disabled = slides.length <= 1;
+    </script>
+
+</body>
+</html>
