@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>كرة تُسحب وتُرمى مع جاذبية أرضية</title>
+    <title>ارمِ الكرة من الماوس — بدون لمسها!</title>
     <style>
         body {
             margin: 0;
@@ -21,6 +21,7 @@
             background-color: #e0e0e0;
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            cursor: pointer;
         }
     </style>
 </head>
@@ -33,8 +34,177 @@
         const ctx = canvas.getContext('2d');
 
         // إعدادات الفيزياء
-        const g = 0.5; // تسارع الجاذبية (معدل مُبسّط ليناسب الشاشة: ≈ 9.8 m/s²)
-        const friction = 0.99; // احتكاك هواء خفيف
+        const g = 0.5;           // تسارع الجاذبية (معدل مُعدّل للشاشة)
+        const friction = 0.99;   // احتكاك الهواء
+        const ballRadius = 20;
+
+        // كائن الكرة
+        let ball = {
+            x: 0,
+            y: 0,
+            vx: 0,
+            vy: 0,
+            radius: ballRadius,
+            active: false,  // هل الكرة مُطلقة؟
+            color: '#ff4757'
+        };
+
+        // حالة السحب
+        let isDragging = false;
+        let dragStart = { x: 0, y: 0 };
+        let powerLine = null;
+
+        // رسم الكرة
+        function drawBall() {
+            if (!ball.active) return;
+
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fillStyle = ball.color;
+            ctx.fill();
+            ctx.strokeStyle = '#d63031';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            ctx.closePath();
+        }
+
+        // رسم خط السحب (عند الضغط)
+        function drawPowerLine() {
+            if (!isDragging || !powerLine) return;
+
+            ctx.beginPath();
+            ctx.moveTo(powerLine.start.x, powerLine.start.y);
+            ctx.lineTo(powerLine.end.x, powerLine.end.y);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([5, 5]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // رسم سهم صغير في نهاية الخط
+            const angle = Math.atan2(powerLine.end.y - powerLine.start.y, powerLine.end.x - powerLine.start.x);
+            const arrowLength = 15;
+            const arrowWidth = 8;
+
+            ctx.save();
+            ctx.translate(powerLine.end.x, powerLine.end.y);
+            ctx.rotate(angle);
+
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(-arrowLength, -arrowWidth/2);
+            ctx.lineTo(-arrowLength, arrowWidth/2);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        // تحديث حركة الكرة
+        function updateBall() {
+            if (!ball.active) return;
+
+            // التسارع → السرعة → الموقع
+            ball.vy += g;           // جاذبية تؤثر كل إطار
+            ball.x += ball.vx;
+            ball.y += ball.vy;
+
+            // احتكاك خفيف
+            ball.vx *= friction;
+            ball.vy *= friction;
+
+            // تصادم مع الأرض
+            if (ball.y + ball.radius > canvas.height) {
+                ball.y = canvas.height - ball.radius;
+                ball.vy *= -0.6; // انعكاس مع فقدان الطاقة
+                ball.vx *= 0.9;
+            }
+
+            // تصادم مع الجدران الجانبية
+            if (ball.x + ball.radius > canvas.width) {
+                ball.x = canvas.width - ball.radius;
+                ball.vx *= -0.7;
+            }
+            if (ball.x - ball.radius < 0) {
+                ball.x = ball.radius;
+                ball.vx *= -0.7;
+            }
+
+            // تصادم مع السقف
+            if (ball.y - ball.radius < 0) {
+                ball.y = ball.radius;
+                ball.vy *= -0.6;
+            }
+        }
+
+        // الرسم الأساسي
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            drawPowerLine();     // خط السحب
+            drawBall();          // الكرة المُطلقة
+            updateBall();        // تحديث الحركة
+
+            requestAnimationFrame(draw);
+        }
+
+        // مراقبة الماوس
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            // بدء السحب من مكان النقر
+            isDragging = true;
+            dragStart = { x, y };
+            powerLine = { start: dragStart, end: { x, y } };
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            // تحديث نهاية خط السحب
+            powerLine.end = { x, y };
+        });
+
+        canvas.addEventListener('mouseup', (e) => {
+            if (!isDragging) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            // حساب القوة والاتجاه
+            const dx = dragStart.x - x;   // عكس الاتجاه: نسحب للخلف، نطلق للأمام
+            const dy = dragStart.y - y;
+
+            // تقييد أقصى قوة
+            const maxPower = 15;
+            const power = Math.min(Math.sqrt(dx*dx + dy*dy) / 5, maxPower);
+
+            // تعيين السرعة الأولية
+            ball.x = dragStart.x;
+            ball.y = dragStart.y;
+            ball.vx = dx * 0.15;   // تحويل السحب إلى سرعة
+            ball.vy = dy * 0.15;
+            ball.active = true;
+
+            // إعادة تعيين السحب
+            isDragging = false;
+            powerLine = null;
+        });
+
+        // بدء المحاكاة
+        draw();
+    </script>
+
+</body>
+</html>        const friction = 0.99; // احتكاك هواء خفيف
 
         // كرة
         const ball = {
