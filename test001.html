@@ -3,586 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الجاذبية الكونية: محاكي تفاعلي للنظام الشمسي</title>
+    <title>كرة تُسحب وتُرمى بالماوس</title>
     <style>
         body {
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #0a1a2f, #16213e, #0f2027);
-            color: #e0e0e0;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
             font-family: 'Tajawal', sans-serif;
-            overflow: hidden;
-            text-align: center;
         }
 
-        h1 {
-            font-size: 2.5rem;
-            margin: 20px 0;
-            color: #4fc3f7;
-            text-shadow: 0 0 15px rgba(79, 195, 247, 0.4);
-        }
-
-        #canvas-container {
-            position: relative;
-            margin: 20px auto;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
-            overflow: hidden;
-        }
-
-        canvas {
-            display: block;
-            background: #000;
+        #canvas {
+            background-color: #e0e0e0;
             border-radius: 10px;
-        }
-
-        .controls {
-            margin: 20px auto;
-            max-width: 900px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-        }
-
-        .controls h2 {
-            color: #4fc3f7;
-            margin-bottom: 15px;
-        }
-
-        .controls button {
-            padding: 10px 20px;
-            margin: 5px;
-            background: #4fc3f7;
-            color: #1a1a2e;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-
-        .controls button:hover {
-            transform: scale(1.05);
-            background: #00b0ff;
-        }
-
-        .info-panel {
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            min-height: 140px;
-            text-align: right;
-            font-size: 1.1rem;
-            line-height: 1.7;
-            font-weight: 300;
-            overflow-y: auto;
-        }
-
-        .highlight {
-            color: #ffcc00;
-            font-weight: bold;
-        }
-
-        .footer {
-            margin-top: 40px;
-            font-size: 0.9rem;
-            color: #888;
-        }
-
-        .toggle-btn {
-            background: #5d4037 !important;
-            color: white !important;
-            margin: 0 5px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
     </style>
 </head>
 <body>
 
-    <h1>🌌 الجاذبية الكونية: محاكي تفاعلي للنظام الشمسي وقوانين نيوتن</h1>
-
-    <div id="canvas-container">
-        <canvas id="canvas" width="900" height="600"></canvas>
-    </div>
-
-    <div class="controls">
-        <h2>تحكم بالمحاكاة</h2>
-        <button id="resetBtn">إعادة الضبط</button>
-        <button id="moonBtn">القمر (g=1.6)</button>
-        <button id="earthBtn">الأرض (g=9.8)</button>
-        <button id="marsBtn">المريخ (g=3.7)</button>
-        <button id="jupiterBtn">المشتري (g=24.8)</button>
-        <button id="spaceBtn">الفضاء (g=0)</button>
-        <button id="toggleMode" class="toggle-btn">← انتقل لوضع الكواكب</button>
-        <button id="changeGBtn">غير G → 10⁻¹⁰</button>
-        <button id="resetGBtn">استعد G ← 6.67e-11</button>
-    </div>
-
-    <div class="info-panel" id="infoPanel">
-        ابدأ بسحب الحجر أسفل الشاشة لإطلاقه، أو اضغط على "انتقال لوضع الكواكب" لتجربة النظام الشمسي!
-    </div>
-
-    <div class="footer">
-        &copy; 2025 محاكي فيزيائي تعليمي — مبني على قوانين نيوتن والجذب الكوني
-    </div>
+    <canvas id="canvas" width="800" height="500"></canvas>
 
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
-        const infoPanel = document.getElementById('infoPanel');
 
-        // الثوابت الفيزيائية
-        let G = 6.67430e-11; // ثابت الجذب الكوني
-        let showOrbits = true;
-        let currentMode = 'projectile'; // 'projectile' أو 'solar'
-
-        // كائنات الجسم
-        let objects = [];
-
-        // الكوكب/الحجر الأساسي
-        let selectedObject = null;
-
-        // الشمس (في وضع الكواكب)
-        const sun = {
+        // كرة
+        const ball = {
             x: canvas.width / 2,
             y: canvas.height / 2,
-            radius: 40,
-            mass: 1.989e30, // كتلة الشمس (kg)
-            color: '#ffff99',
-            glow: true
+            radius: 30,
+            vx: 0,
+            vy: 0,
+            isDragging: false
         };
 
-        // إعداد أولي
-        resetSimulation();
-
-        function resetSimulation() {
-            objects = [];
-            selectedObject = null;
-            if (currentMode === 'projectile') {
-                // وضع القذف
-                objects.push({
-                    x: canvas.width / 2,
-                    y: canvas.height - 50,
-                    radius: 15,
-                    vx: 0,
-                    vy: 0,
-                    mass: 1,
-                    color: '#b37f5c',
-                    trail: [],
-                    isDragging: false,
-                    isPlanet: false
-                });
-            } else {
-                // وضع النظام الشمسي
-                objects.push({
-                    x: canvas.width / 2,
-                    y: canvas.height / 2,
-                    radius: 40,
-                    vx: 0,
-                    vy: 0,
-                    mass: 1.989e30,
-                    color: '#ffff99',
-                    trail: [],
-                    isDragging: false,
-                    isPlanet: false,
-                    name: 'الشمس'
-                });
-
-                // كوكب الأرض
-                addPlanet(
-                    canvas.width / 2 + 150,
-                    canvas.height / 2,
-                    10,
-                    5.972e24,
-                    '#4fc3f7',
-                    0,
-                    -1.5
-                );
-
-                // كوكب المريخ
-                addPlanet(
-                    canvas.width / 2 + 250,
-                    canvas.height / 2,
-                    8,
-                    6.39e23,
-                    '#e74c3c',
-                    0,
-                    -1.1
-                );
-
-                // كوكب القمر (يدور حول الأرض)
-                addPlanet(
-                    canvas.width / 2 + 170,
-                    canvas.height / 2,
-                    4,
-                    7.342e22,
-                    '#cccccc',
-                    0,
-                    -2.0
-                );
-            }
-        }
-
-        function addPlanet(x, y, radius, mass, color, vx, vy) {
-            objects.push({
-                x,
-                y,
-                radius,
-                vx,
-                vy,
-                mass,
-                color,
-                trail: [],
-                isDragging: false,
-                isPlanet: true,
-                name: 'كوكب'
-            });
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // رسم الخلفية النجمية
-            for (let i = 0; i < 100; i++) {
-                ctx.fillStyle = 'rgba(255,255,255,' + Math.random()*0.6 + ')';
-                ctx.fillRect(Math.random()*canvas.width, Math.random()*canvas.height, 1, 1);
-            }
-
-            // رسم مدارات الكواكب (إن كانت مفعّلة)
-            if (showOrbits && currentMode === 'solar') {
-                objects.forEach(obj => {
-                    if (!obj.isPlanet || obj.name === 'الشمس') return;
-                    ctx.beginPath();
-                    ctx.arc(obj.x, obj.y, obj.radius + 50, 0, Math.PI * 2);
-                    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-                    ctx.stroke();
-                });
-            }
-
-            // رسم الشمس
-            if (currentMode === 'solar') {
-                drawStar(sun);
-            }
-
-            // رسم الأجرام
-            objects.forEach(obj => {
-                if (obj.isDragging) {
-                    // مؤشر السحب
-                    const dx = mouse.x - obj.x;
-                    const dy = mouse.y - obj.y;
-                    ctx.beginPath();
-                    ctx.moveTo(obj.x, obj.y);
-                    ctx.lineTo(mouse.x, mouse.y);
-                    ctx.strokeStyle = 'rgba(255,255,255,0.7)';
-                    ctx.lineWidth = 2;
-                    ctx.setLineDash([5,5]);
-                    ctx.stroke();
-                    ctx.setLineDash([]);
-                }
-
-                // رسم الذيل (المسار)
-                if (obj.trail.length > 1) {
-                    ctx.beginPath();
-                    ctx.moveTo(obj.trail[0].x, obj.trail[0].y);
-                    for (let i = 1; i < obj.trail.length; i++) {
-                        ctx.lineTo(obj.trail[i].x, obj.trail[i].y);
-                    }
-                    ctx.strokeStyle = obj.color + '80';
-                    ctx.lineWidth = 1.5;
-                    ctx.stroke();
-                }
-
-                // رسم الجسم
-                ctx.beginPath();
-                ctx.arc(obj.x, obj.y, obj.radius, 0, Math.PI * 2);
-                ctx.fillStyle = obj.color;
-                ctx.fill();
-                ctx.strokeStyle = '#fff';
-                ctx.lineWidth = 1;
-                ctx.stroke();
-                ctx.closePath();
-
-                // تأثير توهج للشمس
-                if (obj.glow) {
-                    const gradient = ctx.createRadialGradient(obj.x, obj.y, obj.radius, obj.x, obj.y, obj.radius * 3);
-                    gradient.addColorStop(0, 'rgba(255,255,150,0.8)');
-                    gradient.addColorStop(1, 'rgba(255,255,150,0)');
-                    ctx.fillStyle = gradient;
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-                }
-            });
-
-            updatePhysics();
-            requestAnimationFrame(draw);
-        }
-
-        function drawStar(star) {
+        // رسم الكرة
+        function drawBall() {
             ctx.beginPath();
-            ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-            ctx.fillStyle = star.color;
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fillStyle = '#ff4757';
             ctx.fill();
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#d63031';
+            ctx.lineWidth = 3;
             ctx.stroke();
             ctx.closePath();
         }
 
-        function updatePhysics() {
-            if (currentMode === 'projectile') {
-                updateProjectile();
-            } else {
-                updateSolarSystem();
+        // تحديث الكرة (الحركة)
+        function updateBall() {
+            if (!ball.isDragging) {
+                // التحرك بسبب السرعة (إذا تم إلقاءها)
+                ball.x += ball.vx;
+                ball.y += ball.vy;
+
+                // تأثير احتكاك بسيط
+                ball.vx *= 0.99;
+                ball.vy *= 0.99;
+            }
+
+            // توقف عند الحواف
+            if (ball.x + ball.radius > canvas.width) {
+                ball.x = canvas.width - ball.radius;
+                ball.vx *= -0.7;
+            }
+            if (ball.x - ball.radius < 0) {
+                ball.x = ball.radius;
+                ball.vx *= -0.7;
+            }
+            if (ball.y + ball.radius > canvas.height) {
+                ball.y = canvas.height - ball.radius;
+                ball.vy *= -0.7;
+            }
+            if (ball.y - ball.radius < 0) {
+                ball.y = ball.radius;
+                ball.vy *= -0.7;
             }
         }
 
-        function updateProjectile() {
-            const earth = objects[0];
-            if (earth.isDragging) return;
-
-            // تسارع الجاذبية فقط في الاتجاه الرأسي
-            earth.vy += g * 0.05;
-
-            earth.x += earth.vx;
-            earth.y += earth.vy;
-
-            // توقف عند الأرض
-            if (earth.y > canvas.height - 50 - earth.radius) {
-                earth.y = canvas.height - 50 - earth.radius;
-                earth.vy *= -0.6;
-                earth.vx *= 0.95;
-                if (Math.abs(earth.vy) < 0.3) earth.vy = 0;
-            }
-
-            // تخزين المسار
-            if (earth.trail.length < 60) {
-                earth.trail.push({x: earth.x, y: earth.y});
-            } else {
-                earth.trail.shift();
-                earth.trail.push({x: earth.x, y: earth.y});
-            }
-
-            // تحديث البيانات
-            const speed = Math.sqrt(earth.vx*earth.vx + earth.vy*earth.vy);
-            const maxHeight = Math.max(...earth.trail.map(p => p.y));
-            const timeElapsed = earth.trail.length * (1/60);
-            const range = earth.x - (canvas.width / 2);
-
-            updateInfoProjectiles(speed, maxHeight, timeElapsed, range);
-        }
-
-        function updateSolarSystem() {
-            // حساب القوى بين جميع الأجرام
-            for (let i = 0; i < objects.length; i++) {
-                const a = objects[i];
-                if (a.isDragging) continue;
-
-                for (let j = i + 1; j < objects.length; j++) {
-                    const b = objects[j];
-                    if (b.isDragging) continue;
-
-                    // فرق الموقع
-                    let dx = b.x - a.x;
-                    let dy = b.y - a.y;
-                    let distSq = dx*dx + dy*dy;
-                    let dist = Math.sqrt(distSq);
-
-                    // تجنب الانهيار عند المسافات الصغيرة جدًا
-                    if (dist < 10) dist = 10;
-
-                    // قانون نيوتن: F = G * m1 * m2 / r²
-                    let force = G * a.mass * b.mass / distSq;
-
-                    // مكونات القوة
-                    let fx = force * dx / dist;
-                    let fy = force * dy / dist;
-
-                    // تسارع = القوة / الكتلة
-                    a.vx += fx / a.mass * 0.001;
-                    a.vy += fy / a.mass * 0.001;
-                    b.vx -= fx / b.mass * 0.001;
-                    b.vy -= fy / b.mass * 0.001;
-                }
-            }
-
-            // تحديث المواقع
-            objects.forEach(obj => {
-                if (obj.isDragging) return;
-                obj.x += obj.vx;
-                obj.y += obj.vy;
-
-                // تخزين المسار
-                if (obj.trail.length < 100) {
-                    obj.trail.push({x: obj.x, y: obj.y});
-                } else {
-                    obj.trail.shift();
-                    obj.trail.push({x: obj.x, y: obj.y});
-                }
-            });
-
-            // تحديث البيانات
-            updateInfoSolarSystem();
-        }
-
-        function updateInfoProjectiles(speed, maxHeight, time, range) {
-            let msg = `
-                <span class="highlight">السرعة:</span> ${speed.toFixed(2)} m/s<br>
-                <span class="highlight">الارتفاع الأقصى:</span> ${(canvas.height - 50 - maxHeight).toFixed(2)} m<br>
-                <span class="highlight">المدى الأفقي:</span> ${range.toFixed(2)} m<br>
-                <span class="highlight">الزمن:</span> ${time.toFixed(2)} s<br>
-                <span class="highlight">تسارع الجاذبية (g):</span> ${g.toFixed(1)} m/s²<br><br>
-                
-                <strong>الشرح:</strong><br>
-                هذا هو قذف تحت تأثير جاذبية الأرض. القوة: F = mg.<br>
-                لكن الجاذبية الحقيقية هي نتيجة جذب كوني: F = G·M·m / r².
-                هنا نستخدم g كتقريب لأننا قريبون من سطح الأرض.
-            `;
-            infoPanel.innerHTML = msg;
-        }
-
-        function updateInfoSolarSystem() {
-            let msg = `<span class="highlight">وضع النظام الشمسي!</span><br><br>`;
-            
-            objects.forEach(obj => {
-                if (!obj.isPlanet) return;
-                const sunObj = objects.find(o => o.name === 'الشمس');
-                const dx = obj.x - sunObj.x;
-                const dy = obj.y - sunObj.y;
-                const dist = Math.sqrt(dx*dx + dy*dy);
-                const speed = Math.sqrt(obj.vx*obj.vx + obj.vy*obj.vy);
-                const force = G * obj.mass * sunObj.mass / (dist*dist);
-                
-                msg += `
-                    <strong>${obj.name || 'كوكب'}</strong>:<br>
-                    المسافة من الشمس: ${Math.round(dist / 100)} px (~${(dist / 100 * 1.5e9).toExponential(1)} km)<br>
-                    السرعة: ${speed.toFixed(2)} px/s<br>
-                    القوة الجاذبة: ${force.toExponential(2)} N<br>
-                    <em>السبب في عدم سقوطه: السرعة المماسية توازن الجذب!</em><br><br>
-                `;
-            });
-
-            msg += `
-                <span class="highlight">ثابت الجذب الكوني G:</span> ${G.toExponential(5)} N·m²/kg²<br>
-                هذه القيمة هي أصغر ثابت في الفيزياء — لكنها تتحكم في كل حركة في الكون!<br>
-                لو زدتها قليلًا، ستنهار المجرات. لو نقصتها، لن تتشكل النجوم!
-            `;
-            infoPanel.innerHTML = msg;
-        }
-
-        function toggleMode() {
-            currentMode = currentMode === 'projectile' ? 'solar' : 'projectile';
-            document.getElementById('toggleMode').textContent = currentMode === 'projectile' 
-                ? '← انتقل لوضع الكواكب' 
-                : '→ انتقل لوضع القذف';
-            resetSimulation();
-        }
-
-        function changeG() {
-            G = G === 6.67430e-11 ? 1e-10 : 6.67430e-11;
-            document.getElementById('changeGBtn').textContent = G === 6.67430e-11 
-                ? 'غير G → 10⁻¹⁰' 
-                : 'استعد G ← 6.67e-11';
-            showInfo(`تم تغيير G إلى: ${G.toExponential(5)}`);
-        }
-
-        function setGravity(value) {
-            g = value;
-            if (currentMode === 'projectile') {
-                resetSimulation();
-                showInfo(`تم تغيير الجاذبية إلى: ${g} m/s²`);
-            }
-        }
-
-        function showInfo(text) {
-            infoPanel.innerHTML = `<strong style="color:#ffcc00;">${text}</strong>`;
+        // الرسم الأساسي
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBall();
+            updateBall();
+            requestAnimationFrame(draw);
         }
 
         // مراقبة الماوس
-        const mouse = { x: 0, y: 0 };
+        let mouse = { x: 0, y: 0 };
+        let isPressed = false;
+
         canvas.addEventListener('mousedown', (e) => {
             const rect = canvas.getBoundingClientRect();
             mouse.x = e.clientX - rect.left;
             mouse.y = e.clientY - rect.top;
 
-            if (currentMode === 'projectile') {
-                const obj = objects[0];
-                const dx = mouse.x - obj.x;
-                const dy = mouse.y - obj.y;
-                const dist = Math.sqrt(dx*dx + dy*dy);
-                if (dist < obj.radius) {
-                    obj.isDragging = true;
-                    obj.trail = [];
-                }
-            } else {
-                // وضع الكواكب: ابحث عن كوكب قريب
-                for (let obj of objects) {
-                    const dx = mouse.x - obj.x;
-                    const dy = mouse.y - obj.y;
-                    const dist = Math.sqrt(dx*dx + dy*dy);
-                    if (dist < obj.radius) {
-                        selectedObject = obj;
-                        obj.isDragging = true;
-                        break;
-                    }
-                }
+            // حساب المسافة من مركز الكرة
+            const dx = mouse.x - ball.x;
+            const dy = mouse.y - ball.y;
+            const distance = Math.sqrt(dx*dx + dy*dy);
+
+            if (distance < ball.radius) {
+                ball.isDragging = true;
+                isPressed = true;
             }
         });
 
         canvas.addEventListener('mousemove', (e) => {
+            if (!isPressed) return;
+
             const rect = canvas.getBoundingClientRect();
             mouse.x = e.clientX - rect.left;
             mouse.y = e.clientY - rect.top;
 
-            if (currentMode === 'projectile') {
-                if (objects[0].isDragging) {
-                    objects[0].x = mouse.x;
-                    objects[0].y = mouse.y;
-                }
-            } else {
-                if (selectedObject && selectedObject.isDragging) {
-                    selectedObject.x = mouse.x;
-                    selectedObject.y = mouse.y;
-                }
+            if (ball.isDragging) {
+                ball.x = mouse.x;
+                ball.y = mouse.y;
             }
         });
 
         canvas.addEventListener('mouseup', () => {
-            if (currentMode === 'projectile') {
-                const obj = objects[0];
-                if (obj.isDragging) {
-                    const dx = mouse.x - obj.x;
-                    const dy = mouse.y - obj.y;
-                    obj.vx = -dx * 0.05;
-                    obj.vy = -dy * 0.05;
-                    obj.isDragging = false;
-                    showInfo("تم إطلاق الحجر! تابع مساره تحت تأثير الجاذبية.");
-                }
-            } else {
-                if (selectedObject && selectedObject.isDragging) {
-                    const dx = mouse.x - selectedObject.x;
-                    const dy = mouse.y - selectedObject.y;
-                    selectedObject.vx = -dx * 0.01;
-                    selectedObject.vy = -dy * 0.01;
-                    selectedObject.isDragging = false;
-                    selectedObject = null;
-                    showInfo("تم إطلاق الكوكب! تابع مداره بفعل الجاذبية الكونية.");
-                }
+            if (ball.isDragging) {
+                // حساب سرعة الإطلاق بناءً على سرعة السحب
+                const dx = mouse.x - ball.x;
+                const dy = mouse.y - ball.y;
+                ball.vx = -dx * 0.1; // تحويل السحب إلى سرعة
+                ball.vy = -dy * 0.1;
+                ball.isDragging = false;
             }
-        });
-
-        // الأزرار
-        document.getElementById('resetBtn').addEventListener('click', resetSimulation);
-        document.getElementById('moonBtn').addEventListener('click', () => setGravity(1.6));
-        document.getElementById('earthBtn').addEventListener('click', () => setGravity(9.8));
-        document.getElementById('marsBtn').addEventListener('click', () => setGravity(3.7));
-        document.getElementById('jupiterBtn').addEventListener('click', () => setGravity(24.8));
-        document.getElementById('spaceBtn').addEventListener('click', () => setGravity(0));
-        document.getElementById('toggleMode').addEventListener('click', toggleMode);
-        document.getElementById('changeGBtn').addEventListener('click', changeG);
-        document.getElementById('resetGBtn').addEventListener('click', () => {
-            G = 6.67430e-11;
-            document.getElementById('changeGBtn').textContent = 'غير G → 10⁻¹⁰';
-            showInfo('تم استعادة ثابت الجذب الكوني: 6.67 × 10⁻¹¹');
+            isPressed = false;
         });
 
         // بدء المحاكاة
