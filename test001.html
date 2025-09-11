@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>كرة تُسحب وتُرمى بالماوس</title>
+    <title>كرة تُسحب وتُرمى مع جاذبية أرضية</title>
     <style>
         body {
             margin: 0;
@@ -32,13 +32,19 @@
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
 
+        // إعدادات الفيزياء
+        const g = 0.5; // تسارع الجاذبية (معدل مُبسّط ليناسب الشاشة: ≈ 9.8 m/s²)
+        const friction = 0.99; // احتكاك هواء خفيف
+
         // كرة
         const ball = {
             x: canvas.width / 2,
             y: canvas.height / 2,
             radius: 30,
-            vx: 0,
-            vy: 0,
+            vx: 0,      // السرعة الأفقية
+            vy: 0,      // السرعة الرأسية
+            ax: 0,      // التسارع الأفقي (صفر إلا إذا كان هناك قوة)
+            ay: g,      // التسارع الرأسي = الجاذبية
             isDragging: false
         };
 
@@ -54,19 +60,30 @@
             ctx.closePath();
         }
 
-        // تحديث الكرة (الحركة)
+        // تحديث الكرة باستخدام قوانين الحركة (تسارع → سرعة → موقع)
         function updateBall() {
             if (!ball.isDragging) {
-                // التحرك بسبب السرعة (إذا تم إلقاءها)
+                // التسارع يؤثر على السرعة
+                ball.vx += ball.ax;
+                ball.vy += ball.ay;
+
+                // السرعة تؤثر على الموقع
                 ball.x += ball.vx;
                 ball.y += ball.vy;
 
-                // تأثير احتكاك بسيط
-                ball.vx *= 0.99;
-                ball.vy *= 0.99;
+                // احتكاك خفيف (لإيقاف الحركة تدريجيًا)
+                ball.vx *= friction;
+                ball.vy *= friction;
             }
 
-            // توقف عند الحواف
+            // تصادم مع الأرض (الأسفل)
+            if (ball.y + ball.radius > canvas.height) {
+                ball.y = canvas.height - ball.radius;
+                ball.vy *= -0.7; // انعكاس مع فقدان الطاقة
+                ball.vx *= 0.9;  // احتكاك مع الأرض
+            }
+
+            // تصادم مع الجدران الجانبية
             if (ball.x + ball.radius > canvas.width) {
                 ball.x = canvas.width - ball.radius;
                 ball.vx *= -0.7;
@@ -75,10 +92,8 @@
                 ball.x = ball.radius;
                 ball.vx *= -0.7;
             }
-            if (ball.y + ball.radius > canvas.height) {
-                ball.y = canvas.height - ball.radius;
-                ball.vy *= -0.7;
-            }
+
+            // تصادم مع السقف (الأعلى)
             if (ball.y - ball.radius < 0) {
                 ball.y = ball.radius;
                 ball.vy *= -0.7;
@@ -102,7 +117,6 @@
             mouse.x = e.clientX - rect.left;
             mouse.y = e.clientY - rect.top;
 
-            // حساب المسافة من مركز الكرة
             const dx = mouse.x - ball.x;
             const dy = mouse.y - ball.y;
             const distance = Math.sqrt(dx*dx + dy*dy);
@@ -128,11 +142,11 @@
 
         canvas.addEventListener('mouseup', () => {
             if (ball.isDragging) {
-                // حساب سرعة الإطلاق بناءً على سرعة السحب
+                // عند الإطلاق: تحويل فرق الماوس إلى سرعة أولية
                 const dx = mouse.x - ball.x;
                 const dy = mouse.y - ball.y;
-                ball.vx = -dx * 0.1; // تحويل السحب إلى سرعة
-                ball.vy = -dy * 0.1;
+                ball.vx = -dx * 0.1;  // تحويل السحب إلى سرعة أفقية
+                ball.vy = -dy * 0.1;  // تحويل السحب إلى سرعة رأسية
                 ball.isDragging = false;
             }
             isPressed = false;
