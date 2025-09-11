@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>قواعد السلوك والمواظبة - Student Conduct and Attendance Code</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /* =================== GLOBAL STYLES =================== */
+    :root {
+      --primary-green: #006633;
+      --secondary-green: #008844;
+      --dark: #000000;
+      --light: #ffffff;
+      --gray: #f5f5f5;
+      --text-dark: #333333;
+      --border: #cccccc;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Tajawal', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--light);
+      color: var(--text-dark);
+      line-height: 1.7;
+      transition: all 0.3s ease;
+    }
+
+    body.en {
+      direction: ltr;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      color: var(--primary-green);
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    p {
+      margin-bottom: 1.2rem;
+    }
+
+    a {
+      color: var(--primary-green);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    a:hover {
+      color: var(--secondary-green);
+      text-decoration: underline;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* =================== HEADER =================== */
+    header {
+      background-color: var(--dark);
+      color: var(--light);
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: var(--primary-green);
+    }
+
+    .lang-toggle {
+      display: flex;
+      gap: 0.5rem;
+      background: var(--primary-green);
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      color: white;
+    }
+
+    .lang-toggle button {
+      background: none;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      padding: 0.3rem 0.6rem;
+      border-radius: 15px;
+    }
+
+    .lang-toggle button.active {
+      background: white;
+      color: var(--dark);
+      font-weight: bold;
+    }
+
+    /* =================== NAVIGATION =================== */
+    nav {
+      background-color: var(--primary-green);
+      padding: 0.8rem 0;
+    }
+
+    .nav-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .nav-item a {
+      color: var(--light);
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      transition: background 0.3s;
+    }
+
+    .nav-item a:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* =================== HERO BANNER =================== */
+    .hero {
+      background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80');
+      background-size: cover;
+      background-position: center;
+      color: white;
+      text-align: center;
+      padding: 6rem 1rem;
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .hero p {
+      font-size: 1.5rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* =================== CONTENT SECTIONS =================== */
+    section {
+      padding: 4rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 3rem;
+      position: relative;
+    }
+
+    .section-title::after {
+      content: '';
+      display: block;
+      width: 80px;
+      height: 4px;
+      background: var(--primary-green);
+      margin: 1rem auto;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+
+    .card {
+      background: var(--light);
+      border-radius: 10px;
+      padding: 2rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0, 102, 51, 0.15);
+    }
+
+    .card h3 {
+      color: var(--primary-green);
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+    }
+
+    .card ul {
+      padding-left: 1.5rem;
+    }
+
+    .card li {
+      margin-bottom: 0.7rem;
+    }
+
+    /* =================== FOOTER =================== */
+    footer {
+      background-color: var(--dark);
+      color: var(--light);
+      text-align: center;
+      padding: 2rem 0;
+      margin-top: 4rem;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin: 1.5rem 0;
+    }
+
+    .footer-links a {
+      color: #ccc;
+      font-size: 0.9rem;
+    }
+
+    .footer-links a:hover {
+      color: var(--primary-green);
+    }
+
+    .copyright {
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+
+    /* =================== TABLES =================== */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 2rem 0;
+      font-size: 0.95rem;
+    }
+
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.8rem;
+      text-align: left;
+    }
+
+    th {
+      background-color: var(--primary-green);
+      color: white;
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) {
+      background-color: var(--gray);
+    }
+
+    /* =================== RESPONSIVE =================== */
+    @media (max-width: 768px) {
+      .header-content {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .hero h1 {
+        font-size: 2.2rem;
+      }
+
+      .hero p {
+        font-size: 1.2rem;
+      }
+
+      .nav-container {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .nav-item {
+        margin: 0.3rem 0;
+      }
+    }
+
+    /* RTL Specific Adjustments */
+    body[dir="rtl"] .content-grid,
+    body[dir="rtl"] .nav-container,
+    body[dir="rtl"] .footer-links {
+      direction: rtl;
+    }
+
+    body[dir="rtl"] .card ul {
+      padding-right: 1.5rem;
+      padding-left: 0;
+    }
+
+    body[dir="rtl"] .table-container {
+      direction: rtl;
+    }
+
+    /* Print Styles */
+    @media print {
+      header, nav, footer, .lang-toggle {
+        display: none;
+      }
+      body {
+        background: white;
+        color: black;
+      }
+      a {
+        color: black;
+        text-decoration: underline;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="container header-content">
+      <div class="logo">وزارة التعليم</div>
+      <div class="lang-toggle">
+        <button id="lang-ar" class="active">العربية</button>
+        <button id="lang-en">English</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation -->
+  <nav>
+    <div class="container nav-container">
+      <div class="nav-item"><a href="#introduction">المقدمة</a></div>
+      <div class="nav-item"><a href="#behavior">قواعد السلوك</a></div>
+      <div class="nav-item"><a href="#attendance">المواظبة</a></div>
+      <div class="nav-item"><a href="#consequences">العقوبات</a></div>
+      <div class="nav-item"><a href="#forms">النماذج</a></div>
+      <div class="nav-item"><a href="#references">المراجع</a></div>
+    </div>
+  </nav>
+
+  <!-- Hero Banner -->
+  <section class="hero">
+    <h1>قواعد السلوك والمواظبة لطلاب وطالبات التعليم العام</h1>
+    <p>المرسوم الملكي رقم 1447ه - 2025 م | وزارة التعليم السعودية</p>
+  </section>
+
+  <!-- Introduction -->
+  <section id="introduction">
+    <div class="container">
+      <h2 class="section-title">المقدمة</h2>
+      <div class="content-grid">
+        <div class="card">
+          <h3>الهدف</h3>
+          <p>تهدف هذه القواعد إلى تعزيز بيئة تعليمية آمنة، منظمة، ومحترمة، تدعم نمو الطلاب الأكاديمي والأخلاقي والاجتماعي، وتحافظ على كرامة الفرد وحقوقه ضمن إطار الشريعة الإسلامية والقيم الوطنية.</p>
+        </div>
+        <div class="card">
+          <h3>النطاق</h3>
+          <p>تنطبق هذه القواعد على جميع طلاب وطالبات التعليم العام في المدارس الحكومية والأهلية في المملكة العربية السعودية، وتغطي سلوكهم داخل الحرم المدرسي، وأثناء الأنشطة المدرسية، وعبر المنصات الإلكترونية.</p>
+        </div>
+        <div class="card">
+          <h3>الأساس القانوني</h3>
+          <ul>
+            <li>النظام الأساسي للحكم</li>
+            <li>نظام التعليم</li>
+            <li>القرارات الصادرة من وزارة التعليم</li>
+            <li>الشريعة الإسلامية</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Behavior Rules -->
+  <section id="behavior">
+    <div class="container">
+      <h2 class="section-title">قواعد السلوك</h2>
+      <div class="content-grid">
+        <div class="card">
+          <h3>الاحترام والانضباط</h3>
+          <ul>
+            <li>احترام المعلمين والإداريين وزملاء الدراسة.</li>
+            <li>الالتزام بالزي المدرسي الموحد.</li>
+            <li>تجنب التحرش، التنمر، أو أي شكل من أشكال العنف.</li>
+            <li>عدم استخدام الهواتف الذكية أثناء الحصص دون إذن.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>النظافة والبيئة</h3>
+          <ul>
+            <li>الحفاظ على نظافة الفصول والممرات والمرافق العامة.</li>
+            <li>عدم إلقاء النفايات في أماكن غير مخصصة.</li>
+            <li>الإبلاغ عن أي تلف أو خلل في المنشآت.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>الاستخدام المسؤول للتكنولوجيا</h3>
+          <ul>
+            <li>استخدام المنصات التعليمية فقط لأغراض تعليمية.</li>
+            <li>منع نشر أو مشاركة محتوى غير لائق أو مخالف للقيم.</li>
+            <li>حماية الخصوصية وعدم مشاركة حسابات الآخرين.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Attendance -->
+  <section id="attendance">
+    <div class="container">
+      <h2 class="section-title">المواظبة</h2>
+      <div class="content-grid">
+        <div class="card">
+          <h3>الحضور</h3>
+          <p>يُطلب من الطالب الحضور المنتظم خلال أيام الأسبوع الدراسي. يُعتبر الغياب غير المبرر انتهاكًا جسيمًا وقد يؤدي إلى عقوبات.</p>
+        </div>
+        <div class="card">
+          <h3>التأخير</h3>
+          <p>يُسمح بتأخير معقول (حتى 15 دقيقة). التكرار قد يؤدي إلى تحذير أو إشعار أولي.</p>
+        </div>
+        <div class="card">
+          <h3>الغياب</h3>
+          <p>يجب تقديم إشعار رسمي (خطي أو إلكتروني) من ولي الأمر عند الغياب لأكثر من يومين. الغياب المتكرر دون عذر يعرض الطالب لإجراءات تأديبية.</p>
+        </div>
+      </div>
+
+      <h3 style="margin-top: 3rem; text-align: center;">جدول تقدير المواظبة</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>الفئة</th>
+            <th>عدد الأيام</th>
+            <th>الإجراء</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>ممتاز</td>
+            <td>0-2 غياب</td>
+            <td>تقدير وتشجيع</td>
+          </tr>
+          <tr>
+            <td>جيد</td>
+            <td>3-5 غياب</td>
+            <td>إشعار أولي لولي الأمر</td>
+          </tr>
+          <tr>
+            <td>مقبول</td>
+            <td>6-10 غياب</td>
+            <td>اجتماع مع الإدارة وولي الأمر</td>
+          </tr>
+          <tr>
+            <td>ضعيف</td>
+            <td>أكثر من 10 غياب</td>
+            <td>إحالة للجان التوجيه والسلوك</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Consequences -->
+  <section id="consequences">
+    <div class="container">
+      <h2 class="section-title">العقوبات</h2>
+      <p>تُطبق العقوبات تدريجيًا حسب خطورة المخالفة، مع مراعاة السياق والظروف.</p>
+
+      <div class="content-grid">
+        <div class="card">
+          <h3>العقوبات التربوية</h3>
+          <ul>
+            <li>تحذير شفهي</li>
+            <li>إشعار كتابي لولي الأمر</li>
+            <li>واجبات تربوية (كتابة مقال، تطوع)</li>
+            <li>إبعاد مؤقت عن النشاطات</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>العقوبات الإدارية</h3>
+          <ul>
+            <li>استدعاء ولي الأمر لمقابلة رسمية</li>
+            <li>تعليق المشاركة في الأنشطة</li>
+            <li>نقل إلى فصل آخر</li>
+            <li>إيقاف مؤقت (حتى 10 أيام)</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>العقوبات الجسيمة</h3>
+          <ul>
+            <li>الطرد المؤقت (أكثر من 10 أيام)</li>
+            <li>الطرد النهائي (في حالات العنف أو التحرش أو المخدرات)</li>
+            <li>إحالة للجهات الأمنية (إذا تطلب الأمر)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Forms -->
+  <section id="forms">
+    <div class="container">
+      <h2 class="section-title">النماذج الرسمية</h2>
+      <p>يمكن تنزيل النماذج التالية من موقع وزارة التعليم:</p>
+      <div class="content-grid">
+        <div class="card">
+          <h3>نموذج مخالفة السلوك</h3>
+          <p>لتوثيق المخالفات واتخاذ الإجراءات المناسبة.</p>
+          <a href="https://backtoschool.moe.gov.sa" target="_blank">تحميل النموذج</a>
+        </div>
+        <div class="card">
+          <h3>نموذج إشعار الغياب</h3>
+          <p>لإبلاغ إدارة المدرسة بالغياب المبرر.</p>
+          <a href="https://backtoschool.moe.gov.sa" target="_blank">تحميل النموذج</a>
+        </div>
+        <div class="card">
+          <h3>نموذج تقرير التوجيه السلوكي</h3>
+          <p>لتسجيل تقارير اللجان التربوية والسلوكية.</p>
+          <a href="https://backtoschool.moe.gov.sa" target="_blank">تحميل النموذج</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- References -->
+  <section id="references">
+    <div class="container">
+      <h2 class="section-title">المراجع والوثائق</h2>
+      <ul>
+        <li><a href="https://backtoschool.moe.gov.sa/n/assets/files/Procedural_Guide_for_Program_-_Enhancement_-_1444_AH.pdf" target="_blank">الدليل الإجرائي للبرنامج التحسيني - 1444ه</a></li>
+        <li><a href="https://backtoschool.moe.gov.sa/n/assets/files/Digital_Behavior_Guide_3.pdf" target="_blank">الدليل الرقمي للسلوك - 2020</a></li>
+        <li><a href="https://laws.boe.gov.sa/BoeLaws/Laws/LawDetails/83f450eb-7985-461f-b053-a9a700f2ba08/1" target="_blank">نظام التعليم (قانوني)</a></li>
+        <li><a href="https://www.hrsd.gov.sa/knowledge-centre/decisions-and-regulations/regulation-and-procedures/%D8%A7%D9%84%D8%AD%D8%A6%D9%84-%D8%A7%D9%84%D9%8A%D8%B0%D9%8A%D9%81-%D8%AA%D9%84%D8%A7-%D9%85%D8%A7%D8%A1-%D9%84%D9%81%D8%B7%D9%84%D8%A7-%D8%A7%D9%84%D9%8A%D8%A7%D8%A7%D9%8A" target="_blank">اللوائح التنفيذية للسلوك والانضباط</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="#">الخصوصية</a>
+        <a href="#">الشروط</a>
+        <a href="#">اتصل بنا</a>
+        <a href="#">الخرائط</a>
+      </div>
+      <p class="copyright">© 2025 وزارة التعليم - المملكة العربية السعودية. جميع الحقوق محفوظة.</p>
+      <p class="copyright">Ministry of Education - Kingdom of Saudi Arabia. All Rights Reserved.</p>
+    </div>
+  </footer>
+
+  <!-- JavaScript for Language Toggle -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const arBtn = document.getElementById('lang-ar');
+      const enBtn = document.getElementById('lang-en');
+      const body = document.body;
+
+      // Initial state
+      if (localStorage.getItem('language') === 'en') {
+        body.classList.add('en');
+        arBtn.classList.remove('active');
+        enBtn.classList.add('active');
+      }
+
+      arBtn.addEventListener('click', () => {
+        body.classList.remove('en');
+        localStorage.setItem('language', 'ar');
+        arBtn.classList.add('active');
+        enBtn.classList.remove('active');
+      });
+
+      enBtn.addEventListener('click', () => {
+        body.classList.add('en');
+        localStorage.setItem('language', 'en');
+        enBtn.classList.add('active');
+        arBtn.classList.remove('active');
+      });
+    });
+  </script>
+
+</body>
+</html>
