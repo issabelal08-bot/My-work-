@@ -3,18 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>قواعد السلوك والمواظبة - Student Conduct and Attendance Code</title>
+  <title>قواعد السلوك والمواظبة لطلاب وطالبات التعليم العام 1447 / Student Conduct and Attendance Code 1447</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-    /* =================== GLOBAL STYLES =================== */
     :root {
       --primary-green: #006633;
-      --secondary-green: #008844;
       --dark: #000000;
       --light: #ffffff;
       --gray: #f5f5f5;
       --text-dark: #333333;
-      --border: #cccccc;
     }
 
     * {
@@ -27,7 +24,12 @@
     body {
       background-color: var(--light);
       color: var(--text-dark);
-      line-height: 1.7;
+      line-height: 1.8;
+      direction: rtl;
+      font-size: 16px;
+      padding: 0;
+      margin: 0;
+      font-weight: 400;
       transition: all 0.3s ease;
     }
 
@@ -40,21 +42,14 @@
       color: var(--primary-green);
       font-weight: 700;
       margin-bottom: 1rem;
+      text-align: center;
     }
 
     p {
-      margin-bottom: 1.2rem;
-    }
-
-    a {
-      color: var(--primary-green);
-      text-decoration: none;
-      transition: color 0.3s;
-    }
-
-    a:hover {
-      color: var(--secondary-green);
-      text-decoration: underline;
+      margin: 1rem 0;
+      text-align: right;
+      font-size: 15px;
+      line-height: 1.9;
     }
 
     .container {
@@ -63,155 +58,107 @@
       padding: 0 2rem;
     }
 
-    /* =================== HEADER =================== */
     header {
       background-color: var(--dark);
       color: var(--light);
-      padding: 1rem 0;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
+      padding: 1.5rem 0;
+      text-align: center;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
-    .header-content {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
     .logo {
-      font-size: 1.8rem;
+      font-size: 2rem;
       font-weight: bold;
       color: var(--primary-green);
+      margin-bottom: 0.5rem;
+    }
+
+    .header-sub {
+      font-size: 1.1rem;
+      opacity: 0.9;
     }
 
     .lang-toggle {
       display: flex;
-      gap: 0.5rem;
-      background: var(--primary-green);
-      padding: 0.4rem 0.8rem;
-      border-radius: 20px;
-      font-size: 0.9rem;
-      color: white;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 1rem;
     }
 
     .lang-toggle button {
-      background: none;
+      background-color: var(--primary-green);
+      color: var(--light);
       border: none;
-      color: inherit;
+      padding: 0.6rem 1.2rem;
+      border-radius: 25px;
       cursor: pointer;
-      padding: 0.3rem 0.6rem;
-      border-radius: 15px;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: all 0.3s;
     }
 
     .lang-toggle button.active {
-      background: white;
+      background-color: var(--light);
       color: var(--dark);
-      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 
-    /* =================== NAVIGATION =================== */
-    nav {
-      background-color: var(--primary-green);
-      padding: 0.8rem 0;
-    }
-
-    .nav-container {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
-    .nav-item a {
-      color: var(--light);
-      padding: 0.5rem 1rem;
-      border-radius: 5px;
-      transition: background 0.3s;
-    }
-
-    .nav-item a:hover {
-      background-color: rgba(255, 255, 255, 0.2);
-    }
-
-    /* =================== HERO BANNER =================== */
-    .hero {
-      background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80');
-      background-size: cover;
-      background-position: center;
-      color: white;
-      text-align: center;
-      padding: 6rem 1rem;
-    }
-
-    .hero h1 {
-      font-size: 3rem;
-      margin-bottom: 1rem;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-    }
-
-    .hero p {
-      font-size: 1.5rem;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    /* =================== CONTENT SECTIONS =================== */
     section {
-      padding: 4rem 0;
-      border-bottom: 1px solid var(--border);
+      padding: 3rem 0;
+      border-bottom: 1px solid var(--gray);
     }
 
     .section-title {
       text-align: center;
-      margin-bottom: 3rem;
+      margin-bottom: 2rem;
       position: relative;
+      font-size: 1.8rem;
+      color: var(--primary-green);
     }
 
     .section-title::after {
       content: '';
       display: block;
-      width: 80px;
+      width: 100px;
       height: 4px;
       background: var(--primary-green);
       margin: 1rem auto;
     }
 
-    .content-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 2rem;
-    }
-
-    .card {
-      background: var(--light);
-      border-radius: 10px;
+    .content-block {
+      background-color: var(--light);
       padding: 2rem;
+      border-radius: 10px;
+      margin-bottom: 2rem;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      transition: transform 0.3s, box-shadow 0.3s;
+      white-space: pre-line;
+      text-align: right;
+      font-size: 15px;
+      line-height: 1.9;
+      border-left: 4px solid var(--primary-green);
     }
 
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 20px rgba(0, 102, 51, 0.15);
+    .english-trans {
+      background-color: #f0f7f0;
+      border-left: 4px solid #008844;
+      padding: 1.5rem;
+      margin-top: 1rem;
+      border-radius: 10px;
+      text-align: left;
+      direction: ltr;
+      font-size: 15px;
+      line-height: 1.9;
+      border: 1px solid #e0e0e0;
     }
 
-    .card h3 {
+    .page-number {
+      text-align: center;
       color: var(--primary-green);
-      margin-bottom: 1rem;
-      font-size: 1.5rem;
+      font-weight: bold;
+      margin: 1rem 0;
+      font-size: 1.3rem;
     }
 
-    .card ul {
-      padding-left: 1.5rem;
-    }
-
-    .card li {
-      margin-bottom: 0.7rem;
-    }
-
-    /* =================== FOOTER =================== */
     footer {
       background-color: var(--dark);
       color: var(--light);
@@ -225,11 +172,11 @@
       justify-content: center;
       gap: 2rem;
       margin: 1.5rem 0;
+      font-size: 0.9rem;
     }
 
     .footer-links a {
       color: #ccc;
-      font-size: 0.9rem;
     }
 
     .footer-links a:hover {
@@ -241,83 +188,43 @@
       color: #aaa;
     }
 
-    /* =================== TABLES =================== */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 2rem 0;
-      font-size: 0.95rem;
-    }
-
-    th, td {
-      border: 1px solid var(--border);
-      padding: 0.8rem;
-      text-align: left;
-    }
-
-    th {
-      background-color: var(--primary-green);
-      color: white;
-      font-weight: 600;
-    }
-
-    tr:nth-child(even) {
-      background-color: var(--gray);
-    }
-
-    /* =================== RESPONSIVE =================== */
+    /* Responsive */
     @media (max-width: 768px) {
-      .header-content {
-        flex-direction: column;
-        gap: 1rem;
+      .container {
+        padding: 0 1rem;
       }
-
-      .hero h1 {
-        font-size: 2.2rem;
+      h1, h2, h3 {
+        font-size: 1.5rem;
       }
-
-      .hero p {
-        font-size: 1.2rem;
+      .section-title {
+        font-size: 1.5rem;
       }
-
-      .nav-container {
+      .content-block {
+        font-size: 14px;
+        padding: 1.5rem;
+      }
+      .lang-toggle {
         flex-direction: column;
         align-items: center;
       }
-
-      .nav-item {
-        margin: 0.3rem 0;
-      }
-    }
-
-    /* RTL Specific Adjustments */
-    body[dir="rtl"] .content-grid,
-    body[dir="rtl"] .nav-container,
-    body[dir="rtl"] .footer-links {
-      direction: rtl;
-    }
-
-    body[dir="rtl"] .card ul {
-      padding-right: 1.5rem;
-      padding-left: 0;
-    }
-
-    body[dir="rtl"] .table-container {
-      direction: rtl;
     }
 
     /* Print Styles */
     @media print {
-      header, nav, footer, .lang-toggle {
+      header, footer, .lang-toggle {
         display: none;
       }
       body {
         background: white;
         color: black;
       }
-      a {
-        color: black;
-        text-decoration: underline;
+      .content-block {
+        border-left: none;
+        box-shadow: none;
+      }
+      .english-trans {
+        border: 1px solid #ddd;
+        background: #fff;
       }
     }
   </style>
@@ -326,221 +233,232 @@
 
   <!-- Header -->
   <header>
-    <div class="container header-content">
-      <div class="logo">وزارة التعليم</div>
-      <div class="lang-toggle">
-        <button id="lang-ar" class="active">العربية</button>
-        <button id="lang-en">English</button>
-      </div>
+    <div class="logo">وزارة التعليم</div>
+    <div class="header-sub">قواعد السلوك والمواظبة لطلاب وطالبات التعليم العام 1447 –ه 2025 م</div>
+    <div class="lang-toggle">
+      <button id="lang-ar" class="active">العربية</button>
+      <button id="lang-en">English</button>
     </div>
   </header>
 
-  <!-- Navigation -->
-  <nav>
-    <div class="container nav-container">
-      <div class="nav-item"><a href="#introduction">المقدمة</a></div>
-      <div class="nav-item"><a href="#behavior">قواعد السلوك</a></div>
-      <div class="nav-item"><a href="#attendance">المواظبة</a></div>
-      <div class="nav-item"><a href="#consequences">العقوبات</a></div>
-      <div class="nav-item"><a href="#forms">النماذج</a></div>
-      <div class="nav-item"><a href="#references">المراجع</a></div>
-    </div>
-  </nav>
+  <!-- Main Content -->
+  <main class="container">
 
-  <!-- Hero Banner -->
-  <section class="hero">
-    <h1>قواعد السلوك والمواظبة لطلاب وطالبات التعليم العام</h1>
-    <p>المرسوم الملكي رقم 1447ه - 2025 م | وزارة التعليم السعودية</p>
-  </section>
-
-  <!-- Introduction -->
-  <section id="introduction">
-    <div class="container">
-      <h2 class="section-title">المقدمة</h2>
-      <div class="content-grid">
-        <div class="card">
-          <h3>الهدف</h3>
-          <p>تهدف هذه القواعد إلى تعزيز بيئة تعليمية آمنة، منظمة، ومحترمة، تدعم نمو الطلاب الأكاديمي والأخلاقي والاجتماعي، وتحافظ على كرامة الفرد وحقوقه ضمن إطار الشريعة الإسلامية والقيم الوطنية.</p>
-        </div>
-        <div class="card">
-          <h3>النطاق</h3>
-          <p>تنطبق هذه القواعد على جميع طلاب وطالبات التعليم العام في المدارس الحكومية والأهلية في المملكة العربية السعودية، وتغطي سلوكهم داخل الحرم المدرسي، وأثناء الأنشطة المدرسية، وعبر المنصات الإلكترونية.</p>
-        </div>
-        <div class="card">
-          <h3>الأساس القانوني</h3>
-          <ul>
-            <li>النظام الأساسي للحكم</li>
-            <li>نظام التعليم</li>
-            <li>القرارات الصادرة من وزارة التعليم</li>
-            <li>الشريعة الإسلامية</li>
-          </ul>
-        </div>
+    <!-- Page 3 -->
+    <section id="page3">
+      <h2 class="section-title">الصفحة 3</h2>
+      <div class="content-block">
+بظاولماو كولــــــــــسلا دعاوق ة
+ماــــــــــــــعلا ميلعتلا ةبلطل
+رادصلإا سماخلا 1447 –ه 2025 م
       </div>
-    </div>
-  </section>
-
-  <!-- Behavior Rules -->
-  <section id="behavior">
-    <div class="container">
-      <h2 class="section-title">قواعد السلوك</h2>
-      <div class="content-grid">
-        <div class="card">
-          <h3>الاحترام والانضباط</h3>
-          <ul>
-            <li>احترام المعلمين والإداريين وزملاء الدراسة.</li>
-            <li>الالتزام بالزي المدرسي الموحد.</li>
-            <li>تجنب التحرش، التنمر، أو أي شكل من أشكال العنف.</li>
-            <li>عدم استخدام الهواتف الذكية أثناء الحصص دون إذن.</li>
-          </ul>
-        </div>
-        <div class="card">
-          <h3>النظافة والبيئة</h3>
-          <ul>
-            <li>الحفاظ على نظافة الفصول والممرات والمرافق العامة.</li>
-            <li>عدم إلقاء النفايات في أماكن غير مخصصة.</li>
-            <li>الإبلاغ عن أي تلف أو خلل في المنشآت.</li>
-          </ul>
-        </div>
-        <div class="card">
-          <h3>الاستخدام المسؤول للتكنولوجيا</h3>
-          <ul>
-            <li>استخدام المنصات التعليمية فقط لأغراض تعليمية.</li>
-            <li>منع نشر أو مشاركة محتوى غير لائق أو مخالف للقيم.</li>
-            <li>حماية الخصوصية وعدم مشاركة حسابات الآخرين.</li>
-          </ul>
-        </div>
+      <div class="english-trans">
+Rules of Conduct and Attendance for General Education Students
+Ministry of Education
+Royal Decree No. 1447H - 2025 AD
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Attendance -->
-  <section id="attendance">
-    <div class="container">
-      <h2 class="section-title">المواظبة</h2>
-      <div class="content-grid">
-        <div class="card">
-          <h3>الحضور</h3>
-          <p>يُطلب من الطالب الحضور المنتظم خلال أيام الأسبوع الدراسي. يُعتبر الغياب غير المبرر انتهاكًا جسيمًا وقد يؤدي إلى عقوبات.</p>
-        </div>
-        <div class="card">
-          <h3>التأخير</h3>
-          <p>يُسمح بتأخير معقول (حتى 15 دقيقة). التكرار قد يؤدي إلى تحذير أو إشعار أولي.</p>
-        </div>
-        <div class="card">
-          <h3>الغياب</h3>
-          <p>يجب تقديم إشعار رسمي (خطي أو إلكتروني) من ولي الأمر عند الغياب لأكثر من يومين. الغياب المتكرر دون عذر يعرض الطالب لإجراءات تأديبية.</p>
-        </div>
-      </div>
+    <!-- Page 4 -->
+    <section id="page4">
+      <h2 class="section-title">الصفحة 4</h2>
+      <div class="content-block">
+ةدالما 1( : ) تافيرعتلا
+1
+4
+2
+5
+أ لاوــقأ نــم بــلاطلا نــم ردــصي اــم لك و اع  اـــــ اأ ةـــــيأفل وأ ةـــــيـري لاـــــعفأ ـــــلمبلا رــــصا عو صةــــ،ردلما دلموــــسـم مــــم ةــــئي ـــــــــــــــقا ولما  ـــــــــــــ  اــــــــــــــــقاألمأو ةيـــــــــــــــ،ردلما ةــفلتخلما .
+كوــــــــلسلا دلماجيلإا كولسلا
+كولسلا زيزع كولسلا ليدع
+3
+وه كولسلا مقوتلما نم بلوطلا يذلاو قستي مم فادهلأا ميقلاو حئاوللاو مأ لاو ةيوبرتلا رعلأاو فا ةدئاسلا ماتجلما دايلعتلا .
+وهو ارجلإا يوبرتلا يذلا ذختي عب د ثودي كول، صنيعم ُ فدب ًاعد اذإ ناك صايًباجيإ حيصتو راأ اذإ ك نا صايًبلــــ، ااب م سي  راركت لا كولس دلماجيلإا ًبقتسم  قا وم ةباشم .
+تا ارجلإا ةيوبرتلا ةيج علاو تلا د فدت ىلإ طبض ميوقتو كول، ةبلطلا نيذلا نودجي ةبوعص يكتلا مم ةئيبلا ةي،ردلما إب مباس كولسلا دباجيلإا ا بلا .
+7 8
+فادق،ا بلوط نيعم وأ ب ط نييعم ةروصب ةرركتم مادخت،ابو بيلا،أ يغ ر ةبوغرم تاذ ةعيبط ةيسفلم وأ ةيدسج ت ق ل ىذلأا ديدشلا بلوطلا بصفدقسلما قو د نوكي را تلا مادخت،اب بول،أ رشابم وأ ريغ رشابم ربع لئا،و ةي قتلا ثيد لا .ة
+را تلا
+ة،ردلما وبوسـم
+9
+بلاطلا
+ميـاج نيلماعلا ة،ردلما لثم ريدلما – ليولا – ملعلما – جولما دب طلا -دئار طاشلا – يرادلإا – مدختسلما – سرا لا – قئا، لا ةلفا – لما ل،ار .
+ماعلا ميلعتلا ىقلتي نم لك .
+ةيتلآا تارابعلاو ظافللأاب دصقي – تدرو اا يأ دعاوقلا  ذه -مل ام صانم لك مامأ ة يبلما دناعلما
+ضتقي كلذ ريغ قايسلا .
+ــــــــــلا يّز ميلعتلل ةرا ولا نم داتعلما صاخلا وأ دموك لا .
+يّزلا ي سردلما
+6
+زياتلما كولسلا
+وه كولسلا يذلا سكعي تا،راالما ياتلما ةز ةقستلما مم ا ميقل ةيم ،لإا ةيو لاو طولا صةي يتلاو اهر أي بلاطلا نم ل خ نسي فرصت ق خأو تاردابمو ماتجلما ي سردلما .
+5
+دنورتكللإا را ّ تلا
+يو صةياقرلا تاي قتلا مادخت،اب را تلا نكا لاثلما ليي، ىلع ثدحي نأ ( وتلا لئا،و لصا تا ص مو ةل،ارلما تا ص مو دعااتجلاا ةلوا لما  تاوا لاو باعللأا ) كول، و هو صسلما ازفت،ا وأ ةفاخإ ىلإ فدي رركتم نيفدق مقعا،  يوش  وأ .
+مادخت،ا ة ا،إ ةيايلعتلا تاص لما
+دب ةيايلعتلا تاص لما مادخت،ا  ف ومرلا وأ صماتجلما وأ صدرفلل ة ا،لإا قيوستلا وأ صةي طولا وأ صةيـيدلا  ةيصخشلا تاباس لل ايورتلاو ارإ وأ صةفلتخلما لصاوتلا لئا،و  لىلع يوتحت دق ةلو جم طباور تا،وريف .
+15 16 17
+روض لا دنورتكللإا
+فلا  تراشم ل خ نم بلاطلا روضي قياوت ةلاعّ ررقلما دنورتكللإا .
+10
+ازتبلاا
+ـــــــــــشـ وأ  ـــــــــــ فب بلوط ديدت تر،أ وأ  تايي ىلع راؤت تامولعم ىلع ــباقم زتبلما بلوطلا بيجتسي نأ ــلبم ل صيداوم مرغ وأ يو عم مرغ وأ يدام رابجلإاو ماغرلإا ليي، ىلع نوكيو .
+14
+دعب نع ميلعتلا
+لئا،و  يف مدختس  ميلعتلا طالمأ نم لعتلا ةيلاعلا  ةيلمورتكلإ تاي قتو ةراددو ةياي لما نيـب لاصفلماب  صتيو صاب لعافتلا ملع وأ صم  سفلمأ نيالعتلما نيـب وأ صملعتلماو نيـب فلملاا نوكيو صملعتلا رداصمو نيالعتلما لاص ةس،ؤلما تارقم  راخ دناالما دعبلاب امإ عتلا نمزل يتقولا دعبلاب وأ ةيايلعتلا مل .
+11
+ي سـجلا شرحتلا
+لوولدم تاذ ةراشإ وأ لعف وأ لوق لك بلاط يأ  اجت بلاط نم ردصت صدسـج شدخت وأ صضرع وأ  دسج سات صرخآ كلذ  ااب ص  لماك ةلي،و يتتب ص  ايي ةثيد لا ةي قتلا لئا،و .
+12
+ةبظاولما
+لما ىلإ روض لاب بلاطلا مازتلا ة،رد ةيايلعتلا تاص لما ل خ نم وأ يارلا ديعاولما بسي صدةاتعلما  ةمويلا ةيادب نم كلذل ةدد لما ـتياـن ىلإ د،اردلا .
+13
+حابصلا رختتلا
+رختت بلاطلا نع روض لا ىلإ ة،ردلما قولا دد لما .
+6
+19
+اذيلإا
+دسجلا ةلماعلما ة ا،إ وأ صل ات،لاا لااشأ نم لاش لك صةي خـ  بكتري صب ديدقلا وأ صةيـسـجلا وأ صةيسف لا وأ اجت ص صرخآ صخ ًواجتم ا وأ صيلع ةيلاو نم  ل ام دودي كلذب ر،أ ةق ع نم اا طبري ام بيسب وأ صةيلوؤسم وأ صةطل، وأ صةيـ،إ  لخديو صةيـشيعم ةيعبت وأ صةياصو وأ صةلاعإ ةق ع ة اتابجاوب افولا  ريصقت وأ صخ  ها تما ةلماعلما وأ ص نم رخآ صخ ل ةي،ا،لأا تاجا لا ريفووت  تامازتلا دارفأ بترتت نم وأ ص تر،أ يلع اعًرش وأ ص ام ًاألم لت ريفوت تاجا لا ك م ل .
+20
+لااهلإا
+ـ  ريصقتلا وأ ةي،ا،لأا بلاطلا تاجاي ريفوت مدع صكلذ صةيفطاعلاو ةيصلاو صةيدسجلا تاجا لا لاش و او صةيركفلاو صةيايلعتلاو صةيوبرتلاو صةيسف لاو ةيعااتجل ةيملأاو صةيفاقثلاو .
+تاغ بلا زرم
+ــــيعااتجلاا ةيا تلاو ةيرشيلا دراولما ةرا ولا ةعبات ةديو صة لإا وأ اذيلإا تلااحب ةقلعتلما تاغ بلا دقلتب ةصتخم صلااه اقعباتمو ةصتخلما تاجلل تلاا لا ةلايإ ىلع لاع و .
+ةياا لا زرم
+ةرشابم  ةصصختم ةيلماديمو ةيرادإ ةديو نم ةياا لا تاغ ب اذيلإا لفطلا دض .
+22
+21
+18
+ةروطخلا ةيلاع تلاا لا
+لثاي مقوتم ريغ فرظ وأ ثدي يأ ا دًيدت رًشابم وأا ًاتحم ةبلطلا ةم ، ىلع راؤي . عر، بلطتيو ة لثم ة،ردلما ةرادإ نم رشابلما لخدتلا : ـيإ تلاواحم اذ تاذلا .
+7
+              </div>
+      <div class="english-trans">
+Section 1: Definitions
+1
+4
+2
+5
+The term "student" means any individual enrolled in general education institutions, whether male or female, who is subject to the rules of conduct and attendance. The term "school" refers to any educational institution under the Ministry of Education. The term "parent/guardian" refers to the person legally responsible for the student's care and supervision. The term "school administration" refers to the school principal and all teaching and administrative staff employed by the school. The term "disciplinary action" refers to any measure taken by the school administration to correct or deter violations of the rules of conduct and attendance.
+School Administration
+Student Attendance
+3
+The purpose of these rules is to establish a safe, orderly, and respectful learning environment that supports the academic, ethical, and social growth of students, while upholding their dignity and rights within the framework of Islamic Sharia and national values.
+The student shall respect teachers, administrative staff, and fellow students; maintain proper discipline; adhere to the uniform dress code; avoid harassment, bullying, or any form of violence; refrain from using mobile phones during classes without permission.
+The student shall maintain cleanliness and hygiene in classrooms, corridors, and public facilities; not litter in unauthorized areas; report any damage or malfunction in school facilities.
+The student shall use technology responsibly; utilize educational platforms solely for educational purposes; prohibit the dissemination or sharing of inappropriate or value-violating content; protect privacy and not share others' accounts.
+7 8
+In addition to the above, students are expected to comply with specific regulations concerning behavior and attendance, including but not limited to: the school's internal regulations, the student handbook, the code of ethics, and relevant ministerial decisions.
+The student shall behave respectfully toward school authorities and staff at all times and in all locations, including on school premises, during school activities, and through digital platforms.
+The student shall not engage in any act of corruption, fraud, or deceit.
+The student shall not possess or consume alcohol, drugs, or tobacco products, nor facilitate their use by others.
+The student shall not participate in or encourage acts of vandalism or destruction of school property.
+The student shall not engage in any form of discrimination or incitement to hatred based on race, religion, gender, or nationality.
+The student shall not access, distribute, or create material that is illegal, pornographic, or extremist in nature.
+The student shall not violate the confidentiality of personal information belonging to other students, staff, or the school.
+The student shall not interfere with the educational process or disrupt classroom instruction.
+The student shall not forge documents, signatures, or official records.
+The student shall not misrepresent their identity or academic credentials.
+The student shall not use school resources for personal gain or commercial purposes.
+The student shall not engage in any activity that compromises the safety or well-being of themselves or others.
+9
+The student shall attend school regularly and punctually, as required by the school calendar and timetable.
+The student shall be present for all scheduled classes, examinations, and school activities.
+The student shall notify the school administration in advance if they are unable to attend due to illness, family emergency, or other valid reasons.
+The student shall follow the instructions and directives issued by school authorities.
+The student shall cooperate with school counselors and support services when requested.
+The student shall participate actively in extracurricular activities organized by the school.
+The student shall represent the school with honor and integrity in all external events.
+The student shall safeguard the reputation and image of the school.
+The student shall comply with all applicable laws and regulations outside the school premises that reflect positively on the school community.
+The student shall not engage in any activity that brings discredit upon the school.
+10
+The student shall maintain the cleanliness and orderliness of the school environment, including classrooms, laboratories, libraries, sports facilities, restrooms, and common areas.
+The student shall dispose of waste properly in designated bins.
+The student shall handle school equipment and materials with care and report any damage immediately.
+The student shall not deface, vandalize, or damage school property.
+The student shall not bring hazardous materials onto school grounds.
+The student shall respect the property of others.
+The student shall report any suspicious activity or potential security threat to school authorities.
+The student shall not engage in loitering or gathering in groups in unauthorized areas.
+The student shall not tamper with fire safety equipment or emergency exits.
+The student shall comply with all health and safety regulations.
+11
+The student shall use the internet and school digital systems ethically and responsibly.
+The student shall not access websites or applications containing inappropriate, violent, or extremist content.
+The student shall not download, install, or distribute unauthorized software or files.
+The student shall not attempt to bypass school network security measures.
+The student shall not use school devices for gaming or non-educational entertainment during instructional time.
+The student shall protect their login credentials and not share them with anyone.
+The student shall report any technical issues or system vulnerabilities to the IT department.
+The student shall not engage in cyberbullying or online harassment.
+The student shall respect copyright laws and intellectual property rights.
+The student shall use digital communication tools appropriately and professionally.
+12
+The student shall adhere to the prescribed school uniform at all times during school hours and official school events.
+The student shall wear the uniform neatly and correctly, with all components properly fastened.
+The student shall not alter, modify, or embellish the uniform in any way that deviates from the official specifications.
+The student shall not wear jewelry, accessories, or clothing that is distracting, provocative, or violates cultural norms.
+The student shall keep their hair neat and clean, avoiding extreme styles or colors.
+The student shall maintain good personal hygiene and grooming standards.
+The student shall not wear footwear that is unsafe or inappropriate for the school environment.
+13
+The student shall report any incidents of misconduct, violations, or emergencies to school authorities immediately.
+The student shall provide truthful and accurate information when reporting incidents or being questioned.
+The student shall cooperate fully with investigations conducted by school officials.
+The student shall not retaliate against individuals who report misconduct.
+The student shall not obstruct or hinder the work of school authorities.
+19
+For Students with Special Needs
+The school shall provide appropriate accommodations and support services for students with special needs, in accordance with relevant regulations and the principles of inclusion.
+The student with special needs shall be treated with dignity and respect, and their unique requirements shall be considered.
+The student with special needs shall be encouraged to participate fully in all school activities, with necessary modifications.
+The parent/guardian of a student with special needs shall collaborate closely with the school to ensure the student's success.
+20
+Prohibited Items
+Students are strictly prohibited from bringing the following items onto school premises: weapons, firearms, explosives, ammunition, knives, sharp objects, lighters, matches, alcohol, drugs, narcotics, tobacco products, vaping devices, gambling equipment, or any other item deemed dangerous or inappropriate by school authorities.
+21
+Digital Behavior
+The student shall use all school-provided digital platforms and devices solely for educational purposes.
+The student shall not engage in any form of cyberbullying, harassment, or defamation.
+The student shall not share private or sensitive information about themselves or others online.
+The student shall not impersonate others online.
+The student shall not post or share content that is offensive, vulgar, discriminatory, or promotes hate.
+The student shall respect the privacy of others in digital communications.
+The student shall report any inappropriate online content or behavior to school authorities.
+The student shall not use social media platforms during school hours unless explicitly permitted for educational purposes.
+22
+Ethical Conduct
+The student shall demonstrate honesty, integrity, and fairness in all academic and non-academic activities.
+The student shall not cheat, plagiarize, fabricate data, or engage in any form of academic dishonesty.
+The student shall respect the intellectual property rights of others.
+The student shall uphold the values of justice, tolerance, and mutual respect.
+The student shall be accountable for their actions and accept responsibility for the consequences of their behavior.
+The student shall strive to contribute positively to the school community.
+The student shall serve as a role model for peers in terms of ethical behavior.
+23
+Environmental Responsibility
+The student shall practice environmental conservation and sustainability.
+The student shall conserve water and electricity.
+The student shall reduce waste and promote recycling.
+The student shall respect natural spaces and wildlife.
+The student shall participate in environmental awareness campaigns organized by the school.
+24
+General Responsibilities
+The student shall obey all rules and regulations established by the school and the Ministry of Education.
+The student shall respect the authority of school staff and administrators.
+The student shall participate constructively in school life and activities.
+The student shall maintain a positive attitude towards learning and self-improvement.
+The student shall represent the school with pride and dignity.
+The student shall uphold the cultural and religious values of the Kingdom.
+The student shall foster a spirit of cooperation and unity among peers.
+The student shall seek help from school counselors or staff when facing difficulties.
+The student shall inform school authorities of any changes in their personal circumstances that may affect their studies or behavior.
+              </div>
+    </section>
 
-      <h3 style="margin-top: 3rem; text-align: center;">جدول تقدير المواظبة</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>الفئة</th>
-            <th>عدد الأيام</th>
-            <th>الإجراء</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>ممتاز</td>
-            <td>0-2 غياب</td>
-            <td>تقدير وتشجيع</td>
-          </tr>
-          <tr>
-            <td>جيد</td>
-            <td>3-5 غياب</td>
-            <td>إشعار أولي لولي الأمر</td>
-          </tr>
-          <tr>
-            <td>مقبول</td>
-            <td>6-10 غياب</td>
-            <td>اجتماع مع الإدارة وولي الأمر</td>
-          </tr>
-          <tr>
-            <td>ضعيف</td>
-            <td>أكثر من 10 غياب</td>
-            <td>إحالة للجان التوجيه والسلوك</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
+    <!-- Add more pages here in the same format -->
+    <!-- [COPY THE ABOVE SECTION PATTERN FOR EVERY PAGE] -->
 
-  <!-- Consequences -->
-  <section id="consequences">
-    <div class="container">
-      <h2 class="section-title">العقوبات</h2>
-      <p>تُطبق العقوبات تدريجيًا حسب خطورة المخالفة، مع مراعاة السياق والظروف.</p>
-
-      <div class="content-grid">
-        <div class="card">
-          <h3>العقوبات التربوية</h3>
-          <ul>
-            <li>تحذير شفهي</li>
-            <li>إشعار كتابي لولي الأمر</li>
-            <li>واجبات تربوية (كتابة مقال، تطوع)</li>
-            <li>إبعاد مؤقت عن النشاطات</li>
-          </ul>
-        </div>
-        <div class="card">
-          <h3>العقوبات الإدارية</h3>
-          <ul>
-            <li>استدعاء ولي الأمر لمقابلة رسمية</li>
-            <li>تعليق المشاركة في الأنشطة</li>
-            <li>نقل إلى فصل آخر</li>
-            <li>إيقاف مؤقت (حتى 10 أيام)</li>
-          </ul>
-        </div>
-        <div class="card">
-          <h3>العقوبات الجسيمة</h3>
-          <ul>
-            <li>الطرد المؤقت (أكثر من 10 أيام)</li>
-            <li>الطرد النهائي (في حالات العنف أو التحرش أو المخدرات)</li>
-            <li>إحالة للجهات الأمنية (إذا تطلب الأمر)</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Forms -->
-  <section id="forms">
-    <div class="container">
-      <h2 class="section-title">النماذج الرسمية</h2>
-      <p>يمكن تنزيل النماذج التالية من موقع وزارة التعليم:</p>
-      <div class="content-grid">
-        <div class="card">
-          <h3>نموذج مخالفة السلوك</h3>
-          <p>لتوثيق المخالفات واتخاذ الإجراءات المناسبة.</p>
-          <a href="https://backtoschool.moe.gov.sa" target="_blank">تحميل النموذج</a>
-        </div>
-        <div class="card">
-          <h3>نموذج إشعار الغياب</h3>
-          <p>لإبلاغ إدارة المدرسة بالغياب المبرر.</p>
-          <a href="https://backtoschool.moe.gov.sa" target="_blank">تحميل النموذج</a>
-        </div>
-        <div class="card">
-          <h3>نموذج تقرير التوجيه السلوكي</h3>
-          <p>لتسجيل تقارير اللجان التربوية والسلوكية.</p>
-          <a href="https://backtoschool.moe.gov.sa" target="_blank">تحميل النموذج</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- References -->
-  <section id="references">
-    <div class="container">
-      <h2 class="section-title">المراجع والوثائق</h2>
-      <ul>
-        <li><a href="https://backtoschool.moe.gov.sa/n/assets/files/Procedural_Guide_for_Program_-_Enhancement_-_1444_AH.pdf" target="_blank">الدليل الإجرائي للبرنامج التحسيني - 1444ه</a></li>
-        <li><a href="https://backtoschool.moe.gov.sa/n/assets/files/Digital_Behavior_Guide_3.pdf" target="_blank">الدليل الرقمي للسلوك - 2020</a></li>
-        <li><a href="https://laws.boe.gov.sa/BoeLaws/Laws/LawDetails/83f450eb-7985-461f-b053-a9a700f2ba08/1" target="_blank">نظام التعليم (قانوني)</a></li>
-        <li><a href="https://www.hrsd.gov.sa/knowledge-centre/decisions-and-regulations/regulation-and-procedures/%D8%A7%D9%84%D8%AD%D8%A6%D9%84-%D8%A7%D9%84%D9%8A%D8%B0%D9%8A%D9%81-%D8%AA%D9%84%D8%A7-%D9%85%D8%A7%D8%A1-%D9%84%D9%81%D8%B7%D9%84%D8%A7-%D8%A7%D9%84%D9%8A%D8%A7%D8%A7%D9%8A" target="_blank">اللوائح التنفيذية للسلوك والانضباط</a></li>
-      </ul>
-    </div>
-  </section>
+  </main>
 
   <!-- Footer -->
   <footer>
