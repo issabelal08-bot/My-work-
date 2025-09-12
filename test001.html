@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>قوانين كبلر الثلاثة - واجهة مطوية تفاعلية</title>
+    <title>قوانين كبلر الثلاثة - مسار إهليلجي دقيق</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -81,7 +81,7 @@
             width: 300px;
             accent-color: #64ffda;
         }
-        /* === أهم تعديل: تخصيص التفاعلية بـ LTR === */
+        /* === التفاعلية الآن تعمل بدقة === */
         .simulation-area {
             position: relative;
             width: 100%;
@@ -90,17 +90,8 @@
             overflow: hidden;
             background-color: #0d1b2a;
             border-radius: 10px;
-            direction: ltr; /* ← هنا نحدد الاتجاه للتفاعلية فقط */
-            text-align: left; /* ← لضمان ترتيب العناصر بشكل صحيح */
-        }
-        .sun {
-            position: absolute;
-            width: 40px;
-            height: 40px;
-            background: radial-gradient(circle, #fffacd, #ffeb3b, #ff9800);
-            border-radius: 50%;
-            box-shadow: 0 0 40px #ff9800, 0 0 80px #ff5722;
-            z-index: 10;
+            direction: ltr;
+            text-align: left;
         }
         .orbit {
             position: absolute;
@@ -111,6 +102,15 @@
             transform: translate(-50%, -50%);
             z-index: 5;
         }
+        .sun {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #fffacd, #ffeb3b, #ff9800);
+            border-radius: 50%;
+            box-shadow: 0 0 40px #ff9800, 0 0 80px #ff5722;
+            z-index: 10;
+        }
         .planet {
             position: absolute;
             width: 16px;
@@ -119,6 +119,7 @@
             border-radius: 50%;
             box-shadow: 0 0 12px #4fc3f7;
             z-index: 15;
+            transform: translate(-50%, -50%); /* محاذاة مركز الكوكب */
         }
         .sector {
             position: absolute;
@@ -188,12 +189,11 @@
             color: #b0bec5;
             margin: 10px 0;
         }
-        .hidden { display: none; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🌌 قوانين كبلر الثلاثة - واجهة مطوية تفاعلية</h1>
+        <h1>🌌 قوانين كبلر الثلاثة - مسار إهليلجي دقيق</h1>
         <p style="font-size:18px; color:#bbdefb;">انقر على أي قانون لعرض التفاعلية الخاصة به — دون مغادرة الصفحة!</p>
 
         <!-- قانون كبلر الأول -->
@@ -214,8 +214,8 @@
             </div>
 
             <div class="simulation-area">
-                <div class="sun" id="sun1"></div>
                 <div class="orbit" id="orbit1"></div>
+                <div class="sun" id="sun1"></div>
                 <div class="planet" id="planet1"></div>
             </div>
 
@@ -247,8 +247,8 @@
             </div>
 
             <div class="simulation-area">
-                <div class="sun" id="sun2"></div>
                 <div class="orbit" id="orbit2"></div>
+                <div class="sun" id="sun2"></div>
                 <div class="planet" id="planet2"></div>
             </div>
 
@@ -301,21 +301,18 @@
                 panel.classList.remove('show');
                 title.classList.remove('active');
             } else {
-                // إغلاق جميع العناصر الأخرى
                 document.querySelectorAll('.accordion-content').forEach(p => p.classList.remove('show'));
                 document.querySelectorAll('.accordion-title').forEach(t => t.classList.remove('active'));
-                
                 panel.classList.add('show');
                 title.classList.add('active');
             }
 
-            // تحديث الرسم البياني عند فتح القسم الثالث
             if (id === 'law3' && panel.classList.contains('show')) {
                 updateLawThird();
             }
         }
 
-        // قانون كبلر الأول - حركة بسيطة
+        // قانون كبلر الأول - حركة دقيقة على الإهليلج
         let animationId1 = null;
         let isPlaying1 = true;
         let time1 = 0;
@@ -335,27 +332,29 @@
             a1Value.textContent = a.toFixed(2) + ' AU';
             e1Value.textContent = e.toFixed(2);
 
-            // تجنب التصادم مع الشمس
             if (e >= 0.9) {
                 e1Slider.value = 0.85;
                 e1Value.textContent = "0.85";
                 return;
             }
 
+            // حساب نصف المحور الصغير
+            const b = a * Math.sqrt(1 - e*e);
+            // المسافة من مركز الإهليلج إلى الشمس (البؤرة)
             const c = a * e;
 
-            sun1.style.left = `${50 + c * 20}%`;
+            // ضبط حجم المدار (الإهليلج)
+            orbit1.style.width = `${a * 2 * 100}px`;
+            orbit1.style.height = `${b * 2 * 100}px`;
+
+            // وضع الشمس في البؤرة (مُزاحة من مركز الإهليلج)
+            sun1.style.left = `${50 + c * 20}%`; // 50% هو مركز الشاشة، c*20 هو التحويل إلى بكسل
             sun1.style.top = `50%`;
 
-            const width = a * 2 * 100;
-            const height = 2 * Math.sqrt(a*a * (1 - e*e)) * 100;
-            orbit1.style.width = `${width}px`;
-            orbit1.style.height = `${height}px`;
-
-            const x0 = 50 + (a + c) * 20;
-            const y0 = 50;
-            planet1.style.left = `${x0}%`;
-            planet1.style.top = `${y0}%`;
+            // وضع الكوكب في بداية المدار (في الأوج - أبعد نقطة)
+            const x0 = (a + c) * 20; // المسافة من مركز الإهليلج إلى الكوكب
+            const y0 = 0;
+            planet1.style.transform = `translate(${x0}px, ${y0}px)`;
         }
 
         a1Slider.addEventListener('input', updateLawFirst);
@@ -378,14 +377,16 @@
             const theta = E;
             const r = a * (1 - e*e) / (1 + e * Math.cos(theta));
 
+            // تحويل إلى إحداثيات نسبية من مركز الإهليلج (ليس من شاشة)
             const x = r * Math.cos(theta);
             const y = r * Math.sin(theta);
 
-            const px = 50 + x * 20;
-            const py = 50 + y * 20;
+            // تحويل إلى بكسل: 1 AU = 20px
+            const px = x * 20;
+            const py = y * 20;
 
-            planet1.style.left = `${px}%`;
-            planet1.style.top = `${py}%`;
+            // تحريك الكوكب بالنسبة لمركز الإهليلج (الذي في منتصف الشاشة)
+            planet1.style.transform = `translate(${px}px, ${py}px)`;
 
             time1 += 0.5;
             animationId1 = requestAnimationFrame(animateLawFirst);
@@ -403,7 +404,7 @@
             animateLawFirst();
         });
 
-        // قانون كبلر الثاني - مع قطاعات
+        // قانون كبلر الثاني - نفس المنطق مع القطاعات
         let animationId2 = null;
         let isPlaying2 = true;
         let time2 = 0;
@@ -423,22 +424,20 @@
             a2Value.textContent = a.toFixed(2) + ' AU';
             e2Value.textContent = e.toFixed(2);
 
+            const b = a * Math.sqrt(1 - e*e);
             const c = a * e;
+
+            orbit2.style.width = `${a * 2 * 100}px`;
+            orbit2.style.height = `${b * 2 * 100}px`;
 
             sun2.style.left = `${50 + c * 20}%`;
             sun2.style.top = `50%`;
 
-            const width = a * 2 * 100;
-            const height = 2 * Math.sqrt(a*a * (1 - e*e)) * 100;
-            orbit2.style.width = `${width}px`;
-            orbit2.style.height = `${height}px`;
+            const x0 = (a + c) * 20;
+            const y0 = 0;
+            planet2.style.transform = `translate(${x0}px, ${y0}px)`;
 
-            const x0 = 50 + (a + c) * 20;
-            const y0 = 50;
-            planet2.style.left = `${x0}%`;
-            planet2.style.top = `${y0}%`;
-
-            // تنظيف القطاعات السابقة
+            // تنظيف القطاعات
             document.querySelectorAll('#law2 .sector').forEach(s => s.remove());
         }
 
@@ -465,11 +464,10 @@
             const x = r * Math.cos(theta);
             const y = r * Math.sin(theta);
 
-            const px = 50 + x * 20;
-            const py = 50 + y * 20;
+            const px = x * 20;
+            const py = y * 20;
 
-            planet2.style.left = `${px}%`;
-            planet2.style.top = `${py}%`;
+            planet2.style.transform = `translate(${px}px, ${py}px)`;
 
             // إنشاء قطاع جديد (كل 1/8 من الدورة)
             const sectorCount = 8;
@@ -561,7 +559,6 @@
                 status3.className = "warning";
             }
 
-            // رسم بياني: T² vs a³
             const a_vals = Array.from({length: 50}, (_, i) => (i + 1) * 0.1);
             const T_vals = a_vals.map(a_val => Math.pow(a_val, 1.5));
             const T2_vals = T_vals.map(T_val => T_val * T_val);
@@ -626,7 +623,6 @@
         a3Slider.addEventListener('input', updateLawThird);
         updateLawThird();
 
-        // تفعيل الحركات عند فتح القسم
         document.querySelectorAll('.accordion-title').forEach(title => {
             title.addEventListener('click', () => {
                 const id = title.nextElementSibling.id;
@@ -636,14 +632,12 @@
             });
         });
 
-        // تمهيد أولي
         window.addEventListener('load', () => {
             document.querySelectorAll('.accordion-content').forEach(el => {
                 el.classList.remove('show');
             });
         });
 
-        // تأكد من وجود Plotly
         if (typeof Plotly === 'undefined') {
             const script = document.createElement('script');
             script.src = 'https://cdn.plot.ly/plotly-latest.min.js';
