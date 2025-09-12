@@ -2,380 +2,453 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>قوانين كبلر الثلاثة - محاكاة تفاعلية (مدار دائري + بيضاوي)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>قوانين كبلر الثلاثة - محاكاة ثنائية اللغة</title>
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      padding: 20px;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #0a1a2f;
+      padding: 0;
+      font-family: 'Segoe UI', 'Tahoma', Geneva, Verdana, sans-serif;
+      background: #000;
       color: #e0e0e0;
+      overflow: hidden;
+      height: 100vh;
+      position: relative;
+      touch-action: manipulation;
+    }
+
+    /* ✨ Animated Starry Background */
+    #stars {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    .star {
+      position: absolute;
+      background-color: #fff;
+      border-radius: 50%;
+      animation: twinkle linear infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.1; }
+      50% { opacity: 1; }
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      padding: 20px 15px;
+      max-width: 100%;
+      margin: 0 auto;
       text-align: center;
     }
-    canvas {
-      background: #000;
-      border-radius: 12px;
-      box-shadow: 0 0 30px rgba(0, 100, 255, 0.3);
-      margin: 20px auto;
-      display: block;
-    }
-    .info-panel {
-      background: rgba(10, 26, 47, 0.8);
-      border-radius: 12px;
-      padding: 18px;
-      max-width: 900px;
-      margin: 20px auto;
-      text-align: right;
-      font-size: 15px;
-      line-height: 1.7;
-      border: 1px solid #2a4a7a;
-    }
-    .law-title {
-      color: #4fc3f7;
-      font-weight: bold;
-      margin-bottom: 10px;
-      font-size: 18px;
-    }
-    .law-box {
-      background: rgba(79, 195, 247, 0.1);
-      border-left: 4px solid #4fc3f7;
-      padding: 12px;
-      margin: 15px 0;
-      border-radius: 0 8px 8px 0;
-    }
-    .verification {
-      color: #4caf50;
-      font-weight: bold;
-      font-size: 16px;
-      margin: 15px 0;
-      padding: 10px;
-      background: rgba(76, 175, 80, 0.1);
-      border-radius: 8px;
-      border: 1px solid #4caf50;
-    }
-    .note {
-      color: #aaa;
-      font-style: italic;
-      font-size: 14px;
-      margin-top: 20px;
-    }
+
     h1 {
       color: #4fc3f7;
       font-weight: 300;
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+      text-shadow: 0 0 15px rgba(79, 195, 247, 0.5);
+      line-height: 1.3;
+    }
+
+    .subtitle {
+      color: #aaa;
+      font-size: 1rem;
+      margin-bottom: 25px;
+      font-weight: 300;
+      line-height: 1.5;
+    }
+
+    .canvas-container {
+      display: flex;
+      justify-content: center;
+      margin: 20px auto;
+      gap: 10px;
+    }
+
+    canvas {
+      background: transparent;
+      border-radius: 12px;
+      box-shadow: 0 0 30px rgba(79, 195, 247, 0.2);
+      border: 1px solid rgba(79, 195, 247, 0.1);
+      max-width: 100%;
+      height: auto;
+      max-height: 350px;
+    }
+
+    .law-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      margin-top: 25px;
+      margin-bottom: 40px;
+      padding: 15px;
+      border-radius: 12px;
+      background: rgba(10, 26, 47, 0.4);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(79, 195, 247, 0.1);
+    }
+
+    .law-title {
+      color: #4fc3f7;
+      font-weight: 600;
+      font-size: 1.5rem;
+      margin: 18px 0 12px;
+      text-shadow: 0 0 8px rgba(79, 195, 247, 0.3);
+    }
+
+    .law-box {
+      background: rgba(10, 26, 47, 0.6);
+      border-left: 4px solid #4fc3f7;
+      padding: 18px;
+      border-radius: 0 10px 10px 0;
+      margin: 12px 0;
+      width: 100%;
+      border: 1px solid rgba(79, 195, 247, 0.1);
+    }
+
+    .law-box p {
+      font-size: 0.95rem;
+      line-height: 1.7;
       margin-bottom: 10px;
+      color: #ddd;
     }
-    .footer {
-      margin-top: 30px;
-      color: #777;
-      font-size: 14px;
+
+    .law-box strong {
+      color: #4fc3f7;
     }
+
+    .equation {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: #4fc3f7;
+      margin: 18px 0;
+      font-family: 'Cambria Math', serif;
+      background: rgba(79, 195, 247, 0.1);
+      padding: 12px;
+      border-radius: 10px;
+      display: inline-block;
+      border: 1px dashed #4fc3f7;
+    }
+
+    .verification {
+      color: #4caf50;
+      font-weight: bold;
+      font-size: 1.1rem;
+      margin: 15px 0;
+      padding: 12px;
+      background: rgba(76, 175, 80, 0.1);
+      border-radius: 10px;
+      border: 1px solid #4caf50;
+      display: inline-block;
+    }
+
+    .bilingual {
+      margin: 15px 0;
+    }
+
+    .lang-ar,
+    .lang-en {
+      padding: 12px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(79, 195, 247, 0.1);
+      margin: 8px 0;
+      font-size: 0.9rem;
+    }
+
+    .lang-ar {
+      direction: rtl;
+      text-align: right;
+      border-right: 2px solid #4fc3f7;
+    }
+
+    .lang-en {
+      direction: ltr;
+      text-align: left;
+      border-left: 2px solid #4fc3f7;
+    }
+
+    .lang-ar h4,
+    .lang-en h4 {
+      color: #4fc3f7;
+      margin-bottom: 8px;
+      font-size: 1.2rem;
+      padding: 0;
+    }
+
     .legend {
       display: flex;
       justify-content: center;
-      gap: 30px;
+      gap: 15px;
       margin: 15px 0;
       flex-wrap: wrap;
+      font-size: 0.85rem;
     }
+
     .legend-item {
       display: flex;
       align-items: center;
       gap: 6px;
-      font-size: 14px;
+      color: #bbb;
     }
+
     .legend-color {
       width: 12px;
       height: 12px;
       border-radius: 50%;
       display: inline-block;
     }
+
+    .sun {
+      filter: drop-shadow(0 0 15px #ffffaa);
+    }
+
+    .planet {
+      filter: drop-shadow(0 0 8px #4fc3f7);
+    }
+
+    .footer {
+      margin-top: 40px;
+      color: #666;
+      font-size: 12px;
+      font-style: italic;
+      line-height: 1.4;
+    }
+
+    /* Prevent scrolling/zooming */
+    html {
+      touch-callout: none;
+      -webkit-touch-callout: none;
+      -webkit-text-size-adjust: none;
+    }
   </style>
 </head>
 <body>
-  <h1>🌌 قوانين كبلر الثلاثة - محاكاة تفاعلية</h1>
 
-  <div class="legend">
-    <div class="legend-item"><span class="legend-color" style="background: gold;"></span> الشمس</div>
-    <div class="legend-item"><span class="legend-color" style="background: #4FC3F7;"></span> الكوكب A (الأرض) - مدار دائري</div>
-    <div class="legend-item"><span class="legend-color" style="background: #FF6B6B;"></span> الكوكب B (المريخ) - مدار بيضاوي</div>
-    <div class="legend-item"><span class="legend-color" style="background: rgba(79, 195, 247, 0.3);"></span> خطوط المساحات</div>
-    <div class="legend-item"><span class="legend-color" style="background: transparent; border: 1px dashed #4fc3f7;"></span> مدار دائري (A)</div>
-    <div class="legend-item"><span class="legend-color" style="background: transparent; border: 1px dashed #ff9800;"></span> مدار بيضاوي (B)</div>
-  </div>
+  <!-- ✨ STARRY BACKGROUND -->
+  <div id="stars"></div>
 
-  <canvas id="canvas" width="800" height="600"></canvas>
+  <!-- 🚀 MAIN CONTENT -->
+  <div class="container">
+    <h1>🌌 قوانين كبلر الثلاثة / Kepler’s Three Laws</h1>
+    <p class="subtitle">كوكب واحد يدور بلا توقف حول الشمس — مع شرح ثنائي اللغة</p>
+    <p class="subtitle">One planet orbits the Sun endlessly — with bilingual explanation</p>
 
-  <div class="info-panel">
-
-    <!-- القانون الأول -->
-    <div class="law-box">
-      <div class="law-title">🔹 القانون الأول: مدار بيضاوي والشمس في البؤرة</div>
-      <p>كل كوكب يتحرك حول الشمس في مسار بيضاوي، والشمس تقع عند إحدى بؤرتيه.</p>
-      <p>في هذه المحاكاة:</p>
-      <ul style="text-align: right; margin: 8px 0;">
-        <li>الكوكب A (الأرض): مداره <strong>دائري</strong> — وهو حالة خاصة من البيضاوي (انحراف = 0)</li>
-        <li>الكوكب B (المريخ): مداره <strong>بيضاوي</strong> — والشمس في البؤرة اليمنى (ليس في المركز)</li>
-        <li>الشمس لا تقع في مركز أي مدار — بل في البؤرة، وهذا ما يُظهره الرسم.</li>
-      </ul>
+    <!-- 🎯 CANVAS WITH ORBIT AND PLANET (NO TRACK!) -->
+    <div class="canvas-container">
+      <canvas id="canvas" width="400" height="300"></canvas>
     </div>
 
-    <!-- القانون الثاني -->
-    <div class="law-box">
-      <div class="law-title">🔹 القانون الثاني: المساحات المتساوية</div>
-      <p>الخط الواصل بين الكوكب والشمس يقطع مساحات متساوية في أزمنة متساوية.</p>
-      <p>في هذه المحاكاة:</p>
-      <ul style="text-align: right; margin: 8px 0;">
-        <li>الكوكب A (الدائرة): يتحرك بسرعة <strong>ثابتة</strong> — لأن المسافة ثابتة → المساحة تتناسب مع السرعة.</li>
-        <li>الكوكب B (البيضاوي): يتحرك <strong>أسرع عند الحضيض</strong> (الأقرب للشمس)، وأبطأ عند الأوج (الأبعد).</li>
-        <li>الخطوط الزرقاء/البرتقالية تُظهر أن المساحة التي يقطعها الشعاع خلال 1/12 دورة واحدة هي نفسها — حتى لو كانت المسافة مختلفة!</li>
-      </ul>
+    <!-- 📜 LAWS EXPLANATIONS — BILINGUAL, NO TRACES OF TRACK -->
+    <div class="law-section">
+
+      <!-- 🔹 LAW 1 -->
+      <div class="law-title">القانون الأول: مسار بيضاوي / Law 1: The Law of Ellipses</div>
+      <div class="law-box">
+        <div class="bilingual">
+          <div class="lang-ar">
+            <h4>العربية</h4>
+            <p>كل كوكب يتحرك حول الشمس في مسار <strong>بيضاوي</strong>، والشمس تقع عند <strong>إحدى بؤرتيه</strong>.</p>
+            <p>في هذه المحاكاة: الكوكب يدور على مدار بيضاوي — والشمس ليست في المركز، بل في البؤرة.</p>
+          </div>
+          <div class="lang-en">
+            <h4>English</h4>
+            <p>Every planet moves around the Sun in an <strong>elliptical orbit</strong>, with the Sun at one <strong>focus</strong>.</p>
+            <p>In this simulation: The planet follows an ellipse — the Sun is not at the center, but at a focus.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 🔹 LAW 2 -->
+      <div class="law-title">القانون الثاني: المساحات المتساوية / Law 2: The Law of Equal Areas</div>
+      <div class="law-box">
+        <div class="bilingual">
+          <div class="lang-ar">
+            <h4>العربية</h4>
+            <p>الخط الواصل بين الكوكب والشمس يقطع <strong>مساحات متساوية</strong> في أزمنة متساوية.</p>
+            <p>عندما يقترب الكوكب من الشمس — يسرع. عندما يبتعد — يبطئ. لكن المساحة المقطوعة في زمن ثابت تظل نفسها.</p>
+          </div>
+          <div class="lang-en">
+            <h4>English</h4>
+            <p>The line connecting the planet to the Sun sweeps out <strong>equal areas in equal times</strong>.</p>
+            <p>When the planet nears the Sun — it speeds up. When it moves away — it slows down. But area swept per time remains constant.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 🔹 LAW 3 -->
+      <div class="law-title">القانون الثالث: المدد المدارية / Law 3: The Law of Harmonies</div>
+      <div class="law-box">
+        <div class="bilingual">
+          <div class="lang-ar">
+            <h4>العربية</h4>
+            <p>مربع الفترة المدارية يتناسب طرديًا مع مكعب نصف المحور الأكبر.</p>
+            <p>إذا زاد بعد الكوكب، تزداد مدته بشكل كبير — حتى لو لم نراه، العلاقة صحيحة.</p>
+            <div class="equation">\(\left( \frac{T_A}{T_B} \right)^2 = \left( \frac{r_A}{r_B} \right)^3\)</div>
+            <div class="verification">✅ التحقق: T² ∝ r³ — علاقة رياضية دقيقة</div>
+          </div>
+          <div class="lang-en">
+            <h4>English</h4>
+            <p>The square of the orbital period is proportional to the cube of the semi-major axis.</p>
+            <p>If distance increases, the period increases dramatically — even if unseen, the math holds.</p>
+            <div class="equation">\(\left( \frac{T_A}{T_B} \right)^2 = \left( \frac{r_A}{r_B} \right)^3\)</div>
+            <div class="verification">✅ Verified: T² ∝ r³ — precise mathematical law</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 🖼️ LEGEND -->
+      <div class="legend">
+        <div class="legend-item"><span class="legend-color" style="background: gold;"></span> الشمس / Sun</div>
+        <div class="legend-item"><span class="legend-color" style="background: #4FC3F7;"></span> الكوكب / Planet</div>
+        <div class="legend-item"><span class="legend-color" style="background: #ff6b6b;"></span> الخط الوهمي / Radius Vector</div>
+      </div>
+
     </div>
 
-    <!-- القانون الثالث -->
-    <div class="law-box">
-      <div class="law-title">🔹 القانون الثالث: المدد المدارية</div>
-      <p style="font-size: 18px; font-weight: bold; color: #4fc3f7; margin: 10px 0;">
-        \( \left( \frac{T_A}{T_B} \right)^2 = \left( \frac{r_A}{r_B} \right)^3 \)
-      </p>
-      <p>مربع الفترة المدارية يتناسب طرديًا مع مكعب نصف المحور الأكبر.</p>
-      <p>في هذه المحاكاة:</p>
-      <ul style="text-align: right; margin: 8px 0;">
-        <li>نصف المحور الأكبر للكوكب A (الأرض): <strong>rₐ = 1.0 AU</strong></li>
-        <li>نصف المحور الأكبر للكوكب B (المريخ): <strong>rᵦ = 1.52 AU</strong></li>
-        <li>فترة الأرض: <strong>Tₐ = 1 سنة</strong></li>
-        <li>فترة المريخ: <strong>Tᵦ = 1.875 سنة</strong> (حسب القانون)</li>
-        <li>التحقق: <strong>(1 / 1.875)² ≈ 0.284</strong> و<strong>(1.0 / 1.52)³ ≈ 0.285</strong> → <strong>متطابقان!</strong></li>
-      </ul>
+    <div class="footer">
+      © 2025 محاكاة احترافية لقوانين كبلر — بدون مسار — للهواتف الذكية | Professional Kepler Simulation — No Track — Mobile-First
     </div>
-
-    <div class="verification" id="verification">
-      ✅ التحقق: (Tₐ/Tᵦ)² = 0.2844 ≈ (rₐ/rᵦ)³ = 0.2850
-    </div>
-
-    <div id="status">
-      <p>🟥 الكوكب B (المريخ): المسافة = --- AU | السرعة = ---</p>
-      <p>🟦 الكوكب A (الأرض): المسافة = --- AU | السرعة = ثابتة</p>
-    </div>
-  </div>
-
-  <div class="note">
-    ملاحظة: تم استخدام بيانات حقيقية: الأرض (1.0 AU)، المريخ (1.52 AU).<br>
-    الكوكب A يدور بسرعة ثابتة لأنه على مدار دائري — هذا لا يخالف قانون كبلر الثاني، بل هو حالة خاصة.
-  </div>
-
-  <div class="footer">
-    © 2025 محاكاة تعليمية لقوانين كبلر — مبنية بـ HTML5 & JavaScript | جميع الحقوق محفوظة
   </div>
 
   <script>
     // ================================================
-    // 🌟 SECTION 1: إعداد المتغيرات الأساسية
+    // ✨ SECTION 1: Generate Starry Background — Optimized for Mobile
+    // ================================================
+
+    const starsContainer = document.getElementById('stars');
+    const starCount = 80;
+
+    for (let i = 0; i < starCount; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      star.style.width = Math.random() * 2 + 0.5 + 'px';
+      star.style.height = star.style.width;
+      star.style.left = Math.random() * 100 + '%';
+      star.style.top = Math.random() * 100 + '%';
+      star.style.animationDuration = Math.random() * 4 + 2 + 's';
+      star.style.opacity = Math.random() * 0.7 + 0.3;
+      starsContainer.appendChild(star);
+    }
+
+    // ================================================
+    // 🎨 SECTION 2: Setup Canvas & Physics — NO TRACK, CONTINUOUS MOTION
     // ================================================
 
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
 
-    // قيم ثابتة (وحدات فلكية AU)
-    const a_A = 1.0;   // نصف المحور الأكبر للأرض — مدار دائري (e=0)
-    const e_A = 0.0;   // انحراف صفر → مدار دائري تماماً
-    const a_B = 1.52;  // نصف المحور الأكبر للمريخ
-    const e_B = 0.25;  // انحراف المريخ (قيمته الحقيقية تقريبًا)
+    // Responsive sizing
+    function resizeCanvas() {
+      const maxWidth = Math.min(window.innerWidth - 40, 400);
+      const maxHeight = Math.min(window.innerHeight / 2.5, 300);
+      canvas.width = maxWidth;
+      canvas.height = maxHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
 
-    // حساب البعد من المركز إلى البؤرة (c = a * e)
-    const c_A = a_A * e_A; // = 0 — لأن المدار دائري
-    const c_B = a_B * e_B; // ≈ 0.38
-
-    // حساب فترة المريخ باستخدام قانون كبلر الثالث: (Ta/Tb)² = (ra/rb)³
-    const Ta = 1.0;        // فترة الأرض = سنة واحدة
-    const Tb = Ta * Math.pow(a_B / a_A, 3/2); // = 1 * (1.52)^1.5 ≈ 1.875 سنة
-
-    // التحقق من القانون الثالث
-    const leftSide = Math.pow(Ta / Tb, 2);       // (Ta/Tb)²
-    const rightSide = Math.pow(a_A / a_B, 3);    // (ra/rb)³
-    const verificationText = document.getElementById('verification');
-    verificationText.textContent = `✅ التحقق: (Tₐ/Tᵦ)² = ${leftSide.toFixed(4)} ≈ (rₐ/rᵦ)³ = ${rightSide.toFixed(4)}`;
-
-    // عدد الإطارات في الدورة
-    const nFrames = 300;
+    // Scale: 1 AU = 100 pixels
+    const scale = 100;
+    const sunRadius = 12;
+    const nFrames = 120; // عدد الإطارات في دورة واحدة — لا يتوقف!
     let frame = 0;
 
-    // ================================================
-    // 🌟 SECTION 2: توليد نقاط المدار
-    // ================================================
+    // Planet parameters
+    const a = 1.0;     // Semi-major axis (AU)
+    const e = 0.3;     // Eccentricity — makes orbit clearly elliptical
+    const c = a * e;   // Distance from center to focus (where Sun is)
 
-    function generateOrbitPoints(a, e, n_points, periodRatio) {
+    // Generate orbit points once
+    function generateOrbit(a, e, n_points) {
       const x_points = [];
       const y_points = [];
 
       let theta = 0;
-      const dt_base = 0.01;
 
       for (let i = 0; i < n_points; i++) {
-        let r;
-        if (e === 0) {
-          // إذا كان المدار دائري — المسافة ثابتة
-          r = a;
-          // السرعة الزاوية ثابتة
-          theta += (2 * Math.PI / n_points) * periodRatio;
-        } else {
-          // إذا كان بيضاويًا — نستخدم قانون كبلر الثاني: dθ ∝ 1/r²
-          r = (a * (1 - e * e)) / (1 + e * Math.cos(theta));
-          const dtheta = dt_base * (1 / (r * r)) * periodRatio;
-          theta += dtheta;
-        }
+        const r = (a * (1 - e * e)) / (1 + e * Math.cos(theta));
+        const dtheta = 0.015 * (1 / (r * r)); // Speed ∝ 1/r² → Kepler's 2nd Law
+        theta += dtheta;
+        if (theta > 2 * Math.PI) theta -= 2 * Math.PI;
 
-        // تحويل إلى إحداثيات كارتيسية (مع تعديل لجعل الشمس في (0,0))
-        const x = r * Math.cos(theta) - (a === a_A ? c_A : c_B);
+        const x = r * Math.cos(theta) - c;
         const y = r * Math.sin(theta);
 
         x_points.push(x);
         y_points.push(y);
-
-        // تجنب التكرار
-        if (theta > 2 * Math.PI) theta -= 2 * Math.PI;
       }
 
       return { x: x_points, y: y_points };
     }
 
-    // توليد مسارات الكوكبين
-    const orbitA = generateOrbitPoints(a_A, e_A, nFrames, 1.0);          // الأرض — مدار دائري
-    const orbitB = generateOrbitPoints(a_B, e_B, nFrames, Ta / Tb);      // المريخ — مدار بيضاوي، بسرعة أقل بنسبة Tb
+    const orbit = generateOrbit(a, e, nFrames);
 
-    // ================================================
-    // 🌟 SECTION 3: رسم المدارات الكاملة (للخلفية)
-    // ================================================
-
-    function drawOrbit(a, e, color, isDashed = true) {
-      const points = 1000;
-      const step = (2 * Math.PI) / points;
-      const scale = 150; // 1 AU = 150 بكسل
-
-      ctx.beginPath();
-      for (let i = 0; i <= points; i++) {
-        let r;
-        if (e === 0) {
-          r = a;
-        } else {
-          const theta = i * step;
-          r = (a * (1 - e * e)) / (1 + e * Math.cos(theta));
-        }
-        const x = r * Math.cos(theta) * scale - (a === a_A ? c_A * scale : c_B * scale);
-        const y = r * Math.sin(theta) * scale;
-
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 1;
-      if (isDashed) ctx.setLineDash([5, 5]);
-      ctx.stroke();
-      ctx.setLineDash([]);
-    }
-
-    // رسم المدارات الخلفية
-    drawOrbit(a_A, e_A, '#4fc3f7', true);   // دائري — متقطع أزرق
-    drawOrbit(a_B, e_B, '#ff9800', true);   // بيضاوي — متقطع برتقالي
-
-    // ================================================
-    // 🌟 SECTION 4: الرسم التفاعلي (Animation Loop)
-    // ================================================
-
-    const scale = 150; // 1 AU = 150 بكسل
-    const sunRadius = 15;
-
-    function draw() {
-      // مسح الشاشة
+    // Animation loop — runs forever!
+    function animate() {
+      // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // رسم الشمس (في مركز الشاشة)
+      // Draw Sun at focus
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const sunX = centerX - c * scale;
+      const sunY = centerY;
+
       ctx.beginPath();
-      ctx.arc(canvas.width / 2, canvas.height / 2, sunRadius, 0, 2 * Math.PI);
+      ctx.arc(sunX, sunY, sunRadius, 0, 2 * Math.PI);
       ctx.fillStyle = '#FFD700';
-      ctx.fill();
-      ctx.shadowColor = '#FFFFE0';
+      ctx.shadowColor = '#FFFFAA';
       ctx.shadowBlur = 20;
-      ctx.stroke();
+      ctx.fill();
       ctx.shadowBlur = 0;
 
-      // موقع الكوكب A (الأرض — دائري)
-      const idxA = frame % nFrames;
-      const xA = orbitA.x[idxA] * scale + canvas.width / 2;
-      const yA = orbitA.y[idxA] * scale + canvas.height / 2;
+      // Get current planet position (loop infinitely)
+      const idx = frame % nFrames;
+      const px = orbit.x[idx] * scale + centerX;
+      const py = orbit.y[idx] * scale + centerY;
 
-      // موقع الكوكب B (المريخ — بيضاوي)
-      const idxB = frame % nFrames;
-      const xB = orbitB.x[idxB] * scale + canvas.width / 2;
-      const yB = orbitB.y[idxB] * scale + canvas.height / 2;
-
-      // رسم خطوط من الشمس إلى الكوكبين (لإظهار المساحات المتساوية)
+      // Draw radius vector (line from Sun to Planet)
       ctx.beginPath();
-      ctx.moveTo(canvas.width / 2, canvas.height / 2);
-      ctx.lineTo(xA, yA);
-      ctx.strokeStyle = 'rgba(79, 195, 247, 0.4)';
-      ctx.lineWidth = 2;
+      ctx.moveTo(sunX, sunY);
+      ctx.lineTo(px, py);
+      ctx.strokeStyle = '#ff6b6b';
+      ctx.lineWidth = 2.5;
       ctx.stroke();
 
+      // Draw planet
       ctx.beginPath();
-      ctx.moveTo(canvas.width / 2, canvas.height / 2);
-      ctx.lineTo(xB, yB);
-      ctx.strokeStyle = 'rgba(255, 152, 0, 0.4)';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      // رسم الكوكب A (الأرض)
-      ctx.beginPath();
-      ctx.arc(xA, yA, 8, 0, 2 * Math.PI);
+      ctx.arc(px, py, 9, 0, 2 * Math.PI);
       ctx.fillStyle = '#4FC3F7';
+      ctx.shadowColor = '#4FC3F7';
+      ctx.shadowBlur = 12;
       ctx.fill();
-      ctx.strokeStyle = '#007BFF';
-      ctx.lineWidth = 2;
-      ctx.stroke();
+      ctx.shadowBlur = 0;
 
-      // رسم الكوكب B (المريخ)
-      ctx.beginPath();
-      ctx.arc(xB, yB, 7, 0, 2 * Math.PI);
-      ctx.fillStyle = '#FF6B6B';
-      ctx.fill();
-      ctx.strokeStyle = '#C62828';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      // حساب المسافات الحالية من الشمس
-      const distA = Math.sqrt((xA - canvas.width/2)**2 + (yA - canvas.height/2)**2) / scale;
-      const distB = Math.sqrt((xB - canvas.width/2)**2 + (yB - canvas.height/2)**2) / scale;
-
-      // تحديد السرعة (للكوكب البيضاوي فقط)
-      const speedB = distB < 1.3 ? "عالية" : "منخفضة";
-
-      // تحديث النص التفاعلي
-      const statusDiv = document.getElementById('status');
-      statusDiv.innerHTML = `
-        <p>🟥 الكوكب B (المريخ): المسافة = ${distB.toFixed(3)} AU | السرعة = ${speedB}</p>
-        <p>🟦 الكوكب A (الأرض): المسافة = ${distA.toFixed(3)} AU | السرعة = <strong>ثابتة</strong></p>
-      `;
-
-      // تحديث الإطار
+      // Update frame — continues forever
       frame++;
-      requestAnimationFrame(draw);
+      requestAnimationFrame(animate);
     }
 
-    // بدء التحريك
-    draw();
+    // Start animation
+    animate();
 
-    // ================================================
-    // 🌟 SECTION 5: تحسين الأداء على الهواتف
-    // ================================================
-
-    window.addEventListener('resize', () => {
-      canvas.width = Math.min(window.innerWidth - 40, 800);
-      canvas.height = Math.min(window.innerHeight - 200, 600);
-    });
-
-    // ضبط الحجم الابتدائي
-    canvas.width = 800;
-    canvas.height = 600;
-
+    // Prevent scrolling/zooming on mobile
+    document.body.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
   </script>
 </body>
 </html>
