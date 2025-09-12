@@ -81,6 +81,7 @@
             width: 300px;
             accent-color: #64ffda;
         }
+        /* === أهم تعديل: تخصيص التفاعلية بـ LTR === */
         .simulation-area {
             position: relative;
             width: 100%;
@@ -89,6 +90,8 @@
             overflow: hidden;
             background-color: #0d1b2a;
             border-radius: 10px;
+            direction: ltr; /* ← هنا نحدد الاتجاه للتفاعلية فقط */
+            text-align: left; /* ← لضمان ترتيب العناصر بشكل صحيح */
         }
         .sun {
             position: absolute;
@@ -177,6 +180,8 @@
             height: 300px;
             margin: 20px auto;
             width: 100%;
+            direction: ltr;
+            text-align: left;
         }
         .earth-reference {
             font-size: 14px;
@@ -304,7 +309,7 @@
                 title.classList.add('active');
             }
 
-            // إذا كان القانون الثالث، تحديث الرسم البياني فقط عند الفتح
+            // تحديث الرسم البياني عند فتح القسم الثالث
             if (id === 'law3' && panel.classList.contains('show')) {
                 updateLawThird();
             }
@@ -585,23 +590,23 @@
                 y: [t_squared],
                 mode: 'markers',
                 marker: { size: 12, color: '#ff9800', symbol: 'star' },
-                name: 'القيمة الحالية',
+                name: 'Current Value',
                 showlegend: true
             };
 
             const data = [trace1, trace2, tracePoint];
 
             const layout = {
-                title: '<b>📊 قانون كبلر الثالث: T² ∝ a³</b>',
+                title: '<b>📊 Kepler’s Third Law: T² ∝ a³</b>',
                 titlefont: { size: 16, color: '#64ffda' },
                 xaxis: {
-                    title: 'نصف المحور الأكبر (a)',
+                    title: 'Semi-major axis (a)',
                     range: [0, 5],
                     showgrid: true,
                     gridcolor: '#334e6e'
                 },
                 yaxis: {
-                    title: 'T² أو a³',
+                    title: 'T² or a³',
                     range: [0, 150],
                     showgrid: true,
                     gridcolor: '#334e6e'
@@ -621,17 +626,6 @@
         a3Slider.addEventListener('input', updateLawThird);
         updateLawThird();
 
-        // تفعيل الرسم عند فتح القسم الثالث
-        document.getElementById('law3').addEventListener('show', updateLawThird);
-
-        // تأكد من وجود Plotly
-        if (typeof Plotly === 'undefined') {
-            const script = document.createElement('script');
-            script.src = 'https://cdn.plot.ly/plotly-latest.min.js';
-            script.onload = () => updateLawThird();
-            document.head.appendChild(script);
-        }
-
         // تفعيل الحركات عند فتح القسم
         document.querySelectorAll('.accordion-title').forEach(title => {
             title.addEventListener('click', () => {
@@ -648,6 +642,14 @@
                 el.classList.remove('show');
             });
         });
+
+        // تأكد من وجود Plotly
+        if (typeof Plotly === 'undefined') {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.plot.ly/plotly-latest.min.js';
+            script.onload = () => updateLawThird();
+            document.head.appendChild(script);
+        }
     </script>
 
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
