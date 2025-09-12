@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>قوانين كبلر الثلاثة - واجهات تفاعلية منفصلة</title>
+    <title>قوانين كبلر الثلاثة - واجهة مطوية تفاعلية</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #0a192f;
             margin: 0;
-            padding: 0;
+            padding: 20px;
             color: #e6f1ff;
             text-align: center;
         }
         h1 {
             color: #64ffda;
-            margin: 20px 0 10px;
+            margin-bottom: 5px;
         }
         .container {
             max-width: 900px;
@@ -25,44 +25,49 @@
             border-radius: 15px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
-        .nav-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-        }
-        .nav-btn {
-            padding: 12px 20px;
-            background: #1a3a60;
+        .accordion-title {
+            background-color: #1a3a60;
             color: #64ffda;
-            border: 1px solid #64ffda;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 16px;
+            padding: 18px;
+            font-size: 18px;
             font-weight: bold;
-            transition: all 0.3s ease;
-            min-width: 180px;
+            cursor: pointer;
+            border-radius: 10px;
+            margin: 15px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
-        .nav-btn:hover {
-            background: #64ffda;
-            color: #0a192f;
+        .accordion-title:hover {
+            background-color: #2a4d7c;
         }
-        .nav-btn.active {
-            background: #64ffda;
-            color: #0a192f;
-            box-shadow: 0 0 15px rgba(100, 255, 218, 0.5);
+        .accordion-title::after {
+            content: '▼';
+            font-size: 16px;
+            transition: transform 0.3s ease;
         }
-        .law-panel {
-            display: none;
-            animation: fadeIn 0.5s;
+        .accordion-title.active::after {
+            content: '▲';
+            transform: rotate(180deg);
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+            background-color: #112240;
+            border-radius: 0 0 10px 10px;
+            margin-bottom: 15px;
+            padding: 0 20px;
+        }
+        .accordion-content.show {
+            max-height: 1000px;
+            padding: 20px;
         }
         .slider-container {
-            margin: 20px 0;
+            margin: 15px 0;
             text-align: right;
         }
         .slider-label {
@@ -80,7 +85,7 @@
             position: relative;
             width: 100%;
             height: 400px;
-            margin: 25px auto;
+            margin: 20px auto;
             overflow: hidden;
             background-color: #0d1b2a;
             border-radius: 10px;
@@ -119,7 +124,7 @@
             opacity: 0.5;
         }
         .controls {
-            margin-top: 20px;
+            margin-top: 15px;
             display: flex;
             justify-content: center;
             gap: 15px;
@@ -160,7 +165,7 @@
             font-weight: bold;
         }
         .info-panel {
-            margin-top: 20px;
+            margin-top: 15px;
             padding: 15px;
             background-color: #1a3a60;
             border-radius: 10px;
@@ -183,19 +188,14 @@
 </head>
 <body>
     <div class="container">
-        <h1>🌌 قوانين كبلر الثلاثة - واجهات تفاعلية منفصلة</h1>
+        <h1>🌌 قوانين كبلر الثلاثة - واجهة مطوية تفاعلية</h1>
+        <p style="font-size:18px; color:#bbdefb;">انقر على أي قانون لعرض التفاعلية الخاصة به — دون مغادرة الصفحة!</p>
 
-        <!-- أزرار التنقل -->
-        <div class="nav-buttons">
-            <button class="nav-btn active" data-law="first">📜 قانون كبلر الأول</button>
-            <button class="nav-btn" data-law="second">🌀 قانون كبلر الثاني</button>
-            <button class="nav-btn" data-law="third">📈 قانون كبلر الثالث</button>
+        <!-- قانون كبلر الأول -->
+        <div class="accordion-title" onclick="toggleAccordion('law1')">
+            📜 قانون كبلر الأول: المدارات إهليلجية والشمس في البؤرة
         </div>
-
-        <!-- واجهة قانون كبلر الأول -->
-        <div id="law-first" class="law-panel active">
-            <p style="font-size:18px; color:#bbdefb;">المدارات إهليلجية، والشمس في إحدى بؤرتيها.</p>
-            
+        <div id="law1" class="accordion-content">
             <div class="slider-container">
                 <span class="slider-label">نصف المحور الأكبر (a):</span>
                 <input type="range" id="a1-slider" min="0.5" max="5" step="0.05" value="1.0" style="width: 300px;">
@@ -204,7 +204,7 @@
 
             <div class="slider-container">
                 <span class="slider-label">الانحراف المركزي (e):</span>
-                <input type="range" id="e1-slider" min="0.0" max="0.9" step="0.05" value="0.4" style="width: 300px;">
+                <input type="range" id="e1-slider" min="0.0" max="0.85" step="0.05" value="0.4" style="width: 300px;">
                 <span id="e1-value">0.4</span>
             </div>
 
@@ -224,10 +224,11 @@
             </div>
         </div>
 
-        <!-- واجهة قانون كبلر الثاني -->
-        <div id="law-second" class="law-panel">
-            <p style="font-size:18px; color:#bbdefb;">الخط الواصل بين الكوكب والشمس يمسح مساحات متساوية في أزمنة متساوية.</p>
-
+        <!-- قانون كبلر الثاني -->
+        <div class="accordion-title" onclick="toggleAccordion('law2')">
+            🌀 قانون كبلر الثاني: المساحات المتساوية في الأزمنة المتساوية
+        </div>
+        <div id="law2" class="accordion-content">
             <div class="slider-container">
                 <span class="slider-label">نصف المحور الأكبر (a):</span>
                 <input type="range" id="a2-slider" min="0.5" max="5" step="0.05" value="1.0" style="width: 300px;">
@@ -256,10 +257,11 @@
             </div>
         </div>
 
-        <!-- واجهة قانون كبلر الثالث -->
-        <div id="law-third" class="law-panel">
-            <p style="font-size:18px; color:#bbdefb;">مربع فترة دوران الكوكب يتناسب مع مكعب نصف المحور الأكبر لمداره.</p>
-
+        <!-- قانون كبلر الثالث -->
+        <div class="accordion-title" onclick="toggleAccordion('law3')">
+            📈 قانون كبلر الثالث: T² ∝ a³
+        </div>
+        <div id="law3" class="accordion-content">
             <div class="slider-container">
                 <span class="slider-label">نصف المحور الأكبر (a):</span>
                 <input type="range" id="a3-slider" min="0.5" max="5" step="0.05" value="1.0" style="width: 300px;">
@@ -285,22 +287,30 @@
     </div>
 
     <script>
-        // إدارة الواجهات
-        const lawButtons = document.querySelectorAll('.nav-btn');
-        const lawPanels = document.querySelectorAll('.law-panel');
-
-        lawButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                lawButtons.forEach(btn => btn.classList.remove('active'));
-                lawPanels.forEach(panel => panel.classList.remove('active'));
+        // وظيفة الطي والفتح
+        function toggleAccordion(id) {
+            const panel = document.getElementById(id);
+            const title = Array.from(document.querySelectorAll('.accordion-title')).find(t => t.textContent.includes(panel.previousElementSibling.textContent));
+            
+            if (panel.classList.contains('show')) {
+                panel.classList.remove('show');
+                title.classList.remove('active');
+            } else {
+                // إغلاق جميع العناصر الأخرى
+                document.querySelectorAll('.accordion-content').forEach(p => p.classList.remove('show'));
+                document.querySelectorAll('.accordion-title').forEach(t => t.classList.remove('active'));
                 
-                button.classList.add('active');
-                const lawId = button.dataset.law;
-                document.getElementById(`law-${lawId}`).classList.add('active');
-            });
-        });
+                panel.classList.add('show');
+                title.classList.add('active');
+            }
 
-        // قانون كبلر الأول - حركة بسيطة بدون قطاعات
+            // إذا كان القانون الثالث، تحديث الرسم البياني فقط عند الفتح
+            if (id === 'law3' && panel.classList.contains('show')) {
+                updateLawThird();
+            }
+        }
+
+        // قانون كبلر الأول - حركة بسيطة
         let animationId1 = null;
         let isPlaying1 = true;
         let time1 = 0;
@@ -320,20 +330,23 @@
             a1Value.textContent = a.toFixed(2) + ' AU';
             e1Value.textContent = e.toFixed(2);
 
-            // حساب البعد من المركز إلى البؤرة
+            // تجنب التصادم مع الشمس
+            if (e >= 0.9) {
+                e1Slider.value = 0.85;
+                e1Value.textContent = "0.85";
+                return;
+            }
+
             const c = a * e;
 
-            // وضع الشمس في البؤرة
             sun1.style.left = `${50 + c * 20}%`;
             sun1.style.top = `50%`;
 
-            // أبعاد المدار الإهليلجي
             const width = a * 2 * 100;
             const height = 2 * Math.sqrt(a*a * (1 - e*e)) * 100;
             orbit1.style.width = `${width}px`;
             orbit1.style.height = `${height}px`;
 
-            // وضع الكوكب في الأوج (أبعد نقطة)
             const x0 = 50 + (a + c) * 20;
             const y0 = 50;
             planet1.style.left = `${x0}%`;
@@ -349,7 +362,7 @@
 
             const a = parseFloat(a1Slider.value);
             const e = parseFloat(e1Slider.value);
-            const T = Math.pow(a, 1.5); // فترة الدورة
+            const T = Math.pow(a, 1.5);
 
             const fracTime = (time1 % (T * 100)) / (T * 100);
             let E = fracTime * 2 * Math.PI;
@@ -359,15 +372,6 @@
 
             const theta = E;
             const r = a * (1 - e*e) / (1 + e * Math.cos(theta));
-
-            // تجنب الدخول في الشمس: الحد الأدنى للمسافة = a(1-e)
-            const minDistance = a * (1 - e);
-            if (minDistance <= 0.1) {
-                alert("⚠️ الانحراف مرتفع جدًا! تم تقليله تلقائيًا لتجنب التصادم.");
-                e1Slider.value = Math.min(e, 0.8);
-                updateLawFirst();
-                return;
-            }
 
             const x = r * Math.cos(theta);
             const y = r * Math.sin(theta);
@@ -394,9 +398,7 @@
             animateLawFirst();
         });
 
-        animateLawFirst();
-
-        // قانون كبلر الثاني - مع قطاعات متحركة
+        // قانون كبلر الثاني - مع قطاعات
         let animationId2 = null;
         let isPlaying2 = true;
         let time2 = 0;
@@ -432,7 +434,7 @@
             planet2.style.top = `${y0}%`;
 
             // تنظيف القطاعات السابقة
-            document.querySelectorAll('.sector').forEach(s => s.remove());
+            document.querySelectorAll('#law2 .sector').forEach(s => s.remove());
         }
 
         a2Slider.addEventListener('input', updateLawSecond);
@@ -464,7 +466,7 @@
             planet2.style.left = `${px}%`;
             planet2.style.top = `${py}%`;
 
-            // إنشاء قطاعات توضح المساحات المتساوية (كل 1/8 من الدورة)
+            // إنشاء قطاع جديد (كل 1/8 من الدورة)
             const sectorCount = 8;
             const sectorAngle = (2 * Math.PI) / sectorCount;
             const centerX = 50;
@@ -472,17 +474,10 @@
             const scale = 20;
 
             // إزالة القطاعات القديمة
-            document.querySelectorAll('.sector').forEach(s => s.remove());
+            document.querySelectorAll('#law2 .sector').forEach(s => s.remove());
 
-            // إنشاء قطاع جديد الآن
+            // إنشاء قطاع الآن
             const lastAngle = theta - sectorAngle;
-            const sector = document.createElement('div');
-            sector.className = 'sector';
-            sector.style.position = 'absolute';
-            sector.style.left = `${centerX}%`;
-            sector.style.top = `${centerY}%`;
-            sector.style.transformOrigin = 'center';
-
             const r1 = a * (1 - e*e) / (1 + e * Math.cos(lastAngle));
             const r2 = a * (1 - e*e) / (1 + e * Math.cos(theta));
 
@@ -499,10 +494,17 @@
                 Z
             `;
 
+            const sector = document.createElement('div');
+            sector.className = 'sector';
+            sector.style.position = 'absolute';
+            sector.style.left = `${centerX}%`;
+            sector.style.top = `${centerY}%`;
+            sector.style.transformOrigin = 'center';
+
             sector.innerHTML = `<svg width="200" height="200" viewBox="-100 -100 200 200" style="position:absolute; top:0; left:0; width:200px; height:200px;">
                 <path d="${pathData}" fill="#64ffda" stroke="none" />
               </svg>`;
-            document.querySelector('.simulation-area').appendChild(sector);
+            document.querySelector('#law2 .simulation-area').appendChild(sector);
 
             time2 += 0.5;
             animationId2 = requestAnimationFrame(animateLawSecond);
@@ -519,8 +521,6 @@
             updateLawSecond();
             animateLawSecond();
         });
-
-        animateLawSecond();
 
         // قانون كبلر الثالث - رسم بياني
         let animationId3 = null;
@@ -621,8 +621,33 @@
         a3Slider.addEventListener('input', updateLawThird);
         updateLawThird();
 
-        // تحديث تلقائي للرسم البياني أثناء الحركة (اختياري)
-        setInterval(updateLawThird, 500);
+        // تفعيل الرسم عند فتح القسم الثالث
+        document.getElementById('law3').addEventListener('show', updateLawThird);
+
+        // تأكد من وجود Plotly
+        if (typeof Plotly === 'undefined') {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.plot.ly/plotly-latest.min.js';
+            script.onload = () => updateLawThird();
+            document.head.appendChild(script);
+        }
+
+        // تفعيل الحركات عند فتح القسم
+        document.querySelectorAll('.accordion-title').forEach(title => {
+            title.addEventListener('click', () => {
+                const id = title.nextElementSibling.id;
+                if (id === 'law1') animateLawFirst();
+                if (id === 'law2') animateLawSecond();
+                if (id === 'law3') updateLawThird();
+            });
+        });
+
+        // تمهيد أولي
+        window.addEventListener('load', () => {
+            document.querySelectorAll('.accordion-content').forEach(el => {
+                el.classList.remove('show');
+            });
+        });
     </script>
 
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
