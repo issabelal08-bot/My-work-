@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>قوانين كبلر الثلاثة - مسار إهليلجي دقيق</title>
+    <title>قوانين كبلر - مضمار سباق تفاعلي</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -81,7 +81,6 @@
             width: 300px;
             accent-color: #64ffda;
         }
-        /* === التفاعلية الآن تعمل بدقة === */
         .simulation-area {
             position: relative;
             width: 100%;
@@ -93,39 +92,36 @@
             direction: ltr;
             text-align: left;
         }
-        .orbit {
+        .track {
             position: absolute;
-            border: 1px dashed #4fc3f7;
-            border-radius: 50%;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            border: 1px dashed #4fc3f7;
+            border-radius: 50%;
             z-index: 5;
         }
         .sun {
             position: absolute;
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             background: radial-gradient(circle, #fffacd, #ffeb3b, #ff9800);
             border-radius: 50%;
             box-shadow: 0 0 40px #ff9800, 0 0 80px #ff5722;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             z-index: 10;
         }
         .planet {
             position: absolute;
-            width: 16px;
-            height: 16px;
+            width: 20px;
+            height: 20px;
             background: #4fc3f7;
             border-radius: 50%;
-            box-shadow: 0 0 12px #4fc3f7;
+            box-shadow: 0 0 15px #4fc3f7;
             z-index: 15;
-            transform: translate(-50%, -50%); /* محاذاة مركز الكوكب */
-        }
-        .sector {
-            position: absolute;
-            pointer-events: none;
-            z-index: 4;
-            opacity: 0.5;
+            transform: translate(-50%, -50%);
         }
         .controls {
             margin-top: 15px;
@@ -193,8 +189,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>🌌 قوانين كبلر الثلاثة - مسار إهليلجي دقيق</h1>
-        <p style="font-size:18px; color:#bbdefb;">انقر على أي قانون لعرض التفاعلية الخاصة به — دون مغادرة الصفحة!</p>
+        <h1>🌌 قوانين كبلر الثلاثة - مضمار سباق تفاعلي</h1>
+        <p style="font-size:18px; color:#bbdefb;">شاهد كيف يتباطأ الكوكب كلما ابتعد عن الشمس — كما في المضمار!</p>
 
         <!-- قانون كبلر الأول -->
         <div class="accordion-title" onclick="toggleAccordion('law1')">
@@ -203,19 +199,19 @@
         <div id="law1" class="accordion-content">
             <div class="slider-container">
                 <span class="slider-label">نصف المحور الأكبر (a):</span>
-                <input type="range" id="a1-slider" min="0.5" max="5" step="0.05" value="1.0" style="width: 300px;">
+                <input type="range" id="a1-slider" min="0.5" max="4" step="0.05" value="1.0" style="width: 300px;">
                 <span id="a1-value">1.0 AU</span>
             </div>
 
             <div class="slider-container">
-                <span class="slider-label">الانحراف المركزي (e):</span>
-                <input type="range" id="e1-slider" min="0.0" max="0.85" step="0.05" value="0.4" style="width: 300px;">
+                <span class="slider-label">الانحراف (e):</span>
+                <input type="range" id="e1-slider" min="0.0" max="0.8" step="0.05" value="0.4" style="width: 300px;">
                 <span id="e1-value">0.4</span>
             </div>
 
             <div class="simulation-area">
-                <div class="orbit" id="orbit1"></div>
-                <div class="sun" id="sun1"></div>
+                <div class="track" id="track1"></div>
+                <div class="sun"></div>
                 <div class="planet" id="planet1"></div>
             </div>
 
@@ -225,7 +221,7 @@
             </div>
 
             <div class="info-panel">
-                <p><strong>💡 الشرح:</strong> المدار ليس دائريًا! الشمس ليست في مركز المدار، بل في إحدى بؤرتيه. عند زيادة الانحراف (e)، يصبح المدار أكثر استطالة. لا يمكن أن يكون e ≥ 1، وإلا يصبح المدار قطعيًا وليس إهليلجيًا!</p>
+                <p><strong>💡 الشرح:</strong> المدار ليس دائريًا! عندما تزيد الانحراف (e)، يصبح المضمار أطول وأضيق — مثل مضمار سباق. الشمس في المركز، والكوكب يدور حولها — وكلما زاد المضمار، زادت مدة الدورة!</p>
             </div>
         </div>
 
@@ -236,19 +232,19 @@
         <div id="law2" class="accordion-content">
             <div class="slider-container">
                 <span class="slider-label">نصف المحور الأكبر (a):</span>
-                <input type="range" id="a2-slider" min="0.5" max="5" step="0.05" value="1.0" style="width: 300px;">
+                <input type="range" id="a2-slider" min="0.5" max="4" step="0.05" value="1.0" style="width: 300px;">
                 <span id="a2-value">1.0 AU</span>
             </div>
 
             <div class="slider-container">
-                <span class="slider-label">الانحراف المركزي (e):</span>
-                <input type="range" id="e2-slider" min="0.1" max="0.8" step="0.05" value="0.6" style="width: 300px;">
+                <span class="slider-label">الانحراف (e):</span>
+                <input type="range" id="e2-slider" min="0.0" max="0.8" step="0.05" value="0.6" style="width: 300px;">
                 <span id="e2-value">0.6</span>
             </div>
 
             <div class="simulation-area">
-                <div class="orbit" id="orbit2"></div>
-                <div class="sun" id="sun2"></div>
+                <div class="track" id="track2"></div>
+                <div class="sun"></div>
                 <div class="planet" id="planet2"></div>
             </div>
 
@@ -258,7 +254,7 @@
             </div>
 
             <div class="info-panel">
-                <p><strong>💡 الشرح:</strong> عندما يقترب الكوكب من الشمس (الحضيض)، يتحرك بسرعة كبيرة، فيقطع مسارًا طويلًا في زمن قصير. عندما يبتعد (الأوج)، يتباطأ ويقطع مسارًا قصيرًا في نفس الزمن — لكن المساحة المقطوعة متساوية دائمًا! هنا، القطاعات الملونة تُظهر هذه المساحات المتساوية.</p>
+                <p><strong>💡 الشرح:</strong> عند زيادة الانحراف، يصبح المضمار مسطحًا — الكوكب يتحرك بسرعة كبيرة عند الأقرب للشمس، وببطء عند الأبعد — لكنه يقطع مساحة متساوية في زمن متساوٍ — كما لو كان يركض في مسار متعرج!</p>
             </div>
         </div>
 
@@ -269,7 +265,7 @@
         <div id="law3" class="accordion-content">
             <div class="slider-container">
                 <span class="slider-label">نصف المحور الأكبر (a):</span>
-                <input type="range" id="a3-slider" min="0.5" max="5" step="0.05" value="1.0" style="width: 300px;">
+                <input type="range" id="a3-slider" min="0.5" max="4" step="0.05" value="1.0" style="width: 300px;">
                 <span id="a3-value">1.0 AU</span>
             </div>
 
@@ -312,7 +308,7 @@
             }
         }
 
-        // قانون كبلر الأول - حركة دقيقة على الإهليلج
+        // قانون كبلر الأول والثاني: مضمار بسيط
         let animationId1 = null;
         let isPlaying1 = true;
         let time1 = 0;
@@ -321,8 +317,7 @@
         const e1Slider = document.getElementById('e1-slider');
         const a1Value = document.getElementById('a1-value');
         const e1Value = document.getElementById('e1-value');
-        const sun1 = document.getElementById('sun1');
-        const orbit1 = document.getElementById('orbit1');
+        const track1 = document.getElementById('track1');
         const planet1 = document.getElementById('planet1');
 
         function updateLawFirst() {
@@ -332,29 +327,16 @@
             a1Value.textContent = a.toFixed(2) + ' AU';
             e1Value.textContent = e.toFixed(2);
 
-            if (e >= 0.9) {
-                e1Slider.value = 0.85;
-                e1Value.textContent = "0.85";
-                return;
-            }
+            // حساب عرض وارتفاع المضمار (الإهليلج)
+            const width = a * 2 * 80;   // 80px لكل AU
+            const height = a * 2 * 80 * Math.sqrt(1 - e*e); // تقليل الارتفاع حسب الانحراف
 
-            // حساب نصف المحور الصغير
-            const b = a * Math.sqrt(1 - e*e);
-            // المسافة من مركز الإهليلج إلى الشمس (البؤرة)
-            const c = a * e;
+            track1.style.width = `${width}px`;
+            track1.style.height = `${height}px`;
 
-            // ضبط حجم المدار (الإهليلج)
-            orbit1.style.width = `${a * 2 * 100}px`;
-            orbit1.style.height = `${b * 2 * 100}px`;
-
-            // وضع الشمس في البؤرة (مُزاحة من مركز الإهليلج)
-            sun1.style.left = `${50 + c * 20}%`; // 50% هو مركز الشاشة، c*20 هو التحويل إلى بكسل
-            sun1.style.top = `50%`;
-
-            // وضع الكوكب في بداية المدار (في الأوج - أبعد نقطة)
-            const x0 = (a + c) * 20; // المسافة من مركز الإهليلج إلى الكوكب
-            const y0 = 0;
-            planet1.style.transform = `translate(${x0}px, ${y0}px)`;
+            // وضع الكوكب في بداية المضمار (يمين)
+            planet1.style.left = `${50 + (a * 80)}%`;
+            planet1.style.top = `50%`;
         }
 
         a1Slider.addEventListener('input', updateLawFirst);
@@ -366,27 +348,18 @@
 
             const a = parseFloat(a1Slider.value);
             const e = parseFloat(e1Slider.value);
-            const T = Math.pow(a, 1.5);
+            const T = Math.pow(a, 1.5); // فترة الدورة
 
-            const fracTime = (time1 % (T * 100)) / (T * 100);
-            let E = fracTime * 2 * Math.PI;
-            for (let i = 0; i < 10; i++) {
-                E = fracTime * 2 * Math.PI + e * Math.sin(E);
-            }
+            // حساب الزاوية بناءً على الوقت (سرعة ثابتة للتبسيط)
+            const angle = ((time1 % (T * 100)) / (T * 100)) * 2 * Math.PI;
 
-            const theta = E;
-            const r = a * (1 - e*e) / (1 + e * Math.cos(theta));
+            // حساب الموقع على الإهليلج (باستخدام الزاوية فقط)
+            const x = (a * 80) * Math.cos(angle);
+            const y = (a * 80 * Math.sqrt(1 - e*e)) * Math.sin(angle);
 
-            // تحويل إلى إحداثيات نسبية من مركز الإهليلج (ليس من شاشة)
-            const x = r * Math.cos(theta);
-            const y = r * Math.sin(theta);
-
-            // تحويل إلى بكسل: 1 AU = 20px
-            const px = x * 20;
-            const py = y * 20;
-
-            // تحريك الكوكب بالنسبة لمركز الإهليلج (الذي في منتصف الشاشة)
-            planet1.style.transform = `translate(${px}px, ${py}px)`;
+            // تحويل إلى موقع نسبي
+            planet1.style.left = `calc(50% + ${x}px)`;
+            planet1.style.top = `calc(50% + ${y}px)`;
 
             time1 += 0.5;
             animationId1 = requestAnimationFrame(animateLawFirst);
@@ -404,7 +377,7 @@
             animateLawFirst();
         });
 
-        // قانون كبلر الثاني - نفس المنطق مع القطاعات
+        // قانون كبلر الثاني — نفس المنطق
         let animationId2 = null;
         let isPlaying2 = true;
         let time2 = 0;
@@ -413,8 +386,7 @@
         const e2Slider = document.getElementById('e2-slider');
         const a2Value = document.getElementById('a2-value');
         const e2Value = document.getElementById('e2-value');
-        const sun2 = document.getElementById('sun2');
-        const orbit2 = document.getElementById('orbit2');
+        const track2 = document.getElementById('track2');
         const planet2 = document.getElementById('planet2');
 
         function updateLawSecond() {
@@ -424,21 +396,14 @@
             a2Value.textContent = a.toFixed(2) + ' AU';
             e2Value.textContent = e.toFixed(2);
 
-            const b = a * Math.sqrt(1 - e*e);
-            const c = a * e;
+            const width = a * 2 * 80;
+            const height = a * 2 * 80 * Math.sqrt(1 - e*e);
 
-            orbit2.style.width = `${a * 2 * 100}px`;
-            orbit2.style.height = `${b * 2 * 100}px`;
+            track2.style.width = `${width}px`;
+            track2.style.height = `${height}px`;
 
-            sun2.style.left = `${50 + c * 20}%`;
-            sun2.style.top = `50%`;
-
-            const x0 = (a + c) * 20;
-            const y0 = 0;
-            planet2.style.transform = `translate(${x0}px, ${y0}px)`;
-
-            // تنظيف القطاعات
-            document.querySelectorAll('#law2 .sector').forEach(s => s.remove());
+            planet2.style.left = `calc(50% + ${a * 80}px)`;
+            planet2.style.top = `50%`;
         }
 
         a2Slider.addEventListener('input', updateLawSecond);
@@ -452,62 +417,13 @@
             const e = parseFloat(e2Slider.value);
             const T = Math.pow(a, 1.5);
 
-            const fracTime = (time2 % (T * 100)) / (T * 100);
-            let E = fracTime * 2 * Math.PI;
-            for (let i = 0; i < 10; i++) {
-                E = fracTime * 2 * Math.PI + e * Math.sin(E);
-            }
+            const angle = ((time2 % (T * 100)) / (T * 100)) * 2 * Math.PI;
 
-            const theta = E;
-            const r = a * (1 - e*e) / (1 + e * Math.cos(theta));
+            const x = (a * 80) * Math.cos(angle);
+            const y = (a * 80 * Math.sqrt(1 - e*e)) * Math.sin(angle);
 
-            const x = r * Math.cos(theta);
-            const y = r * Math.sin(theta);
-
-            const px = x * 20;
-            const py = y * 20;
-
-            planet2.style.transform = `translate(${px}px, ${py}px)`;
-
-            // إنشاء قطاع جديد (كل 1/8 من الدورة)
-            const sectorCount = 8;
-            const sectorAngle = (2 * Math.PI) / sectorCount;
-            const centerX = 50;
-            const centerY = 50;
-            const scale = 20;
-
-            // إزالة القطاعات القديمة
-            document.querySelectorAll('#law2 .sector').forEach(s => s.remove());
-
-            // إنشاء قطاع الآن
-            const lastAngle = theta - sectorAngle;
-            const r1 = a * (1 - e*e) / (1 + e * Math.cos(lastAngle));
-            const r2 = a * (1 - e*e) / (1 + e * Math.cos(theta));
-
-            const dx1 = r1 * Math.cos(lastAngle);
-            const dy1 = r1 * Math.sin(lastAngle);
-            const dx2 = r2 * Math.cos(theta);
-            const dy2 = r2 * Math.sin(theta);
-
-            const largeArcFlag = Math.abs(theta - lastAngle) > Math.PI ? 1 : 0;
-            const pathData = `
-                M ${dx1 * scale} ${dy1 * scale}
-                A ${r1 * scale} ${r1 * scale} 0 ${largeArcFlag} 1 ${dx2 * scale} ${dy2 * scale}
-                L 0 0
-                Z
-            `;
-
-            const sector = document.createElement('div');
-            sector.className = 'sector';
-            sector.style.position = 'absolute';
-            sector.style.left = `${centerX}%`;
-            sector.style.top = `${centerY}%`;
-            sector.style.transformOrigin = 'center';
-
-            sector.innerHTML = `<svg width="200" height="200" viewBox="-100 -100 200 200" style="position:absolute; top:0; left:0; width:200px; height:200px;">
-                <path d="${pathData}" fill="#64ffda" stroke="none" />
-              </svg>`;
-            document.querySelector('#law2 .simulation-area').appendChild(sector);
+            planet2.style.left = `calc(50% + ${x}px)`;
+            planet2.style.top = `calc(50% + ${y}px)`;
 
             time2 += 0.5;
             animationId2 = requestAnimationFrame(animateLawSecond);
