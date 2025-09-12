@@ -3,205 +3,628 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ارمِ الكرة من الماوس — بدون لمسها!</title>
+    <title>قوانين كبلر الثلاثة - واجهات تفاعلية منفصلة</title>
     <style>
         body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0a192f;
             margin: 0;
             padding: 0;
-            background-color: #f0f0f0;
+            color: #e6f1ff;
+            text-align: center;
+        }
+        h1 {
+            color: #64ffda;
+            margin: 20px 0 10px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #112240;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        .nav-buttons {
             display: flex;
             justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-            font-family: 'Tajawal', sans-serif;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
         }
-
-        #canvas {
-            background-color: #e0e0e0;
+        .nav-btn {
+            padding: 12px 20px;
+            background: #1a3a60;
+            color: #64ffda;
+            border: 1px solid #64ffda;
             border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
             cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            min-width: 180px;
         }
+        .nav-btn:hover {
+            background: #64ffda;
+            color: #0a192f;
+        }
+        .nav-btn.active {
+            background: #64ffda;
+            color: #0a192f;
+            box-shadow: 0 0 15px rgba(100, 255, 218, 0.5);
+        }
+        .law-panel {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .slider-container {
+            margin: 20px 0;
+            text-align: right;
+        }
+        .slider-label {
+            display: inline-block;
+            width: 200px;
+            font-weight: bold;
+            color: #64ffda;
+            margin-right: 15px;
+        }
+        input[type="range"] {
+            width: 300px;
+            accent-color: #64ffda;
+        }
+        .simulation-area {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            margin: 25px auto;
+            overflow: hidden;
+            background-color: #0d1b2a;
+            border-radius: 10px;
+        }
+        .sun {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #fffacd, #ffeb3b, #ff9800);
+            border-radius: 50%;
+            box-shadow: 0 0 40px #ff9800, 0 0 80px #ff5722;
+            z-index: 10;
+        }
+        .orbit {
+            position: absolute;
+            border: 1px dashed #4fc3f7;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+        }
+        .planet {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: #4fc3f7;
+            border-radius: 50%;
+            box-shadow: 0 0 12px #4fc3f7;
+            z-index: 15;
+        }
+        .sector {
+            position: absolute;
+            pointer-events: none;
+            z-index: 4;
+            opacity: 0.5;
+        }
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        .btn {
+            padding: 8px 16px;
+            background: #64ffda;
+            color: #0a192f;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .btn:hover { background: #4dd0e1; }
+        .result-box {
+            background-color: #1a3a60;
+            border-left: 5px solid #64ffda;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px auto;
+            text-align: right;
+            font-size: 16px;
+            line-height: 1.6;
+            max-width: 700px;
+        }
+        .equation {
+            font-family: 'Courier New', monospace;
+            background-color: #2a4d7c;
+            padding: 8px 12px;
+            border-radius: 6px;
+            display: inline-block;
+            margin: 5px 0;
+            color: #64ffda;
+        }
+        .check {
+            color: #64ffda;
+            font-weight: bold;
+        }
+        .info-panel {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #1a3a60;
+            border-radius: 10px;
+            text-align: right;
+            font-size: 15px;
+            line-height: 1.7;
+        }
+        .plot-container {
+            height: 300px;
+            margin: 20px auto;
+            width: 100%;
+        }
+        .earth-reference {
+            font-size: 14px;
+            color: #b0bec5;
+            margin: 10px 0;
+        }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h1>🌌 قوانين كبلر الثلاثة - واجهات تفاعلية منفصلة</h1>
 
-    <canvas id="canvas" width="800" height="500"></canvas>
+        <!-- أزرار التنقل -->
+        <div class="nav-buttons">
+            <button class="nav-btn active" data-law="first">📜 قانون كبلر الأول</button>
+            <button class="nav-btn" data-law="second">🌀 قانون كبلر الثاني</button>
+            <button class="nav-btn" data-law="third">📈 قانون كبلر الثالث</button>
+        </div>
+
+        <!-- واجهة قانون كبلر الأول -->
+        <div id="law-first" class="law-panel active">
+            <p style="font-size:18px; color:#bbdefb;">المدارات إهليلجية، والشمس في إحدى بؤرتيها.</p>
+            
+            <div class="slider-container">
+                <span class="slider-label">نصف المحور الأكبر (a):</span>
+                <input type="range" id="a1-slider" min="0.5" max="5" step="0.05" value="1.0" style="width: 300px;">
+                <span id="a1-value">1.0 AU</span>
+            </div>
+
+            <div class="slider-container">
+                <span class="slider-label">الانحراف المركزي (e):</span>
+                <input type="range" id="e1-slider" min="0.0" max="0.9" step="0.05" value="0.4" style="width: 300px;">
+                <span id="e1-value">0.4</span>
+            </div>
+
+            <div class="simulation-area">
+                <div class="sun" id="sun1"></div>
+                <div class="orbit" id="orbit1"></div>
+                <div class="planet" id="planet1"></div>
+            </div>
+
+            <div class="controls">
+                <button class="btn" id="play-pause1">▶️ تشغيل</button>
+                <button class="btn" id="reset1">🔄 إعادة ضبط</button>
+            </div>
+
+            <div class="info-panel">
+                <p><strong>💡 الشرح:</strong> المدار ليس دائريًا! الشمس ليست في مركز المدار، بل في إحدى بؤرتيه. عند زيادة الانحراف (e)، يصبح المدار أكثر استطالة. لا يمكن أن يكون e ≥ 1، وإلا يصبح المدار قطعيًا وليس إهليلجيًا!</p>
+            </div>
+        </div>
+
+        <!-- واجهة قانون كبلر الثاني -->
+        <div id="law-second" class="law-panel">
+            <p style="font-size:18px; color:#bbdefb;">الخط الواصل بين الكوكب والشمس يمسح مساحات متساوية في أزمنة متساوية.</p>
+
+            <div class="slider-container">
+                <span class="slider-label">نصف المحور الأكبر (a):</span>
+                <input type="range" id="a2-slider" min="0.5" max="5" step="0.05" value="1.0" style="width: 300px;">
+                <span id="a2-value">1.0 AU</span>
+            </div>
+
+            <div class="slider-container">
+                <span class="slider-label">الانحراف المركزي (e):</span>
+                <input type="range" id="e2-slider" min="0.1" max="0.8" step="0.05" value="0.6" style="width: 300px;">
+                <span id="e2-value">0.6</span>
+            </div>
+
+            <div class="simulation-area">
+                <div class="sun" id="sun2"></div>
+                <div class="orbit" id="orbit2"></div>
+                <div class="planet" id="planet2"></div>
+            </div>
+
+            <div class="controls">
+                <button class="btn" id="play-pause2">▶️ تشغيل</button>
+                <button class="btn" id="reset2">🔄 إعادة ضبط</button>
+            </div>
+
+            <div class="info-panel">
+                <p><strong>💡 الشرح:</strong> عندما يقترب الكوكب من الشمس (الحضيض)، يتحرك بسرعة كبيرة، فيقطع مسارًا طويلًا في زمن قصير. عندما يبتعد (الأوج)، يتباطأ ويقطع مسارًا قصيرًا في نفس الزمن — لكن المساحة المقطوعة متساوية دائمًا! هنا، القطاعات الملونة تُظهر هذه المساحات المتساوية.</p>
+            </div>
+        </div>
+
+        <!-- واجهة قانون كبلر الثالث -->
+        <div id="law-third" class="law-panel">
+            <p style="font-size:18px; color:#bbdefb;">مربع فترة دوران الكوكب يتناسب مع مكعب نصف المحور الأكبر لمداره.</p>
+
+            <div class="slider-container">
+                <span class="slider-label">نصف المحور الأكبر (a):</span>
+                <input type="range" id="a3-slider" min="0.5" max="5" step="0.05" value="1.0" style="width: 300px;">
+                <span id="a3-value">1.0 AU</span>
+            </div>
+
+            <div class="plot-container" id="plot3"></div>
+
+            <div class="result-box">
+                <div class="equation">T = a<sup>3/2</sup> = <span id="t-ratio3">1.000</span> سنة</div>
+                <div class="equation">T<sup>2</sup> = <span id="t-squared3">1.000</span> | a<sup>3</sup> = <span id="a-cubed3">1.000</span></div>
+                <div id="status3" class="check">✅ العلاقة صحيحة!</div>
+            </div>
+
+            <div class="earth-reference">
+                ⚖️ الأرض: a = 1.0 AU → T = 1 سنة (المرجع)
+            </div>
+
+            <div class="info-panel">
+                <p><strong>💡 الشرح:</strong> إذا ضاعفت نصف المحور الأكبر (a)، فإن فترة الدوران تزيد بأكثر من الضعف! فمثلاً: a=4 → T=8 سنوات. هذا هو السبب في أن كواكب النظام الشمسي الخارجية تأخذ سنوات طويلة لتكميل دورة واحدة.</p>
+            </div>
+        </div>
+    </div>
 
     <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
+        // إدارة الواجهات
+        const lawButtons = document.querySelectorAll('.nav-btn');
+        const lawPanels = document.querySelectorAll('.law-panel');
 
-        // إعدادات الفيزياء
-        const g = 0.5;           // تسارع الجاذبية (معدل مُعدّل للشاشة)
-        const friction = 0.99;   // احتكاك الهواء
-        const ballRadius = 20;
-
-        // كائن الكرة
-        let ball = {
-            x: 0,
-            y: 0,
-            vx: 0,
-            vy: 0,
-            radius: ballRadius,
-            active: false,  // هل الكرة مُطلقة؟
-            color: '#ff4757'
-        };
-
-        // حالة السحب
-        let isDragging = false;
-        let dragStart = { x: 0, y: 0 };
-        let powerLine = null;
-
-        // رسم الكرة
-        function drawBall() {
-            if (!ball.active) return;
-
-            ctx.beginPath();
-            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-            ctx.fillStyle = ball.color;
-            ctx.fill();
-            ctx.strokeStyle = '#d63031';
-            ctx.lineWidth = 3;
-            ctx.stroke();
-            ctx.closePath();
-        }
-
-        // رسم خط السحب (عند الضغط)
-        function drawPowerLine() {
-            if (!isDragging || !powerLine) return;
-
-            ctx.beginPath();
-            ctx.moveTo(powerLine.start.x, powerLine.start.y);
-            ctx.lineTo(powerLine.end.x, powerLine.end.y);
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-            ctx.lineWidth = 3;
-            ctx.setLineDash([5, 5]);
-            ctx.stroke();
-            ctx.setLineDash([]);
-            
-            // رسم سهم صغير في نهاية الخط
-            const angle = Math.atan2(powerLine.end.y - powerLine.start.y, powerLine.end.x - powerLine.start.x);
-            const arrowLength = 15;
-            const arrowWidth = 8;
-
-            ctx.save();
-            ctx.translate(powerLine.end.x, powerLine.end.y);
-            ctx.rotate(angle);
-
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.lineTo(-arrowLength, -arrowWidth/2);
-            ctx.lineTo(-arrowLength, arrowWidth/2);
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-            ctx.fill();
-
-            ctx.restore();
-        }
-
-        // تحديث حركة الكرة
-        function updateBall() {
-            if (!ball.active) return;
-
-            // التسارع → السرعة → الموقع
-            ball.vy += g;           // جاذبية تؤثر كل إطار
-            ball.x += ball.vx;
-            ball.y += ball.vy;
-
-            // احتكاك خفيف
-            ball.vx *= friction;
-            ball.vy *= friction;
-
-            // تصادم مع الأرض
-            if (ball.y + ball.radius > canvas.height) {
-                ball.y = canvas.height - ball.radius;
-                ball.vy *= -0.6; // انعكاس مع فقدان الطاقة
-                ball.vx *= 0.9;
-            }
-
-            // تصادم مع الجدران الجانبية
-            if (ball.x + ball.radius > canvas.width) {
-                ball.x = canvas.width - ball.radius;
-                ball.vx *= -0.7;
-            }
-            if (ball.x - ball.radius < 0) {
-                ball.x = ball.radius;
-                ball.vx *= -0.7;
-            }
-
-            // تصادم مع السقف
-            if (ball.y - ball.radius < 0) {
-                ball.y = ball.radius;
-                ball.vy *= -0.6;
-            }
-        }
-
-        // الرسم الأساسي
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            drawPowerLine();     // خط السحب
-            drawBall();          // الكرة المُطلقة
-            updateBall();        // تحديث الحركة
-
-            requestAnimationFrame(draw);
-        }
-
-        // مراقبة الماوس
-        canvas.addEventListener('mousedown', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-
-            // بدء السحب من مكان النقر
-            isDragging = true;
-            dragStart = { x, y };
-            powerLine = { start: dragStart, end: { x, y } };
+        lawButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                lawButtons.forEach(btn => btn.classList.remove('active'));
+                lawPanels.forEach(panel => panel.classList.remove('active'));
+                
+                button.classList.add('active');
+                const lawId = button.dataset.law;
+                document.getElementById(`law-${lawId}`).classList.add('active');
+            });
         });
 
-        canvas.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
+        // قانون كبلر الأول - حركة بسيطة بدون قطاعات
+        let animationId1 = null;
+        let isPlaying1 = true;
+        let time1 = 0;
 
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+        const a1Slider = document.getElementById('a1-slider');
+        const e1Slider = document.getElementById('e1-slider');
+        const a1Value = document.getElementById('a1-value');
+        const e1Value = document.getElementById('e1-value');
+        const sun1 = document.getElementById('sun1');
+        const orbit1 = document.getElementById('orbit1');
+        const planet1 = document.getElementById('planet1');
 
-            // تحديث نهاية خط السحب
-            powerLine.end = { x, y };
+        function updateLawFirst() {
+            const a = parseFloat(a1Slider.value);
+            const e = parseFloat(e1Slider.value);
+
+            a1Value.textContent = a.toFixed(2) + ' AU';
+            e1Value.textContent = e.toFixed(2);
+
+            // حساب البعد من المركز إلى البؤرة
+            const c = a * e;
+
+            // وضع الشمس في البؤرة
+            sun1.style.left = `${50 + c * 20}%`;
+            sun1.style.top = `50%`;
+
+            // أبعاد المدار الإهليلجي
+            const width = a * 2 * 100;
+            const height = 2 * Math.sqrt(a*a * (1 - e*e)) * 100;
+            orbit1.style.width = `${width}px`;
+            orbit1.style.height = `${height}px`;
+
+            // وضع الكوكب في الأوج (أبعد نقطة)
+            const x0 = 50 + (a + c) * 20;
+            const y0 = 50;
+            planet1.style.left = `${x0}%`;
+            planet1.style.top = `${y0}%`;
+        }
+
+        a1Slider.addEventListener('input', updateLawFirst);
+        e1Slider.addEventListener('input', updateLawFirst);
+        updateLawFirst();
+
+        function animateLawFirst() {
+            if (!isPlaying1) return;
+
+            const a = parseFloat(a1Slider.value);
+            const e = parseFloat(e1Slider.value);
+            const T = Math.pow(a, 1.5); // فترة الدورة
+
+            const fracTime = (time1 % (T * 100)) / (T * 100);
+            let E = fracTime * 2 * Math.PI;
+            for (let i = 0; i < 10; i++) {
+                E = fracTime * 2 * Math.PI + e * Math.sin(E);
+            }
+
+            const theta = E;
+            const r = a * (1 - e*e) / (1 + e * Math.cos(theta));
+
+            // تجنب الدخول في الشمس: الحد الأدنى للمسافة = a(1-e)
+            const minDistance = a * (1 - e);
+            if (minDistance <= 0.1) {
+                alert("⚠️ الانحراف مرتفع جدًا! تم تقليله تلقائيًا لتجنب التصادم.");
+                e1Slider.value = Math.min(e, 0.8);
+                updateLawFirst();
+                return;
+            }
+
+            const x = r * Math.cos(theta);
+            const y = r * Math.sin(theta);
+
+            const px = 50 + x * 20;
+            const py = 50 + y * 20;
+
+            planet1.style.left = `${px}%`;
+            planet1.style.top = `${py}%`;
+
+            time1 += 0.5;
+            animationId1 = requestAnimationFrame(animateLawFirst);
+        }
+
+        document.getElementById('play-pause1').addEventListener('click', () => {
+            isPlaying1 = !isPlaying1;
+            document.getElementById('play-pause1').textContent = isPlaying1 ? '⏸️ إيقاف' : '▶️ تشغيل';
+            if (isPlaying1) animateLawFirst();
         });
 
-        canvas.addEventListener('mouseup', (e) => {
-            if (!isDragging) return;
-
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-
-            // حساب القوة والاتجاه
-            const dx = dragStart.x - x;   // عكس الاتجاه: نسحب للخلف، نطلق للأمام
-            const dy = dragStart.y - y;
-
-            // تقييد أقصى قوة
-            const maxPower = 15;
-            const power = Math.min(Math.sqrt(dx*dx + dy*dy) / 5, maxPower);
-
-            // تعيين السرعة الأولية
-            ball.x = dragStart.x;
-            ball.y = dragStart.y;
-            ball.vx = dx * 0.15;   // تحويل السحب إلى سرعة
-            ball.vy = dy * 0.15;
-            ball.active = true;
-
-            // إعادة تعيين السحب
-            isDragging = false;
-            powerLine = null;
+        document.getElementById('reset1').addEventListener('click', () => {
+            time1 = 0;
+            updateLawFirst();
+            animateLawFirst();
         });
 
-        // بدء المحاكاة
-        draw();
+        animateLawFirst();
+
+        // قانون كبلر الثاني - مع قطاعات متحركة
+        let animationId2 = null;
+        let isPlaying2 = true;
+        let time2 = 0;
+
+        const a2Slider = document.getElementById('a2-slider');
+        const e2Slider = document.getElementById('e2-slider');
+        const a2Value = document.getElementById('a2-value');
+        const e2Value = document.getElementById('e2-value');
+        const sun2 = document.getElementById('sun2');
+        const orbit2 = document.getElementById('orbit2');
+        const planet2 = document.getElementById('planet2');
+
+        function updateLawSecond() {
+            const a = parseFloat(a2Slider.value);
+            const e = parseFloat(e2Slider.value);
+
+            a2Value.textContent = a.toFixed(2) + ' AU';
+            e2Value.textContent = e.toFixed(2);
+
+            const c = a * e;
+
+            sun2.style.left = `${50 + c * 20}%`;
+            sun2.style.top = `50%`;
+
+            const width = a * 2 * 100;
+            const height = 2 * Math.sqrt(a*a * (1 - e*e)) * 100;
+            orbit2.style.width = `${width}px`;
+            orbit2.style.height = `${height}px`;
+
+            const x0 = 50 + (a + c) * 20;
+            const y0 = 50;
+            planet2.style.left = `${x0}%`;
+            planet2.style.top = `${y0}%`;
+
+            // تنظيف القطاعات السابقة
+            document.querySelectorAll('.sector').forEach(s => s.remove());
+        }
+
+        a2Slider.addEventListener('input', updateLawSecond);
+        e2Slider.addEventListener('input', updateLawSecond);
+        updateLawSecond();
+
+        function animateLawSecond() {
+            if (!isPlaying2) return;
+
+            const a = parseFloat(a2Slider.value);
+            const e = parseFloat(e2Slider.value);
+            const T = Math.pow(a, 1.5);
+
+            const fracTime = (time2 % (T * 100)) / (T * 100);
+            let E = fracTime * 2 * Math.PI;
+            for (let i = 0; i < 10; i++) {
+                E = fracTime * 2 * Math.PI + e * Math.sin(E);
+            }
+
+            const theta = E;
+            const r = a * (1 - e*e) / (1 + e * Math.cos(theta));
+
+            const x = r * Math.cos(theta);
+            const y = r * Math.sin(theta);
+
+            const px = 50 + x * 20;
+            const py = 50 + y * 20;
+
+            planet2.style.left = `${px}%`;
+            planet2.style.top = `${py}%`;
+
+            // إنشاء قطاعات توضح المساحات المتساوية (كل 1/8 من الدورة)
+            const sectorCount = 8;
+            const sectorAngle = (2 * Math.PI) / sectorCount;
+            const centerX = 50;
+            const centerY = 50;
+            const scale = 20;
+
+            // إزالة القطاعات القديمة
+            document.querySelectorAll('.sector').forEach(s => s.remove());
+
+            // إنشاء قطاع جديد الآن
+            const lastAngle = theta - sectorAngle;
+            const sector = document.createElement('div');
+            sector.className = 'sector';
+            sector.style.position = 'absolute';
+            sector.style.left = `${centerX}%`;
+            sector.style.top = `${centerY}%`;
+            sector.style.transformOrigin = 'center';
+
+            const r1 = a * (1 - e*e) / (1 + e * Math.cos(lastAngle));
+            const r2 = a * (1 - e*e) / (1 + e * Math.cos(theta));
+
+            const dx1 = r1 * Math.cos(lastAngle);
+            const dy1 = r1 * Math.sin(lastAngle);
+            const dx2 = r2 * Math.cos(theta);
+            const dy2 = r2 * Math.sin(theta);
+
+            const largeArcFlag = Math.abs(theta - lastAngle) > Math.PI ? 1 : 0;
+            const pathData = `
+                M ${dx1 * scale} ${dy1 * scale}
+                A ${r1 * scale} ${r1 * scale} 0 ${largeArcFlag} 1 ${dx2 * scale} ${dy2 * scale}
+                L 0 0
+                Z
+            `;
+
+            sector.innerHTML = `<svg width="200" height="200" viewBox="-100 -100 200 200" style="position:absolute; top:0; left:0; width:200px; height:200px;">
+                <path d="${pathData}" fill="#64ffda" stroke="none" />
+              </svg>`;
+            document.querySelector('.simulation-area').appendChild(sector);
+
+            time2 += 0.5;
+            animationId2 = requestAnimationFrame(animateLawSecond);
+        }
+
+        document.getElementById('play-pause2').addEventListener('click', () => {
+            isPlaying2 = !isPlaying2;
+            document.getElementById('play-pause2').textContent = isPlaying2 ? '⏸️ إيقاف' : '▶️ تشغيل';
+            if (isPlaying2) animateLawSecond();
+        });
+
+        document.getElementById('reset2').addEventListener('click', () => {
+            time2 = 0;
+            updateLawSecond();
+            animateLawSecond();
+        });
+
+        animateLawSecond();
+
+        // قانون كبلر الثالث - رسم بياني
+        let animationId3 = null;
+        let isPlaying3 = true;
+        let time3 = 0;
+
+        const a3Slider = document.getElementById('a3-slider');
+        const a3Value = document.getElementById('a3-value');
+        const plot3 = document.getElementById('plot3');
+        const tRatio3 = document.getElementById('t-ratio3');
+        const tSquared3 = document.getElementById('t-squared3');
+        const aCubed3 = document.getElementById('a-cubed3');
+        const status3 = document.getElementById('status3');
+
+        function updateLawThird() {
+            const a = parseFloat(a3Slider.value);
+            a3Value.textContent = a.toFixed(2) + ' AU';
+
+            const T = Math.pow(a, 1.5);
+            const t_squared = T * T;
+            const a_cubed = a * a * a;
+
+            tRatio3.textContent = T.toFixed(3);
+            tSquared3.textContent = t_squared.toFixed(3);
+            aCubed3.textContent = a_cubed.toFixed(3);
+
+            const tolerance = 1e-10;
+            if (Math.abs(t_squared - a_cubed) < tolerance) {
+                status3.textContent = "✅ العلاقة صحيحة!";
+                status3.className = "check";
+            } else {
+                status3.textContent = "❌ خطأ في الحساب!";
+                status3.className = "warning";
+            }
+
+            // رسم بياني: T² vs a³
+            const a_vals = Array.from({length: 50}, (_, i) => (i + 1) * 0.1);
+            const T_vals = a_vals.map(a_val => Math.pow(a_val, 1.5));
+            const T2_vals = T_vals.map(T_val => T_val * T_val);
+            const a3_vals = a_vals.map(a_val => a_val * a_val * a_val);
+
+            const trace1 = {
+                x: a_vals,
+                y: T2_vals,
+                mode: 'lines',
+                name: 'T²',
+                line: { color: '#64ffda', width: 3 },
+                showlegend: true
+            };
+
+            const trace2 = {
+                x: a_vals,
+                y: a3_vals,
+                mode: 'lines',
+                name: 'a³',
+                line: { color: '#ffab40', width: 3, dash: 'dash' },
+                showlegend: true
+            };
+
+            const tracePoint = {
+                x: [a],
+                y: [t_squared],
+                mode: 'markers',
+                marker: { size: 12, color: '#ff9800', symbol: 'star' },
+                name: 'القيمة الحالية',
+                showlegend: true
+            };
+
+            const data = [trace1, trace2, tracePoint];
+
+            const layout = {
+                title: '<b>📊 قانون كبلر الثالث: T² ∝ a³</b>',
+                titlefont: { size: 16, color: '#64ffda' },
+                xaxis: {
+                    title: 'نصف المحور الأكبر (a)',
+                    range: [0, 5],
+                    showgrid: true,
+                    gridcolor: '#334e6e'
+                },
+                yaxis: {
+                    title: 'T² أو a³',
+                    range: [0, 150],
+                    showgrid: true,
+                    gridcolor: '#334e6e'
+                },
+                legend: { orientation: 'h', y: -0.2 },
+                paper_bgcolor: '#112240',
+                plot_bgcolor: '#112240',
+                font: { color: '#e6f1ff' },
+                width: 800,
+                height: 300,
+                margin: { l: 60, r: 60, t: 80, b: 80 }
+            };
+
+            Plotly.newPlot(plot3, data, layout, { responsive: true });
+        }
+
+        a3Slider.addEventListener('input', updateLawThird);
+        updateLawThird();
+
+        // تحديث تلقائي للرسم البياني أثناء الحركة (اختياري)
+        setInterval(updateLawThird, 500);
     </script>
 
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </body>
 </html>
