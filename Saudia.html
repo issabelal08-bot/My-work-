@@ -79,6 +79,16 @@
       color: #145a32;
       font-weight: bold;
     }
+    .video-box {
+      padding:20px;
+      margin:20px auto;
+      max-width:900px;
+      background:#fff;
+      border:3px solid #145a32;
+      border-radius:20px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.1);
+      text-align:center;
+    }
   </style>
 </head>
 <body>
@@ -95,24 +105,13 @@
     <a href="#duty">واجبنا</a>
     <a href="#end">الخاتمة</a>
   </nav>
-<section id="video" style="
-    padding:20px;
-    margin:20px auto;
-    max-width:900px;
-    background:#fff;
-    border:3px solid #145a32;
-    border-radius:20px;
-    box-shadow:0 4px 12px rgba(0,0,0,0.1);
-    text-align:center;
-  ">
-    <h2 style="color:#145a32; border-bottom:2px solid #c5b358; padding-bottom:8px;">
-      فيديو اليوم الوطني السعودي
-    </h2>
-    <video controls style="width:100%; border-radius:15px; border:3px solid #145a32;">
-      <source src="https://files.fm/f/fkxatwe3me" type="video/mp4">
-      المتصفح لا يدعم تشغيل الفيديو.
-    </video>
-</section>
+
+  <!-- ✅ الفيديو داخل إطار أخضر -->
+  <div class="video-box">
+    <h2>فيديو اليوم الوطني السعودي</h2>
+    <script type="text/javascript" src="https://files.fm/embed/playerv2?hash=fkxatwe3me&autoplay=off&autoload=off&w=100%&h=auto&poster_src=https://files.fm/thumb_video_picture.php?i=fkxatwe3me&source_type=p2p" id="filesfm_embed_js__fkxatwe3me"></script>
+  </div>
+
   <section id="intro">
     <h2>المقدمة</h2>
     <p>اليوم الوطني السعودي هو مناسبة وطنية تحمل في طياتها معاني الفخر والاعتزاز، حيث يذكرنا هذا اليوم بتاريخ توحيد المملكة على يد الملك عبدالعزيز بن عبدالرحمن آل سعود رحمه الله. هو يوم نستحضر فيه الماضي العريق ونستشرف فيه مستقبلًا زاهرًا.</p>
