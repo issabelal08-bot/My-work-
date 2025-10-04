@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>اليوم المعلم</title>
+  <meta name="description" content="موقع احتفالي بيوم المعلم — مادة أدبية وفكرية تجمع آيات، أحاديث، شعر وكلام القدامى مع تصميم سماوي أنيق.">
+
+  <!-- خطوط: Tajawal مناسبة للعربية -->
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700;900&display=swap" rel="stylesheet">
+
+  <style>
+  /* =========================
+     لوحة الألوان (قابلة للتعديل بسهولة)
+     ========================= */
+  :root{
+    --blue-dark: #0B3D91;        /* نص أساسي غامق */
+    --blue-light: #A7C7E7;       /* عناوين قريبة للفاتح */
+    --sky-100: #E3F2FD;         /* خلفيات فاتحة سماوية */
+    --sky-200: #B3E5FC;         /* صندوق الطلبة */
+    --muted: #6b7aa3;
+    --accent: #1565C0;         /* hover / أزرار */
+    --page-bg: linear-gradient(180deg,#fbfdff 0%, #f2f9ff 100%);
+    --radius: 14px;
+  }
+
+  /* =========================
+     قواعد عامة
+     ========================= */
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:'Tajawal', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    background: var(--page-bg);
+    color:var(--blue-dark);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    line-height:1.75;
+  }
+
+  a{color:var(--blue-dark); text-decoration:none}
+  img{max-width:100%;height:auto;display:block}
+
+  /* =========================
+     رأس الصفحة (Header)
+     ========================= */
+  .hero{
+    position:relative;
+    padding:64px 20px;
+    background-image: url('https://imgg.io/images/2025/10/04/3483349b94176eb727fd10c49e01c33e.jpg');
+    background-size:cover;
+    background-position:center;
+    color:#fff;
+    overflow:hidden;
+  }
+  .hero::before{
+    content:""; position:absolute; inset:0; background:linear-gradient(180deg, rgba(6,23,64,0.48), rgba(2,8,33,0.45));
+  }
+  .container{max-width:1100px;margin:0 auto;padding:0 18px;position:relative;z-index:2}
+  .title{font-size:2.4rem;margin:0 0 8px;color:var(--sky-100);text-shadow:0 2px 10px rgba(2,8,33,0.5)}
+  .subtitle{color:var(--sky-100);opacity:0.95;margin:0 0 14px}
+
+  /* =========================
+     شريط التنقل
+     ========================= */
+  .nav-wrap{background:transparent;position:sticky;top:0;z-index:60}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:10px 0}
+  .nav-links{display:flex;gap:10px;align-items:center}
+  .nav-links a{padding:8px 12px;border-radius:8px;font-weight:700}
+  .nav-links a.active{background:rgba(255,255,255,0.12);color:var(--sky-100)}
+  .nav-toggle{display:none;border:0;background:rgba(255,255,255,0.06);padding:8px;border-radius:8px;color:var(--sky-100)}
+
+  /* =========================
+     الأقسام
+     ========================= */
+  main{padding:32px 0}
+  section.card{
+    background:#fff;border-radius:var(--radius);padding:26px;margin:18px auto;max-width:920px;box-shadow:0 8px 24px rgba(12,40,90,0.06)
+  }
+  h2{color:var(--blue-light);font-size:1.6rem;margin:0 0 12px;border-right:6px solid var(--sky-200);padding-right:12px}
+  p{color:var(--blue-dark);margin:0 0 14px}
+  blockquote{margin:10px 0;padding-right:14px;border-right:4px solid var(--sky-200);font-style:italic;color:var(--muted)}
+
+  ul.toc{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;padding:10px 0;margin:12px 0}
+  ul.toc a{background:var(--sky-100);padding:10px 14px;border-radius:10px}
+
+  /* صندوق الطلاب */
+  .students-box{max-width:720px;margin:26px auto;padding:16px;border-radius:20px;background:var(--sky-200);color:var(--blue-dark);font-weight:700;text-align:center;box-shadow:0 6px 18px rgba(11,61,145,0.06)}
+
+  /* حقوق */
+  footer{padding:14px;text-align:center;margin-top:30px;background:transparent;color:var(--blue-dark)}
+
+  /* =========================
+     تلميحات للعرض الصغير
+     ========================= */
+  @media (max-width:800px){
+    .title{font-size:1.8rem}
+    .nav-links{display:none}
+    .nav-toggle{display:inline-flex}
+    .mobile-menu{display:block;background:rgba(255,255,255,0.03);padding:12px;border-radius:10px;margin-top:10px}
+    .mobile-menu a{display:block;padding:8px 0}
+  }
+
+  /* =========================
+     تأثيرات وحركات خفيفة CSS only
+     ========================= */
+  .fade-in{animation:fadeIn .8s ease both}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  /* طباعة */
+  @media print{
+    nav, .nav-toggle, .mobile-menu, .hero::before{display:none}
+    body{background:white;color:black}
+  }
+  </style>
+</head>
+<body>
+
+  <!-- تضمين الفيديو كما طلبت بالموقع -->
+  <script type="text/javascript" src="https://files.fm/embed/playerv2?hash=tvefshant2&autoplay=off&autoload=off&w=100%&h=auto&poster_src=https://files.fm/thumb_video_picture.php?i=tvefshant2&source_type=simple" id="filesfm_embed_js__tvefshant2"></script>
+
+  <div class="hero">
+    <div class="container">
+      <div class="nav-wrap">
+        <nav aria-label="القوائم الرئيسية">
+          <div style="display:flex;gap:12px;align-items:center">
+            <strong style="color:var(--sky-100);font-size:1rem">اليوم المعلم</strong>
+          </div>
+
+          <div class="nav-links" id="navLinks">
+            <a href="#intro">المقدمة</a>
+            <a href="#what">ما هو يوم المعلم؟</a>
+            <a href="#why">لماذا نحتفل؟</a>
+            <a href="#value">مكانة المعلم</a>
+            <a href="#duty">واجبنا</a>
+            <a href="#end">الخاتمة</a>
+          </div>
+
+          <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="mobileMenu">☰</button>
+        </nav>
+
+        <div id="mobileMenu" class="mobile-menu" style="display:none">
+          <a href="#intro">المقدمة</a>
+          <a href="#what">ما هو يوم المعلم؟</a>
+          <a href="#why">لماذا نحتفل؟</a>
+          <a href="#value">مكانة المعلم</a>
+          <a href="#duty">واجبنا</a>
+          <a href="#end">الخاتمة</a>
+        </div>
+      </div>
+
+      <h1 class="title">اليوم المعلم</h1>
+      <p class="subtitle">تحية شكر وإجلال لمن غرسوا فينا القيم، وعلّمونا أن العالم بيت من نور.</p>
+    </div>
+  </div>
+
+  <main>
+    <div class="container">
+
+      <!-- مقدمة وفهرس مختصر -->
+      <section id="intro" class="card fade-in" tabindex="0">
+        <h2>المقدمة</h2>
+        <p>
+          في يوم المعلم نرفع الرايات احترامًا وغبطة لمن حملوا على عواتقهم مسئولية تعليم الأجيال. هذا الموقع يجمع كلمات من أقلام المعلمين والقدامى، آيات قرآنية، أحاديث نبوية، وقصائد تُجسد المكانة الرفيعة للمعلم في مجتمعنا.
+        </p>
+
+        <nav aria-label="فهرس المحتوى">
+          <ul class="toc" role="list">
+            <li><a href="#what">ما هو يوم المعلم؟</a></li>
+            <li><a href="#why">لماذا نحتفل بيوم المعلم؟</a></li>
+            <li><a href="#value">ما الذي يجعل المعلم مميزًا؟</a></li>
+            <li><a href="#duty">واجبنا نحو المعلم</a></li>
+            <li><a href="#end">الخاتمة</a></li>
+          </ul>
+        </nav>
+
+      </section>
+
+      <!-- الأقسام المطلوبة (محتوى متوازن كما طلبت) -->
+      <section id="what" class="card fade-in">
+        <h2>ما هو يوم المعلم؟</h2>
+        <p>
+          يوم نخصصه لتقدير المعلم، ونتذكر فيه فضلًا كبيرًا. المعلم ليس مجرد ناقل معلومات بل هو مربي وقائد وموجه. الله سبحانه قال: <q>قُلْ هَلْ يَسْتَوِي الَّذِينَ يَعْلَمُونَ وَالَّذِينَ لَا يَعْلَمُونَ</q>، فمكانة العلماء والمعلمين عظيمة.
+        </p>
+      </section>
+
+      <section id="why" class="card fade-in">
+        <h2>لماذا نحتفل بيوم المعلم؟</h2>
+        <p>
+          نحتفل تقديرًا لجهد المعلمين، واستذكارًا للعطاء الذي لا يُقاس بالمال بل بالقلوب والعقول التي صاغوها. تكريم المعلم هو تكريم للعلم والوطن.
+        </p>
+        <blockquote>
+          قم للمعلم وفّه التبجيلا، كاد المعلم أن يكون رسولا.
+        </blockquote>
+      </section>
+
+      <section id="value" class="card fade-in">
+        <h2>ما الذي جعل المعلم متميزًا عن غيره؟</h2>
+        <p>
+          المعلم يملك الصبر، والقدرة على إشعال حب التعلم داخل التلميذ. هو الذي يبني مجتمعًا واعيًا وقادرًا على التقدم. وصفه الرسولُ صلى الله عليه وسلم في فضلِ من يُعلمُ الخير يعكس هذه المكانة.
+        </p>
+      </section>
+
+      <section id="duty" class="card fade-in">
+        <h2>واجبنا نحو المعلم</h2>
+        <p>
+          احترام المعلم، طاعته في الحق، شكرُه، والوقوف إلى جانبه في الميدان التعليمي — كلها وسائل لرد جميله. كما أن الحفاظ على سمعته والدفاع عنها جزء من واجبنا.
+        </p>
+      </section>
+
+      <section id="end" class="card fade-in">
+        <h2>الخاتمة</h2>
+        <p>
+          المعلم نبراس لا ينطفئ. نجدد العهد على تقديره والدعاء له بالمثوبة والجزاء الحسن. فليكن يوم المعلم مناسبة تجدد العرفان في قلوبنا.
+        </p>
+      </section>
+
+      <div class="students-box" role="contentinfo">
+        عمل الطالبان: بلال إبراهيم عيسى — حسان إبراهيم عيسى<br>
+        تحت إدارة مدرسة الأهلية الحديثة
+      </div>
+
+      <footer>
+        جميع الحقوق محفوظة © لدى مدرسة الأهلية الحديثة
+      </footer>
+
+    </div>
+  </main>
+
+  <script>
+  // ======= تفاعلات JS خفيفة: قائمة الموبايل، تمرير ناعم، وscroll-spy =======
+  (function(){
+    const navToggle = document.getElementById('navToggle');
+    const mobileMenu = document.getElementById('mobileMenu');
+    navToggle && navToggle.addEventListener('click', ()=>{
+      const open = navToggle.getAttribute('aria-expanded') === 'true';
+      navToggle.setAttribute('aria-expanded', String(!open));
+      mobileMenu.style.display = open ? 'none' : 'block';
+    });
+
+    // smooth scroll for internal links
+    document.querySelectorAll('a[href^="#"]').forEach(a=>{
+      a.addEventListener('click', function(e){
+        const target = document.querySelector(this.getAttribute('href'));
+        if(target){
+          e.preventDefault();
+          target.scrollIntoView({behavior:'smooth',block:'start'});
+          // close mobile menu if open
+          if(window.innerWidth <= 800) mobileMenu.style.display = 'none';
+        }
+      });
+    });
+
+    // simple scroll-spy to add .active to nav links
+    const sections = Array.from(document.querySelectorAll('main section'));
+    const navLinks = Array.from(document.querySelectorAll('.nav-links a'));
+
+    function onScroll(){
+      const y = window.scrollY + 120; // offset for header
+      let current = sections[0];
+      for(const sec of sections){
+        if(sec.offsetTop <= y) current = sec;
+      }
+      const id = current.id;
+      navLinks.forEach(a=>{
+        a.classList.toggle('active', a.getAttribute('href') === '#'+id);
+      });
+    }
+    window.addEventListener('scroll', onScroll, {passive:true});
+    window.addEventListener('resize', onScroll);
+    // initial call
+    setTimeout(onScroll,300);
+
+  })();
+  </script>
+
+</body>
+</html>
