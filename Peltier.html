@@ -180,6 +180,43 @@
             z-index: 1;
         }
 
+        /* Stats Counter Section */
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(26, 42, 78, 0.8), rgba(15, 27, 51, 0.8));
+            border-radius: 25px;
+            padding: 2.5rem;
+            text-align: center;
+            border: 2px solid rgba(168, 224, 99, 0.3);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            transition: all 0.4s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            border-color: #a8e063;
+            box-shadow: 0 20px 60px rgba(168, 224, 99, 0.3);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #a8e063;
+            text-shadow: 0 0 20px rgba(168, 224, 99, 0.5);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            color: #b8c5d6;
+        }
+
         .features {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -256,6 +293,122 @@
             font-size: 1.05rem;
             position: relative;
             z-index: 1;
+        }
+
+        /* Comparison Table */
+        .comparison-section {
+            background: linear-gradient(135deg, rgba(26, 42, 78, 0.9), rgba(15, 27, 51, 0.9));
+            border-radius: 30px;
+            padding: 4rem;
+            margin: 3rem 0;
+            border: 2px solid rgba(168, 224, 99, 0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .comparison-section h2 {
+            color: #a8e063;
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            text-shadow: 0 0 20px rgba(168, 224, 99, 0.5);
+        }
+
+        .comparison-table {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 1rem;
+        }
+
+        th {
+            background: linear-gradient(135deg, #56ab2f, #a8e063);
+            color: #0a1628;
+            padding: 1.5rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        th:first-child {
+            border-radius: 15px 0 0 15px;
+        }
+
+        th:last-child {
+            border-radius: 0 15px 15px 0;
+        }
+
+        body[dir="rtl"] th:first-child {
+            border-radius: 0 15px 15px 0;
+        }
+
+        body[dir="rtl"] th:last-child {
+            border-radius: 15px 0 0 15px;
+        }
+
+        body[dir="ltr"] th:first-child {
+            border-radius: 15px 0 0 15px;
+        }
+
+        body[dir="ltr"] th:last-child {
+            border-radius: 0 15px 15px 0;
+        }
+
+        td {
+            background: linear-gradient(135deg, rgba(168, 224, 99, 0.1), rgba(86, 171, 47, 0.05));
+            padding: 1.2rem;
+            text-align: center;
+            color: #b8c5d6;
+            border-top: 1px solid rgba(168, 224, 99, 0.2);
+            border-bottom: 1px solid rgba(168, 224, 99, 0.2);
+        }
+
+        td:first-child {
+            border-right: 1px solid rgba(168, 224, 99, 0.2);
+            border-radius: 15px 0 0 15px;
+            font-weight: bold;
+            color: #a8e063;
+        }
+
+        td:last-child {
+            border-left: 1px solid rgba(168, 224, 99, 0.2);
+            border-radius: 0 15px 15px 0;
+        }
+
+        body[dir="rtl"] td:first-child {
+            border-right: none;
+            border-left: 1px solid rgba(168, 224, 99, 0.2);
+            border-radius: 0 15px 15px 0;
+        }
+
+        body[dir="rtl"] td:last-child {
+            border-left: none;
+            border-right: 1px solid rgba(168, 224, 99, 0.2);
+            border-radius: 15px 0 0 15px;
+        }
+
+        body[dir="ltr"] td:first-child {
+            border-right: 1px solid rgba(168, 224, 99, 0.2);
+            border-left: none;
+            border-radius: 15px 0 0 15px;
+        }
+
+        body[dir="ltr"] td:last-child {
+            border-left: 1px solid rgba(168, 224, 99, 0.2);
+            border-right: none;
+            border-radius: 0 15px 15px 0;
+        }
+
+        .check {
+            color: #a8e063;
+            font-size: 1.5rem;
+        }
+
+        .cross {
+            color: #ff6b6b;
+            font-size: 1.5rem;
         }
 
         .how-it-works {
@@ -356,6 +509,211 @@
             font-size: 1.05rem;
         }
 
+        /* Gallery Section */
+        .gallery-section {
+            background: linear-gradient(135deg, rgba(26, 42, 78, 0.9), rgba(15, 27, 51, 0.9));
+            border-radius: 30px;
+            padding: 4rem;
+            margin: 3rem 0;
+            border: 2px solid rgba(168, 224, 99, 0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .gallery-section h2 {
+            color: #a8e063;
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            text-shadow: 0 0 20px rgba(168, 224, 99, 0.5);
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .gallery-item {
+            background: linear-gradient(135deg, rgba(168, 224, 99, 0.1), rgba(86, 171, 47, 0.1));
+            border-radius: 20px;
+            padding: 2rem;
+            border: 2px solid rgba(168, 224, 99, 0.2);
+            transition: all 0.4s ease;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+            border-color: #a8e063;
+            box-shadow: 0 15px 40px rgba(168, 224, 99, 0.3);
+        }
+
+        .gallery-placeholder {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, rgba(168, 224, 99, 0.2), rgba(86, 171, 47, 0.2));
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .gallery-item h3 {
+            color: #a8e063;
+            margin-top: 1rem;
+            font-size: 1.3rem;
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            background: linear-gradient(135deg, rgba(26, 42, 78, 0.9), rgba(15, 27, 51, 0.9));
+            border-radius: 30px;
+            padding: 4rem;
+            margin: 3rem 0;
+            border: 2px solid rgba(168, 224, 99, 0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .faq-section h2 {
+            color: #a8e063;
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            text-shadow: 0 0 20px rgba(168, 224, 99, 0.5);
+        }
+
+        .faq-item {
+            background: linear-gradient(135deg, rgba(168, 224, 99, 0.1), rgba(86, 171, 47, 0.05));
+            border-radius: 15px;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(168, 224, 99, 0.2);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .faq-question {
+            padding: 1.5rem 2rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #a8e063;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .faq-question:hover {
+            background: linear-gradient(135deg, rgba(168, 224, 99, 0.2), rgba(86, 171, 47, 0.1));
+        }
+
+        .faq-icon {
+            font-size: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            padding: 0 2rem;
+            color: #b8c5d6;
+            font-size: 1.05rem;
+            line-height: 1.8;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 500px;
+            padding: 1.5rem 2rem 2rem 2rem;
+        }
+
+        /* Contact Form */
+        .contact-section {
+            background: linear-gradient(135deg, rgba(26, 42, 78, 0.9), rgba(15, 27, 51, 0.9));
+            border-radius: 30px;
+            padding: 4rem;
+            margin: 3rem 0;
+            border: 2px solid rgba(168, 224, 99, 0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .contact-section h2 {
+            color: #a8e063;
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            text-shadow: 0 0 20px rgba(168, 224, 99, 0.5);
+        }
+
+        .contact-form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        .form-group label {
+            display: block;
+            color: #a8e063;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background: rgba(168, 224, 99, 0.1);
+            border: 2px solid rgba(168, 224, 99, 0.3);
+            border-radius: 15px;
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #a8e063;
+            background: rgba(168, 224, 99, 0.15);
+            box-shadow: 0 0 20px rgba(168, 224, 99, 0.2);
+        }
+
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #56ab2f, #a8e063);
+            color: #0a1628;
+            border: none;
+            padding: 1.2rem 3rem;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(168, 224, 99, 0.4);
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(168, 224, 99, 0.6);
+        }
+
         .specs {
             background: linear-gradient(135deg, rgba(26, 42, 78, 0.9), rgba(15, 27, 51, 0.9));
             border-radius: 30px;
@@ -438,11 +796,25 @@
 
         @media (max-width: 768px) {
             .header h1 {
-                font-size: 2rem;
+                font-size: 1.8rem;
+                line-height: 1.3;
+            }
+
+            .header p {
+                font-size: 1rem;
             }
             
-            .hero, .how-it-works, .specs {
+            .hero, .how-it-works, .specs, .comparison-section, .faq-section, .contact-section {
                 padding: 2rem 1.5rem;
+            }
+
+            .hero h2, .how-it-works h2, .specs h2, .comparison-section h2, .faq-section h2, .contact-section h2 {
+                font-size: 1.8rem;
+            }
+
+            .hero-text {
+                font-size: 1rem;
+                line-height: 1.8;
             }
 
             .lang-toggle {
@@ -455,6 +827,190 @@
             body[dir="ltr"] .lang-toggle {
                 left: auto;
                 right: 10px;
+            }
+
+            .stats-section {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .stat-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .stat-number {
+                font-size: 2.5rem;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .feature-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .feature-icon {
+                font-size: 3rem;
+            }
+
+            .feature-card h3 {
+                font-size: 1.4rem;
+            }
+
+            .feature-card p {
+                font-size: 1rem;
+            }
+
+            .comparison-table {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            table {
+                min-width: 600px;
+                font-size: 0.85rem;
+            }
+
+            th, td {
+                padding: 0.8rem 0.5rem;
+                font-size: 0.85rem;
+            }
+
+            th {
+                font-size: 1rem;
+            }
+
+            .step {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1.5rem;
+            }
+
+            .step-number {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+
+            .step-content h3 {
+                font-size: 1.2rem;
+            }
+
+            .step-content p {
+                font-size: 0.95rem;
+            }
+
+            .faq-question {
+                padding: 1rem 1.5rem;
+                font-size: 1.05rem;
+            }
+
+            .faq-icon {
+                font-size: 1.2rem;
+            }
+
+            .faq-answer {
+                font-size: 0.95rem;
+                padding: 0 1.5rem;
+            }
+
+            .faq-item.active .faq-answer {
+                padding: 1rem 1.5rem 1.5rem 1.5rem;
+            }
+
+            .spec-list {
+                grid-template-columns: 1fr;
+            }
+
+            .spec-item {
+                padding: 1.5rem;
+            }
+
+            .spec-item strong {
+                font-size: 1.1rem;
+            }
+
+            .spec-item span {
+                font-size: 0.95rem;
+            }
+
+            .contact-form {
+                padding: 0;
+            }
+
+            .form-group {
+                margin-bottom: 1.5rem;
+            }
+
+            .form-group label {
+                font-size: 1rem;
+            }
+
+            .form-group input,
+            .form-group textarea {
+                padding: 0.9rem 1.2rem;
+                font-size: 0.95rem;
+            }
+
+            .submit-btn {
+                padding: 1rem 2rem;
+                font-size: 1.1rem;
+            }
+
+            .footer p {
+                font-size: 1.1rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .header p {
+                font-size: 0.9rem;
+            }
+
+            .hero, .how-it-works, .specs, .comparison-section, .faq-section, .contact-section {
+                padding: 1.5rem 1rem;
+                margin: 2rem 0;
+            }
+
+            .hero h2, .how-it-works h2, .specs h2, .comparison-section h2, .faq-section h2, .contact-section h2 {
+                font-size: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            .stat-label {
+                font-size: 0.95rem;
+            }
+
+            .feature-icon {
+                font-size: 2.5rem;
+            }
+
+            table {
+                min-width: 500px;
+                font-size: 0.8rem;
+            }
+
+            th, td {
+                padding: 0.6rem 0.4rem;
+                font-size: 0.8rem;
+            }
+
+            .check, .cross {
+                font-size: 1.2rem;
             }
         }
     </style>
@@ -475,6 +1031,22 @@
             <p class="hero-text" data-ar="في عصر يتطلب حلولاً مبتكرة ومستدامة، يأتي جهازنا الثوري ليحول التحدي إلى فرصة. باستخدام تقنية Peltier المتقدمة، نقدم لك جهازاً يمتص الرطوبة من الجو ويحولها إلى ماء نقي صالح للشرب. مثالي للمناطق الرطبة، ومصمم لمستقبل أكثر استدامة وراحة." data-en="In an era that demands innovative and sustainable solutions, our revolutionary device turns challenges into opportunities. Using advanced Peltier technology, we offer you a device that absorbs humidity from the air and converts it into pure drinking water. Perfect for humid areas, designed for a more sustainable and comfortable future.">
                 في عصر يتطلب حلولاً مبتكرة ومستدامة، يأتي جهازنا الثوري ليحول التحدي إلى فرصة. باستخدام تقنية Peltier المتقدمة، نقدم لك جهازاً يمتص الرطوبة من الجو ويحولها إلى ماء نقي صالح للشرب. مثالي للمناطق الرطبة، ومصمم لمستقبل أكثر استدامة وراحة.
             </p>
+        </div>
+
+        <!-- Stats Counter Section -->
+        <div class="stats-section">
+            <div class="stat-card">
+                <div class="stat-number" id="waterCounter">0</div>
+                <div class="stat-label" data-ar="لتر ماء نقي يومياً" data-en="Liters of Pure Water Daily">لتر ماء نقي يومياً</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="co2Counter">0</div>
+                <div class="stat-label" data-ar="كجم كربون تم تجنبه سنوياً" data-en="kg CO₂ Avoided Annually">كجم كربون تم تجنبه سنوياً</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="energyCounter">0</div>
+                <div class="stat-label" data-ar="% توفير في الطاقة" data-en="% Energy Savings">% توفير في الطاقة</div>
+            </div>
         </div>
 
         <div class="features">
@@ -500,6 +1072,59 @@
                 <div class="feature-icon">🛡️</div>
                 <h3 data-ar="حماية شاملة" data-en="Complete Protection">حماية شاملة</h3>
                 <p data-ar="يحمي المنزل من التلف والصدأ والعفن الناتج عن الرطوبة الزائدة" data-en="Protects your home from damage, rust, and mold caused by excess humidity">يحمي المنزل من التلف والصدأ والعفن الناتج عن الرطوبة الزائدة</p>
+            </div>
+        </div>
+
+        <!-- Comparison Table -->
+        <div class="comparison-section">
+            <h2 data-ar="📊 مقارنة شاملة" data-en="📊 Comprehensive Comparison">📊 مقارنة شاملة</h2>
+            <div class="comparison-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th data-ar="الميزة" data-en="Feature">الميزة</th>
+                            <th data-ar="جهازنا - Peltier" data-en="Our Device - Peltier">جهازنا - Peltier</th>
+                            <th data-ar="المكيف التقليدي" data-en="Traditional AC">المكيف التقليدي</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td data-ar="استهلاك الطاقة" data-en="Energy Consumption">استهلاك الطاقة</td>
+                            <td><span class="check">✓</span> <span data-ar="منخفض جداً" data-en="Very Low">منخفض جداً</span></td>
+                            <td><span class="cross">✗</span> <span data-ar="مرتفع" data-en="High">مرتفع</span></td>
+                        </tr>
+                        <tr>
+                            <td data-ar="الطاقة الشمسية" data-en="Solar Power">الطاقة الشمسية</td>
+                            <td><span class="check">✓</span> <span data-ar="متوافق بالكامل" data-en="Fully Compatible">متوافق بالكامل</span></td>
+                            <td><span class="cross">✗</span> <span data-ar="غير متوافق" data-en="Not Compatible">غير متوافق</span></td>
+                        </tr>
+                        <tr>
+                            <td data-ar="انبعاثات الكربون" data-en="Carbon Emissions">انبعاثات الكربون</td>
+                            <td><span class="check">✓</span> <span data-ar="صفر" data-en="Zero">صفر</span></td>
+                            <td><span class="cross">✗</span> <span data-ar="عالية" data-en="High">عالية</span></td>
+                        </tr>
+                        <tr>
+                            <td data-ar="استخدام الفريون" data-en="Freon Usage">استخدام الفريون</td>
+                            <td><span class="check">✓</span> <span data-ar="لا يستخدم" data-en="Not Used">لا يستخدم</span></td>
+                            <td><span class="cross">✗</span> <span data-ar="يستخدم" data-en="Used">يستخدم</span></td>
+                        </tr>
+                        <tr>
+                            <td data-ar="إنتاج الماء" data-en="Water Production">إنتاج الماء</td>
+                            <td><span class="check">✓</span> <span data-ar="ماء نقي صالح للشرب" data-en="Pure Drinking Water">ماء نقي صالح للشرب</span></td>
+                            <td><span class="cross">✗</span> <span data-ar="لا ينتج ماء" data-en="No Water Production">لا ينتج ماء</span></td>
+                        </tr>
+                        <tr>
+                            <td data-ar="تقليل الرطوبة" data-en="Humidity Reduction">تقليل الرطوبة</td>
+                            <td><span class="check">✓</span> <span data-ar="فعال جداً" data-en="Very Effective">فعال جداً</span></td>
+                            <td><span class="check">✓</span> <span data-ar="فعال" data-en="Effective">فعال</span></td>
+                        </tr>
+                        <tr>
+                            <td data-ar="التكلفة التشغيلية" data-en="Operating Cost">التكلفة التشغيلية</td>
+                            <td><span class="check">✓</span> <span data-ar="منخفضة جداً" data-en="Very Low">منخفضة جداً</span></td>
+                            <td><span class="cross">✗</span> <span data-ar="مرتفعة" data-en="High">مرتفعة</span></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -556,6 +1181,71 @@
             </div>
         </div>
 
+        <!-- FAQ Section -->
+        <div class="faq-section">
+            <h2 data-ar="❓ الأسئلة الشائعة" data-en="❓ Frequently Asked Questions">❓ الأسئلة الشائعة</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span data-ar="كيف يعمل الجهاز؟" data-en="How does the device work?">كيف يعمل الجهاز؟</span>
+                    <span class="faq-icon">▼</span>
+                </div>
+                <div class="faq-answer" data-ar="يستخدم الجهاز تقنية Peltier للتبريد الكهروحراري لتخفيض درجة حرارة السطح المعدني، مما يؤدي إلى تكثيف بخار الماء الموجود في الهواء الرطب وتحويله إلى ماء سائل يتم تجميعه وتنقيته." data-en="The device uses Peltier thermoelectric cooling technology to lower the temperature of the metal surface, causing water vapor in humid air to condense and convert into liquid water that is collected and purified.">
+                    يستخدم الجهاز تقنية Peltier للتبريد الكهروحراري لتخفيض درجة حرارة السطح المعدني، مما يؤدي إلى تكثيف بخار الماء الموجود في الهواء الرطب وتحويله إلى ماء سائل يتم تجميعه وتنقيته.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span data-ar="كم يستهلك الجهاز من الكهرباء؟" data-en="How much electricity does the device consume?">كم يستهلك الجهاز من الكهرباء؟</span>
+                    <span class="faq-icon">▼</span>
+                </div>
+                <div class="faq-answer" data-ar="الجهاز موفر جداً للطاقة ويمكن تشغيله بالطاقة الشمسية بشكل كامل. استهلاكه أقل بكثير من المكيفات التقليدية، مما يوفر على فاتورة الكهرباء بشكل كبير." data-en="The device is very energy-efficient and can be powered entirely by solar energy. Its consumption is much lower than traditional air conditioners, significantly reducing your electricity bill.">
+                    الجهاز موفر جداً للطاقة ويمكن تشغيله بالطاقة الشمسية بشكل كامل. استهلاكه أقل بكثير من المكيفات التقليدية، مما يوفر على فاتورة الكهرباء بشكل كبير.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span data-ar="هل الماء الناتج آمن للشرب؟" data-en="Is the produced water safe to drink?">هل الماء الناتج آمن للشرب؟</span>
+                    <span class="faq-icon">▼</span>
+                </div>
+                <div class="faq-answer" data-ar="نعم، الماء الناتج يمر بمرحلتين من التنقية: المرحلة الأولى ميكانيكية لإزالة الشوائب والمعادن، والمرحلة الثانية حرارية للتعقيم والقضاء على الجراثيم، مما يجعله آمناً تماماً للشرب." data-en="Yes, the produced water goes through two purification stages: the first is mechanical to remove impurities and minerals, and the second is thermal for sterilization and elimination of germs, making it completely safe to drink.">
+                    نعم، الماء الناتج يمر بمرحلتين من التنقية: المرحلة الأولى ميكانيكية لإزالة الشوائب والمعادن، والمرحلة الثانية حرارية للتعقيم والقضاء على الجراثيم، مما يجعله آمناً تماماً للشرب.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span data-ar="ما هي كمية الماء المنتجة يومياً؟" data-en="How much water is produced daily?">ما هي كمية الماء المنتجة يومياً؟</span>
+                    <span class="faq-icon">▼</span>
+                </div>
+                <div class="faq-answer" data-ar="ينتج الجهاز حوالي 200 ملي كل 8-12 ساعة، وهذا يعتمد على نسبة الرطوبة في الجو. في المناطق الرطبة مثل الحجاز والشرقية، الإنتاج يكون أعلى وأكثر كفاءة." data-en="The device produces approximately 200ml every 8-12 hours, depending on humidity levels in the air. In humid areas like Hijaz and Eastern regions, production is higher and more efficient.">
+                    ينتج الجهاز حوالي 200 ملي كل 8-12 ساعة، وهذا يعتمد على نسبة الرطوبة في الجو. في المناطق الرطبة مثل الحجاز والشرقية، الإنتاج يكون أعلى وأكثر كفاءة.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span data-ar="هل يعمل الجهاز ليلاً؟" data-en="Does the device work at night?">هل يعمل الجهاز ليلاً؟</span>
+                    <span class="faq-icon">▼</span>
+                </div>
+                <div class="faq-answer" data-ar="نعم، الجهاز مزود ببطارية تخزن الطاقة الشمسية خلال النهار لتشغيل الجهاز ليلاً، مما يضمن عمله بشكل مستمر على مدار 24 ساعة." data-en="Yes, the device is equipped with a battery that stores solar energy during the day to operate the device at night, ensuring continuous 24-hour operation.">
+                    نعم، الجهاز مزود ببطارية تخزن الطاقة الشمسية خلال النهار لتشغيل الجهاز ليلاً، مما يضمن عمله بشكل مستمر على مدار 24 ساعة.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span data-ar="هل يحتاج الجهاز لصيانة دورية؟" data-en="Does the device require regular maintenance?">هل يحتاج الجهاز لصيانة دورية؟</span>
+                    <span class="faq-icon">▼</span>
+                </div>
+                <div class="faq-answer" data-ar="الصيانة بسيطة جداً وتقتصر على تنظيف الفلاتر بشكل دوري وفحص نظام التجميع. الجهاز مصمم ليكون سهل الصيانة ولا يتطلب خبرة تقنية." data-en="Maintenance is very simple and limited to periodic filter cleaning and collection system inspection. The device is designed to be easy to maintain and requires no technical expertise.">
+                    الصيانة بسيطة جداً وتقتصر على تنظيف الفلاتر بشكل دوري وفحص نظام التجميع. الجهاز مصمم ليكون سهل الصيانة ولا يتطلب خبرة تقنية.
+                </div>
+            </div>
+        </div>
+
         <div class="specs">
             <h2 data-ar="📊 مواصفات تقنية متقدمة" data-en="📊 Advanced Technical Specifications">📊 مواصفات تقنية متقدمة</h2>
             <div class="spec-list">
@@ -591,6 +1281,30 @@
             </div>
         </div>
 
+        <!-- Contact Form -->
+        <div class="contact-section">
+            <h2 data-ar="📧 تواصل معنا" data-en="📧 Contact Us">📧 تواصل معنا</h2>
+            <form class="contact-form" onsubmit="return handleSubmit(event)">
+                <div class="form-group">
+                    <label data-ar="الاسم" data-en="Name">الاسم</label>
+                    <input type="text" required placeholder="">
+                </div>
+                <div class="form-group">
+                    <label data-ar="البريد الإلكتروني" data-en="Email">البريد الإلكتروني</label>
+                    <input type="email" required placeholder="">
+                </div>
+                <div class="form-group">
+                    <label data-ar="رقم الهاتف" data-en="Phone Number">رقم الهاتف</label>
+                    <input type="tel" placeholder="">
+                </div>
+                <div class="form-group">
+                    <label data-ar="الرسالة" data-en="Message">الرسالة</label>
+                    <textarea required placeholder=""></textarea>
+                </div>
+                <button type="submit" class="submit-btn" data-ar="إرسال" data-en="Send">إرسال</button>
+            </form>
+        </div>
+
         <div class="footer">
             <p data-ar="🚀 المستقبل يبدأ اليوم - تقنية نظيفة لعالم أفضل 🌟" data-en="🚀 The Future Starts Today - Clean Technology for a Better World 🌟">🚀 المستقبل يبدأ اليوم - تقنية نظيفة لعالم أفضل 🌟</p>
         </div>
@@ -616,12 +1330,73 @@
 
             // Update all translatable elements
             document.querySelectorAll('[data-ar]').forEach(el => {
-                if (currentLang === 'ar') {
-                    el.textContent = el.getAttribute('data-ar');
+                const tag = el.tagName.toLowerCase();
+                if (tag === 'input' || tag === 'textarea') {
+                    if (currentLang === 'ar') {
+                        el.placeholder = el.getAttribute('data-ar') || '';
+                    } else {
+                        el.placeholder = el.getAttribute('data-en') || '';
+                    }
                 } else {
-                    el.textContent = el.getAttribute('data-en');
+                    if (currentLang === 'ar') {
+                        el.textContent = el.getAttribute('data-ar');
+                    } else {
+                        el.textContent = el.getAttribute('data-en');
+                    }
                 }
             });
+        }
+
+        // Animated counters
+        function animateCounter(id, target, suffix = '') {
+            const element = document.getElementById(id);
+            let current = 0;
+            const increment = target / 100;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.floor(current) + suffix;
+            }, 20);
+        }
+
+        // Start counters when page loads
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                animateCounter('waterCounter', 2.4);
+                animateCounter('co2Counter', 450);
+                animateCounter('energyCounter', 75, '%');
+            }, 500);
+        });
+
+        // FAQ Toggle
+        function toggleFAQ(element) {
+            const faqItem = element.parentElement;
+            const wasActive = faqItem.classList.contains('active');
+            
+            // Close all FAQ items
+            document.querySelectorAll('.faq-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Open clicked item if it wasn't active
+            if (!wasActive) {
+                faqItem.classList.add('active');
+            }
+        }
+
+        // Contact Form Handler
+        function handleSubmit(event) {
+            event.preventDefault();
+            const lang = currentLang;
+            const message = lang === 'ar' ? 
+                'شكراً لتواصلك معنا! سنرد عليك في أقرب وقت ممكن.' : 
+                'Thank you for contacting us! We will respond to you as soon as possible.';
+            alert(message);
+            event.target.reset();
+            return false;
         }
 
         // إنشاء جزيئات متحركة في الخلفية
@@ -655,7 +1430,7 @@
             });
         }, observerOptions);
 
-        document.querySelectorAll('.feature-card, .step, .spec-item').forEach(el => {
+        document.querySelectorAll('.feature-card, .step, .spec-item, .stat-card, .faq-item').forEach(el => {
             el.style.opacity = '0';
             el.style.transform = 'translateY(50px)';
             el.style.transition = 'all 0.6s ease-out';
