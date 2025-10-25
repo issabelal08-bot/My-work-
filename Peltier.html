@@ -17,6 +17,7 @@
             color: #fff;
             line-height: 1.8;
             overflow-x: hidden;
+            transition: all 0.3s ease;
         }
 
         .particles {
@@ -41,6 +42,33 @@
             0%, 100% { transform: translateY(0) translateX(0) scale(1); }
             33% { transform: translateY(-100px) translateX(50px) scale(1.2); }
             66% { transform: translateY(-50px) translateX(-50px) scale(0.8); }
+        }
+
+        .lang-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            color: #0a1628;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(168, 224, 99, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .lang-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 30px rgba(168, 224, 99, 0.6);
+        }
+
+        body[dir="ltr"] .lang-toggle {
+            left: auto;
+            right: 20px;
         }
 
         .header {
@@ -277,10 +305,19 @@
             transition: transform 0.4s ease;
         }
 
+        body[dir="ltr"] .step::before {
+            left: auto;
+            right: 0;
+        }
+
         .step:hover {
             transform: translateX(-10px);
             background: linear-gradient(135deg, rgba(168, 224, 99, 0.2), rgba(86, 171, 47, 0.2));
             box-shadow: 0 10px 30px rgba(168, 224, 99, 0.2);
+        }
+
+        body[dir="ltr"] .step:hover {
+            transform: translateX(10px);
         }
 
         .step:hover::before {
@@ -351,10 +388,19 @@
             cursor: pointer;
         }
 
+        body[dir="ltr"] .spec-item {
+            border-right: none;
+            border-left: 5px solid #a8e063;
+        }
+
         .spec-item:hover {
             transform: translateX(-10px);
             background: linear-gradient(135deg, rgba(168, 224, 99, 0.25), rgba(86, 171, 47, 0.2));
             box-shadow: 0 10px 30px rgba(168, 224, 99, 0.2);
+        }
+
+        body[dir="ltr"] .spec-item:hover {
+            transform: translateX(10px);
         }
 
         .spec-item strong {
@@ -398,21 +444,35 @@
             .hero, .how-it-works, .specs {
                 padding: 2rem 1.5rem;
             }
+
+            .lang-toggle {
+                top: 10px;
+                left: 10px;
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+
+            body[dir="ltr"] .lang-toggle {
+                left: auto;
+                right: 10px;
+            }
         }
     </style>
 </head>
-<body>
+<body dir="rtl">
+    <button class="lang-toggle" onclick="toggleLanguage()">English</button>
+    
     <div class="particles" id="particles"></div>
 
     <div class="header">
-        <h1>⚡ جهاز تكثيف الرطوبة - تقنية Peltier</h1>
-        <p>التكنولوجيا المستقبلية لتحويل الرطوبة إلى حياة</p>
+        <h1 data-ar="⚡ جهاز تكثيف الرطوبة - تقنية Peltier" data-en="⚡ Humidity Condenser - Peltier Technology">⚡ جهاز تكثيف الرطوبة - تقنية Peltier</h1>
+        <p data-ar="التكنولوجيا المستقبلية لتحويل الرطوبة إلى حياة" data-en="Future Technology Turning Humidity into Life">التكنولوجيا المستقبلية لتحويل الرطوبة إلى حياة</p>
     </div>
 
     <div class="container">
         <div class="hero">
-            <h2>🌍 ثورة في عالم التكنولوجيا البيئية</h2>
-            <p class="hero-text">
+            <h2 data-ar="🌍 ثورة في عالم التكنولوجيا البيئية" data-en="🌍 Revolution in Environmental Technology">🌍 ثورة في عالم التكنولوجيا البيئية</h2>
+            <p class="hero-text" data-ar="في عصر يتطلب حلولاً مبتكرة ومستدامة، يأتي جهازنا الثوري ليحول التحدي إلى فرصة. باستخدام تقنية Peltier المتقدمة، نقدم لك جهازاً يمتص الرطوبة من الجو ويحولها إلى ماء نقي صالح للشرب. مثالي للمناطق الرطبة، ومصمم لمستقبل أكثر استدامة وراحة." data-en="In an era that demands innovative and sustainable solutions, our revolutionary device turns challenges into opportunities. Using advanced Peltier technology, we offer you a device that absorbs humidity from the air and converts it into pure drinking water. Perfect for humid areas, designed for a more sustainable and comfortable future.">
                 في عصر يتطلب حلولاً مبتكرة ومستدامة، يأتي جهازنا الثوري ليحول التحدي إلى فرصة. باستخدام تقنية Peltier المتقدمة، نقدم لك جهازاً يمتص الرطوبة من الجو ويحولها إلى ماء نقي صالح للشرب. مثالي للمناطق الرطبة، ومصمم لمستقبل أكثر استدامة وراحة.
             </p>
         </div>
@@ -420,123 +480,150 @@
         <div class="features">
             <div class="feature-card">
                 <div class="feature-icon">🌱</div>
-                <h3>بيئة نظيفة</h3>
-                <p>تقنية خالية من الفريون والانبعاثات الكربونية، نساهم في حماية كوكبنا للأجيال القادمة</p>
+                <h3 data-ar="بيئة نظيفة" data-en="Clean Environment">بيئة نظيفة</h3>
+                <p data-ar="تقنية خالية من الفريون والانبعاثات الكربونية، نساهم في حماية كوكبنا للأجيال القادمة" data-en="Freon-free and carbon-neutral technology, contributing to protecting our planet for future generations">تقنية خالية من الفريون والانبعاثات الكربونية، نساهم في حماية كوكبنا للأجيال القادمة</p>
             </div>
 
             <div class="feature-card">
                 <div class="feature-icon">⚡</div>
-                <h3>كفاءة طاقة عالية</h3>
-                <p>يعمل بالطاقة الشمسية المتجددة، توفير هائل في الكهرباء مع إمكانية التشغيل الليلي بالبطارية</p>
+                <h3 data-ar="كفاءة طاقة عالية" data-en="High Energy Efficiency">كفاءة طاقة عالية</h3>
+                <p data-ar="يعمل بالطاقة الشمسية المتجددة، توفير هائل في الكهرباء مع إمكانية التشغيل الليلي بالبطارية" data-en="Operates on renewable solar energy, massive electricity savings with battery backup for nighttime operation">يعمل بالطاقة الشمسية المتجددة، توفير هائل في الكهرباء مع إمكانية التشغيل الليلي بالبطارية</p>
             </div>
 
             <div class="feature-card">
                 <div class="feature-icon">💧</div>
-                <h3>مصدر ماء متجدد</h3>
-                <p>تحويل الرطوبة إلى ماء نقي قابل للشرب، حل مبتكر لتأمين المياه النظيفة</p>
+                <h3 data-ar="مصدر ماء متجدد" data-en="Renewable Water Source">مصدر ماء متجدد</h3>
+                <p data-ar="تحويل الرطوبة إلى ماء نقي قابل للشرب، حل مبتكر لتأمين المياه النظيفة" data-en="Converts humidity into pure drinking water, an innovative solution for securing clean water">تحويل الرطوبة إلى ماء نقي قابل للشرب، حل مبتكر لتأمين المياه النظيفة</p>
             </div>
 
             <div class="feature-card">
                 <div class="feature-icon">🛡️</div>
-                <h3>حماية شاملة</h3>
-                <p>يحمي المنزل من التلف والصدأ والعفن الناتج عن الرطوبة الزائدة</p>
+                <h3 data-ar="حماية شاملة" data-en="Complete Protection">حماية شاملة</h3>
+                <p data-ar="يحمي المنزل من التلف والصدأ والعفن الناتج عن الرطوبة الزائدة" data-en="Protects your home from damage, rust, and mold caused by excess humidity">يحمي المنزل من التلف والصدأ والعفن الناتج عن الرطوبة الزائدة</p>
             </div>
         </div>
 
         <div class="how-it-works">
-            <h2>🔬 تقنية متقدمة بخطوات ذكية</h2>
+            <h2 data-ar="🔬 تقنية متقدمة بخطوات ذكية" data-en="🔬 Advanced Technology with Smart Steps">🔬 تقنية متقدمة بخطوات ذكية</h2>
             <div class="steps">
                 <div class="step">
                     <div class="step-number">1</div>
                     <div class="step-content">
-                        <h3>امتصاص ذكي للهواء</h3>
-                        <p>نظام مراوح متقدم يسحب الهواء الرطب بكفاءة عالية من البيئة المحيطة</p>
+                        <h3 data-ar="امتصاص ذكي للهواء" data-en="Smart Air Intake">امتصاص ذكي للهواء</h3>
+                        <p data-ar="نظام مراوح متقدم يسحب الهواء الرطب بكفاءة عالية من البيئة المحيطة" data-en="Advanced fan system efficiently draws humid air from the surrounding environment">نظام مراوح متقدم يسحب الهواء الرطب بكفاءة عالية من البيئة المحيطة</p>
                     </div>
                 </div>
 
                 <div class="step">
                     <div class="step-number">2</div>
                     <div class="step-content">
-                        <h3>تبريد بتقنية Peltier</h3>
-                        <p>وحدة التبريد الكهروحرارية تخفض درجة الحرارة لتحويل البخار إلى قطرات ماء</p>
+                        <h3 data-ar="تبريد بتقنية Peltier" data-en="Peltier Cooling">تبريد بتقنية Peltier</h3>
+                        <p data-ar="وحدة التبريد الكهروحرارية تخفض درجة الحرارة لتحويل البخار إلى قطرات ماء" data-en="Thermoelectric cooling unit lowers temperature to convert vapor into water droplets">وحدة التبريد الكهروحرارية تخفض درجة الحرارة لتحويل البخار إلى قطرات ماء</p>
                     </div>
                 </div>
 
                 <div class="step">
                     <div class="step-number">3</div>
                     <div class="step-content">
-                        <h3>تجميع وتخزين</h3>
-                        <p>نظام تجميع محكم يوجه الماء المتكثف إلى خزان التخزين الآمن</p>
+                        <h3 data-ar="تجميع وتخزين" data-en="Collection & Storage">تجميع وتخزين</h3>
+                        <p data-ar="نظام تجميع محكم يوجه الماء المتكثف إلى خزان التخزين الآمن" data-en="Sealed collection system directs condensed water to a secure storage tank">نظام تجميع محكم يوجه الماء المتكثف إلى خزان التخزين الآمن</p>
                     </div>
                 </div>
 
                 <div class="step">
                     <div class="step-number">4</div>
                     <div class="step-content">
-                        <h3>تنقية ميكانيكية</h3>
-                        <p>فلاتر متعددة الطبقات تزيل الشوائب والمعادن الذائبة بفعالية</p>
+                        <h3 data-ar="تنقية ميكانيكية" data-en="Mechanical Filtration">تنقية ميكانيكية</h3>
+                        <p data-ar="فلاتر متعددة الطبقات تزيل الشوائب والمعادن الذائبة بفعالية" data-en="Multi-layer filters effectively remove impurities and dissolved minerals">فلاتر متعددة الطبقات تزيل الشوائب والمعادن الذائبة بفعالية</p>
                     </div>
                 </div>
 
                 <div class="step">
                     <div class="step-number">5</div>
                     <div class="step-content">
-                        <h3>تعقيم حراري</h3>
-                        <p>معالجة حرارية للقضاء التام على الجراثيم والميكروبات</p>
+                        <h3 data-ar="تعقيم حراري" data-en="Thermal Sterilization">تعقيم حراري</h3>
+                        <p data-ar="معالجة حرارية للقضاء التام على الجراثيم والميكروبات" data-en="Heat treatment for complete elimination of germs and microbes">معالجة حرارية للقضاء التام على الجراثيم والميكروبات</p>
                     </div>
                 </div>
 
                 <div class="step">
                     <div class="step-number">6</div>
                     <div class="step-content">
-                        <h3>ماء نقي جاهز</h3>
-                        <p>النتيجة: ماء صالح للشرب وبيئة منزلية أكثر صحة وراحة</p>
+                        <h3 data-ar="ماء نقي جاهز" data-en="Pure Water Ready">ماء نقي جاهز</h3>
+                        <p data-ar="النتيجة: ماء صالح للشرب وبيئة منزلية أكثر صحة وراحة" data-en="Result: Drinking water and a healthier, more comfortable home environment">النتيجة: ماء صالح للشرب وبيئة منزلية أكثر صحة وراحة</p>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="specs">
-            <h2>📊 مواصفات تقنية متقدمة</h2>
+            <h2 data-ar="📊 مواصفات تقنية متقدمة" data-en="📊 Advanced Technical Specifications">📊 مواصفات تقنية متقدمة</h2>
             <div class="spec-list">
                 <div class="spec-item">
-                    <strong>⚙️ التقنية</strong>
-                    <span>وحدة Peltier للتبريد الكهروحراري المتقدم</span>
+                    <strong data-ar="⚙️ التقنية" data-en="⚙️ Technology">⚙️ التقنية</strong>
+                    <span data-ar="وحدة Peltier للتبريد الكهروحراري المتقدم" data-en="Advanced Peltier thermoelectric cooling unit">وحدة Peltier للتبريد الكهروحراري المتقدم</span>
                 </div>
                 
                 <div class="spec-item">
-                    <strong>💧 معدل الإنتاج</strong>
-                    <span>200 ملي / 8-12 ساعة (متغير حسب الرطوبة)</span>
+                    <strong data-ar="💧 معدل الإنتاج" data-en="💧 Production Rate">💧 معدل الإنتاج</strong>
+                    <span data-ar="200 ملي / 8-12 ساعة (متغير حسب الرطوبة)" data-en="200ml / 8-12 hours (variable based on humidity)">200 ملي / 8-12 ساعة (متغير حسب الرطوبة)</span>
                 </div>
                 
                 <div class="spec-item">
-                    <strong>🔋 الطاقة</strong>
-                    <span>طاقة شمسية + بطارية ليلية / كهرباء منخفضة الاستهلاك</span>
+                    <strong data-ar="🔋 الطاقة" data-en="🔋 Power">🔋 الطاقة</strong>
+                    <span data-ar="طاقة شمسية + بطارية ليلية / كهرباء منخفضة الاستهلاك" data-en="Solar power + night battery / low-consumption electricity">طاقة شمسية + بطارية ليلية / كهرباء منخفضة الاستهلاك</span>
                 </div>
                 
                 <div class="spec-item">
-                    <strong>🌡️ الكفاءة</strong>
-                    <span>أداء مرتبط بنسبة الرطوبة وجودة المكونات</span>
+                    <strong data-ar="🌡️ الكفاءة" data-en="🌡️ Efficiency">🌡️ الكفاءة</strong>
+                    <span data-ar="أداء مرتبط بنسبة الرطوبة وجودة المكونات" data-en="Performance linked to humidity levels and component quality">أداء مرتبط بنسبة الرطوبة وجودة المكونات</span>
                 </div>
                 
                 <div class="spec-item">
-                    <strong>♻️ الاستدامة</strong>
-                    <span>خالٍ تماماً من الفريون والانبعاثات الضارة</span>
+                    <strong data-ar="♻️ الاستدامة" data-en="♻️ Sustainability">♻️ الاستدامة</strong>
+                    <span data-ar="خالٍ تماماً من الفريون والانبعاثات الضارة" data-en="Completely freon-free and emission-free">خالٍ تماماً من الفريون والانبعاثات الضارة</span>
                 </div>
                 
                 <div class="spec-item">
-                    <strong>🎯 الاستخدام الأمثل</strong>
-                    <span>المناطق الرطبة والساحلية - الحجاز والشرقية</span>
+                    <strong data-ar="🎯 الاستخدام الأمثل" data-en="🎯 Optimal Use">🎯 الاستخدام الأمثل</strong>
+                    <span data-ar="المناطق الرطبة والساحلية - الحجاز والشرقية" data-en="Humid and coastal areas - Hijaz and Eastern regions">المناطق الرطبة والساحلية - الحجاز والشرقية</span>
                 </div>
             </div>
         </div>
 
         <div class="footer">
-            <p>🚀 المستقبل يبدأ اليوم - تقنية نظيفة لعالم أفضل 🌟</p>
+            <p data-ar="🚀 المستقبل يبدأ اليوم - تقنية نظيفة لعالم أفضل 🌟" data-en="🚀 The Future Starts Today - Clean Technology for a Better World 🌟">🚀 المستقبل يبدأ اليوم - تقنية نظيفة لعالم أفضل 🌟</p>
         </div>
     </div>
 
     <script>
+        let currentLang = 'ar';
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            const body = document.body;
+            const langBtn = document.querySelector('.lang-toggle');
+            
+            if (currentLang === 'en') {
+                body.setAttribute('dir', 'ltr');
+                body.setAttribute('lang', 'en');
+                langBtn.textContent = 'العربية';
+            } else {
+                body.setAttribute('dir', 'rtl');
+                body.setAttribute('lang', 'ar');
+                langBtn.textContent = 'English';
+            }
+
+            // Update all translatable elements
+            document.querySelectorAll('[data-ar]').forEach(el => {
+                if (currentLang === 'ar') {
+                    el.textContent = el.getAttribute('data-ar');
+                } else {
+                    el.textContent = el.getAttribute('data-en');
+                }
+            });
+        }
+
         // إنشاء جزيئات متحركة في الخلفية
         const particlesContainer = document.getElementById('particles');
         const particleCount = 20;
