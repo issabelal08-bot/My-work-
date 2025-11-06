@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pulse Bike - Ride Faster Than Flight</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --dark-blue: #0a1628;
+            --medium-blue: #1e3a5f;
+            --light-blue: #2563eb;
+            --accent-blue: #60a5fa;
+            --white: #ffffff;
+            --black: #000000;
+            --gray: #94a3b8;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--dark-blue);
+            color: var(--white);
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, var(--dark-blue) 0%, var(--medium-blue) 50%, var(--dark-blue) 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* Floating Particles - removed */
+
+        /* Language Switcher */
+        .lang-switcher {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(37, 99, 235, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 12px 25px;
+            border-radius: 30px;
+            border: 2px solid var(--light-blue);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .lang-switcher:hover {
+            background: rgba(37, 99, 235, 0.4);
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(37, 99, 235, 0.5);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        /* Logo Container */
+        .logo-container {
+            width: 300px;
+            height: 300px;
+            margin-bottom: 40px;
+            position: relative;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .logo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 0 30px rgba(37, 99, 235, 0.6));
+        }
+
+        /* Rotating Gears - Removed */
+
+        h1 {
+            font-size: 5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-blue), var(--white), var(--light-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            text-align: center;
+            animation: titleGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { filter: drop-shadow(0 0 10px rgba(96, 165, 250, 0.5)); }
+            50% { filter: drop-shadow(0 0 25px rgba(96, 165, 250, 0.8)); }
+        }
+
+        .tagline {
+            font-size: 2rem;
+            color: var(--accent-blue);
+            margin-bottom: 50px;
+            text-align: center;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, var(--light-blue), var(--accent-blue));
+            color: var(--white);
+            padding: 18px 50px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 40px rgba(37, 99, 235, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-button:before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .cta-button:hover:before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(37, 99, 235, 0.6);
+        }
+
+        /* Sections */
+        .section {
+            padding: 120px 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .section-title {
+            font-size: 3.5rem;
+            text-align: center;
+            margin-bottom: 80px;
+            background: linear-gradient(135deg, var(--white), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+        }
+
+        .section-title:after {
+            content: '';
+            display: block;
+            width: 150px;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--light-blue), transparent);
+            margin: 20px auto 0;
+            border-radius: 2px;
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(37, 99, 235, 0.3);
+            border-radius: 25px;
+            padding: 40px;
+            transition: all 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .feature-card:hover:before {
+            left: 100%;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--accent-blue);
+            box-shadow: 0 30px 60px rgba(37, 99, 235, 0.3);
+        }
+
+        .feature-icon {
+            font-size: 4rem;
+            margin-bottom: 25px;
+            display: inline-block;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .feature-title {
+            font-size: 1.8rem;
+            color: var(--accent-blue);
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .feature-description {
+            color: var(--gray);
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+
+        /* Gallery - Removed */
+
+        /* Specs */
+        .specs-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+
+        .spec-item {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(96, 165, 250, 0.05));
+            padding: 35px;
+            border-radius: 20px;
+            border-left: 5px solid var(--light-blue);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .spec-item:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(96, 165, 250, 0.2), transparent);
+            border-radius: 50%;
+        }
+
+        .spec-item:hover {
+            border-left-color: var(--accent-blue);
+            transform: translateX(15px);
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(96, 165, 250, 0.1));
+        }
+
+        .spec-label {
+            color: var(--gray);
+            font-size: 1rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .spec-value {
+            color: var(--white);
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        /* Comparison */
+        .comparison-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            overflow: hidden;
+            margin-top: 60px;
+            border: 3px solid rgba(37, 99, 235, 0.4);
+            box-shadow: 0 10px 40px rgba(37, 99, 235, 0.2);
+        }
+
+        .comparison-row {
+            display: grid;
+            grid-template-columns: 2.5fr 2fr 2fr;
+            gap: 20px;
+            padding: 28px 35px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+            align-items: center;
+        }
+
+        .comparison-row:last-child {
+            border-bottom: none;
+        }
+
+        .comparison-row:hover:not(.comparison-header) {
+            background: rgba(37, 99, 235, 0.08);
+            transform: translateX(5px);
+        }
+
+        .comparison-header {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            font-weight: 800;
+            font-size: 1.3rem;
+            padding: 32px 35px;
+            border-bottom: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .comparison-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .comparison-cell.feature-name {
+            justify-content: flex-start;
+            font-weight: 700;
+            font-size: 1.15rem;
+            color: var(--white);
+        }
+
+        .check-yes {
+            color: #10b981;
+            font-size: 2.2rem;
+            font-weight: bold;
+        }
+
+        .check-no {
+            color: #ef4444;
+            font-size: 2.2rem;
+            font-weight: bold;
+        }
+
+        .comparison-value {
+            font-weight: 600;
+            color: #94a3b8;
+            font-size: 1.05rem;
+        }
+
+        .comparison-value-highlight {
+            font-weight: 800;
+            color: #60a5fa;
+            font-size: 1.2rem;
+        }
+
+        /* Pricing */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .price-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            padding: 50px;
+            text-align: center;
+            transition: all 0.4s;
+            position: relative;
+        }
+
+        .price-card:hover {
+            transform: translateY(-20px) scale(1.03);
+            border-color: var(--accent-blue);
+            box-shadow: 0 30px 70px rgba(37, 99, 235, 0.4);
+        }
+
+        .price-card.featured {
+            border-color: var(--light-blue);
+            background: rgba(37, 99, 235, 0.15);
+            border-width: 3px;
+        }
+
+        .price-card.featured:before {
+            content: '🔥 HOT';
+            position: absolute;
+            top: -15px;
+            right: 30px;
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .price-title {
+            font-size: 2.2rem;
+            margin-bottom: 25px;
+            color: var(--accent-blue);
+            font-weight: bold;
+        }
+
+        .price-amount {
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 15px;
+            color: var(--white);
+        }
+
+        .price-original {
+            text-decoration: line-through;
+            color: var(--gray);
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+        }
+
+        .price-features {
+            list-style: none;
+            margin: 35px 0;
+            text-align: left;
+        }
+
+        .price-features li {
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 1.1rem;
+        }
+
+        .price-features li:before {
+            content: "✓ ";
+            color: #10b981;
+            font-weight: bold;
+            margin-right: 12px;
+            font-size: 1.3rem;
+        }
+
+        /* FAQ Section */
+        .faq-container {
+            max-width: 900px;
+            margin: 60px auto 0;
+        }
+
+        .faq-item {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(37, 99, 235, 0.3);
+            border-radius: 20px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .faq-item:hover {
+            border-color: var(--accent-blue);
+        }
+
+        .faq-question {
+            padding: 25px 30px;
+            cursor: pointer;
+            font-size: 1.3rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .faq-question:hover {
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .faq-answer {
+            padding: 0 30px;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.4s;
+            color: var(--gray);
+            line-height: 1.8;
+        }
+
+        .faq-item.active .faq-answer {
+            padding: 0 30px 25px;
+            max-height: 500px;
+        }
+
+        .faq-icon {
+            transition: transform 0.3s;
+            font-size: 1.5rem;
+            color: var(--accent-blue);
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Contact Section */
+        .contact-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+
+        .contact-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(37, 99, 235, 0.3);
+            border-radius: 25px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .contact-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent-blue);
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .contact-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: var(--accent-blue);
+        }
+
+        .contact-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--white);
+            font-weight: bold;
+        }
+
+        .contact-info {
+            color: var(--gray);
+            font-size: 1.1rem;
+        }
+
+        /* Team Section */
+        .team-box {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 3px solid var(--light-blue);
+            border-radius: 30px;
+            padding: 60px;
+            margin-top: 60px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(37, 99, 235, 0.3);
+        }
+
+        .team-title {
+            font-size: 2.5rem;
+            color: var(--accent-blue);
+            margin-bottom: 40px;
+            font-weight: bold;
+        }
+
+        .team-members {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+
+        .team-member {
+            background: rgba(37, 99, 235, 0.15);
+            padding: 30px;
+            border-radius: 20px;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .team-member:hover {
+            background: rgba(37, 99, 235, 0.25);
+            transform: translateY(-10px) scale(1.05);
+            border-color: var(--accent-blue);
+        }
+
+        .team-member p {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .supervisor {
+            font-size: 1.5rem;
+            color: var(--white);
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 3px solid var(--light-blue);
+        }
+
+        .supervisor span {
+            color: var(--accent-blue);
+            font-weight: bold;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 { font-size: 3rem; }
+            .tagline { font-size: 1.3rem; }
+            .section-title { font-size: 2.5rem; }
+            .logo-container { width: 200px; height: 200px; }
+            .comparison-row { grid-template-columns: 1fr; }
+            .comparison-cell { justify-content: flex-start; }
+        }
+
+        [lang="ar"] {
+            direction: rtl;
+        }
+
+        [lang="ar"] .spec-item {
+            border-left: none;
+            border-right: 5px solid var(--light-blue);
+        }
+
+        [lang="ar"] .spec-item:hover {
+            border-right-color: var(--accent-blue);
+            transform: translateX(-15px);
+        }
+
+        /* Scroll to top button */
+        .scroll-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--light-blue), var(--accent-blue));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 999;
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.4);
+        }
+
+        .scroll-top.visible {
+            opacity: 1;
+        }
+
+        .scroll-top:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(37, 99, 235, 0.6);
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-bg"></div>
+
+
+
+    <!-- Language Switcher -->
+    <div class="lang-switcher" onclick="toggleLanguage()">
+        <span id="langText">🌐 العربية</span>
+    </div>
+
+    <!-- Scroll to Top -->
+    <div class="scroll-top" onclick="scrollToTop()">
+        <span style="font-size: 2rem; color: white;">↑</span>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="logo-container">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cdefs%3E%3ClinearGradient id='grad1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%232563eb;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%2360a5fa;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='100' cy='100' r='90' fill='none' stroke='url(%23grad1)' stroke-width='8'/%3E%3Ccircle cx='100' cy='100' r='70' fill='none' stroke='url(%23grad1)' stroke-width='3'/%3E%3Cline x1='100' y1='30' x2='100' y2='170' stroke='url(%23grad1)' stroke-width='3'/%3E%3Cline x1='30' y1='100' x2='170' y2='100' stroke='url(%23grad1)' stroke-width='3'/%3E%3Cline x1='45' y1='45' x2='155' y2='155' stroke='url(%23grad1)' stroke-width='3'/%3E%3Cline x1='155' y1='45' x2='45' y2='155' stroke='url(%23grad1)' stroke-width='3'/%3E%3Cpath d='M100 60 L120 100 L100 140 L80 100 Z' fill='url(%23grad1)'/%3E%3Ccircle cx='100' cy='100' r='15' fill='%23ffffff'/%3E%3C/svg%3E" alt="Pulse Bike Logo">
+        </div>
+
+        <h1 data-en="Pulse Bike" data-ar="بالس بايك">Pulse Bike</h1>
+        <p class="tagline" data-en="Ride Your Bike Faster Than Flight" data-ar="اركب دراجتك أسرع من الطيران">Ride Your Bike Faster Than Flight</p>
+        <button class="cta-button" data-en="🚀 Discover Innovation" data-ar="🚀 اكتشف الابتكار">🚀 Discover Innovation</button>
+    </section>
+    <!-- Features Section -->
+    <section class="section">
+        <h2 class="section-title" data-en="Revolutionary Features" data-ar="مميزات ثورية">Revolutionary Features</h2>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3 class="feature-title" data-en="Hybrid Power System" data-ar="نظام طاقة هجين">Hybrid Power System</h3>
+                <p class="feature-description" data-en="Switch seamlessly between pedal power, electric motor, or combine both for maximum efficiency. Your pedaling charges the battery automatically!" data-ar="انتقل بسلاسة بين قوة البدال والمحرك الكهربائي أو ادمجهما معاً لأقصى كفاءة. البدال يشحن البطارية تلقائياً!">Switch seamlessly between pedal power, electric motor, or combine both for maximum efficiency. Your pedaling charges the battery automatically!</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <h3 class="feature-title" data-en="Semi-Autonomous Driving" data-ar="القيادة الذاتية الجزئية">Semi-Autonomous Driving</h3>
+                <p class="feature-description" data-en="Advanced AI assists with navigation while you maintain steering control. Smart collision avoidance sensors work day and night for maximum safety." data-ar="الذكاء الاصطناعي المتقدم يساعد في الملاحة بينما تحتفظ بالتحكم في التوجيه. مستشعرات تجنب الحوادث الذكية تعمل نهاراً وليلاً لأقصى سلامة.">Advanced AI assists with navigation while you maintain steering control. Smart collision avoidance sensors work day and night for maximum safety.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h3 class="feature-title" data-en="Smart App Integration" data-ar="تكامل تطبيق ذكي">Smart App Integration</h3>
+                <p class="feature-description" data-en="Real-time GPS tracking, remote lock/unlock, route planning, and user permission management. Control everything from your smartphone!" data-ar="تتبع GPS الفوري، قفل/فتح عن بعد، تخطيط المسار، وإدارة صلاحيات المستخدمين. تحكم في كل شيء من هاتفك الذكي!">Real-time GPS tracking, remote lock/unlock, route planning, and user permission management. Control everything from your smartphone!</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🛡️</div>
+                <h3 class="feature-title" data-en="360° Protection System" data-ar="نظام حماية 360 درجة">360° Protection System</h3>
+                <p class="feature-description" data-en="Full airbag coverage for rider and bike, 360° camera recording, night vision sensors, and ultra-loud anti-theft alarm with instant notifications." data-ar="تغطية كاملة بالوسادة الهوائية للراكب والدراجة، تسجيل كاميرات 360 درجة، مستشعرات رؤية ليلية، وإنذار سرقة عالٍ جداً مع إشعارات فورية.">Full airbag coverage for rider and bike, 360° camera recording, night vision sensors, and ultra-loud anti-theft alarm with instant notifications.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🎮</div>
+                <h3 class="feature-title" data-en="Intuitive Control Interface" data-ar="واجهة تحكم بديهية">Intuitive Control Interface</h3>
+                <p class="feature-description" data-en="Easy-to-use buttons for speed control, braking, sound system, and mode switching. Built-in Bluetooth speakers for calls and music." data-ar="أزرار سهلة الاستخدام للتحكم في السرعة والفرامل ونظام الصوت وتبديل الأوضاع. سماعات بلوتوث مدمجة للمكالمات والموسيقى.">Easy-to-use buttons for speed control, braking, sound system, and mode switching. Built-in Bluetooth speakers for calls and music.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🎨</div>
+                <h3 class="feature-title" data-en="Futuristic Design" data-ar="تصميم مستقبلي">Futuristic Design</h3>
+                <p class="feature-description" data-en="Aerodynamic styling with specialized models for men and women. LED lighting system and premium materials for the ultimate modern look." data-ar="تصميم انسيابي مع موديلات متخصصة للرجال والنساء. نظام إضاءة LED ومواد فاخرة للمظهر العصري الأمثل.">Aerodynamic styling with specialized models for men and women. LED lighting system and premium materials for the ultimate modern look.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Specifications -->
+    <section class="section">
+        <h2 class="section-title" data-en="Technical Excellence" data-ar="التميز التقني">Technical Excellence</h2>
+        
+        <div class="specs-container">
+            <div class="spec-item">
+                <div class="spec-label" data-en="TOP SPEED" data-ar="السرعة القصوى">TOP SPEED</div>
+                <div class="spec-value" data-en="125+ km/h" data-ar="+125 كم/س">125+ km/h</div>
+            </div>
+            <div class="spec-item">
+                <div class="spec-label" data-en="POWER MODES" data-ar="أوضاع الطاقة">POWER MODES</div>
+                <div class="spec-value" data-en="3 Modes" data-ar="3 أوضاع">3 Modes</div>
+            </div>
+            <div class="spec-item">
+                <div class="spec-label" data-en="CAMERA SYSTEM" data-ar="نظام الكاميرا">CAMERA SYSTEM</div>
+                <div class="spec-value" data-en="360° View" data-ar="رؤية 360°">360° View</div>
+            </div>
+            <div class="spec-item">
+                <div class="spec-label" data-en="SAFETY" data-ar="السلامة">SAFETY</div>
+                <div class="spec-value" data-en="Full Airbag" data-ar="وسادة هوائية">Full Airbag</div>
+            </div>
+            <div class="spec-item">
+                <div class="spec-label" data-en="CONNECTIVITY" data-ar="الاتصال">CONNECTIVITY</div>
+                <div class="spec-value" data-en="Smart App" data-ar="تطبيق ذكي">Smart App</div>
+            </div>
+            <div class="spec-item">
+                <div class="spec-label" data-en="NIGHT VISION" data-ar="الرؤية الليلية">NIGHT VISION</div>
+                <div class="spec-value" data-en="Advanced AI" data-ar="ذكاء متقدم">Advanced AI</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison -->
+    <section class="section">
+        <h2 class="section-title" data-en="Why Pulse Bike Wins" data-ar="لماذا بالس بايك تتفوق">Why Pulse Bike Wins</h2>
+        
+        <div class="comparison-container">
+            <div class="comparison-row comparison-header">
+                <div class="comparison-cell" data-en="Feature" data-ar="الميزة">Feature</div>
+                <div class="comparison-cell" data-en="Traditional E-Bikes" data-ar="الدراجات التقليدية">Traditional E-Bikes</div>
+                <div class="comparison-cell" data-en="Pulse Bike" data-ar="بالس بايك">Pulse Bike</div>
+            </div>
+            <div class="comparison-row">
+                <div class="comparison-cell feature-name" data-en="Maximum Speed" data-ar="السرعة القصوى">Maximum Speed</div>
+                <div class="comparison-cell comparison-value" data-en="25-45 km/h" data-ar="25-45 كم/س">25-45 km/h</div>
+                <div class="comparison-cell comparison-value-highlight" data-en="125+ km/h ⚡" data-ar="125+ كم/س ⚡">125+ km/h ⚡</div>
+            </div>
+            <div class="comparison-row">
+                <div class="comparison-cell feature-name" data-en="Self-Charging Battery" data-ar="بطارية تشحن ذاتياً">Self-Charging Battery</div>
+                <div class="comparison-cell"><span class="check-no">✗</span></div>
+                <div class="comparison-cell"><span class="check-yes">✓</span></div>
+            </div>
+            <div class="comparison-row">
+                <div class="comparison-cell feature-name" data-en="Semi-Autonomous Driving" data-ar="القيادة الذاتية">Semi-Autonomous Driving</div>
+                <div class="comparison-cell"><span class="check-no">✗</span></div>
+                <div class="comparison-cell"><span class="check-yes">✓</span></div>
+            </div>
+            <div class="comparison-row">
+                <div class="comparison-cell feature-name" data-en="Full Airbag Protection" data-ar="حماية وسادة هوائية كاملة">Full Airbag Protection</div>
+                <div class="comparison-cell"><span class="check-no">✗</span></div>
+                <div class="comparison-cell"><span class="check-yes">✓</span></div>
+            </div>
+            <div class="comparison-row">
+                <div class="comparison-cell feature-name" data-en="360° Camera System" data-ar="كاميرات 360 درجة">360° Camera System</div>
+                <div class="comparison-cell"><span class="check-no">✗</span></div>
+                <div class="comparison-cell"><span class="check-yes">✓</span></div>
+            </div>
+            <div class="comparison-row">
+                <div class="comparison-cell feature-name" data-en="Smart App Control" data-ar="تحكم بتطبيق ذكي">Smart App Control</div>
+                <div class="comparison-cell comparison-value" data-en="Basic" data-ar="أساسي">Basic</div>
+                <div class="comparison-cell comparison-value-highlight" data-en="Advanced ✓" data-ar="متقدم ✓">Advanced ✓</div>
+            </div>
+            <div class="comparison-row">
+                <div class="comparison-cell feature-name" data-en="Night Vision Sensors" data-ar="مستشعرات رؤية ليلية">Night Vision Sensors</div>
+                <div class="comparison-cell"><span class="check-no">✗</span></div>
+                <div class="comparison-cell"><span class="check-yes">✓</span></div>
+            </div>
+            <div class="comparison-row">
+                <div class="comparison-cell feature-name" data-en="Anti-Theft System" data-ar="نظام مكافحة السرقة">Anti-Theft System</div>
+                <div class="comparison-cell comparison-value" data-en="Basic Lock" data-ar="قفل أساسي">Basic Lock</div>
+                <div class="comparison-cell comparison-value-highlight" data-en="AI + GPS + Alarm" data-ar="ذكاء اصطناعي + GPS">AI + GPS + Alarm</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="section">
+        <h2 class="section-title" data-en="Choose Your Package" data-ar="اختر باقتك">Choose Your Package</h2>
+        
+        <div class="pricing-grid">
+            <div class="price-card featured">
+                <h3 class="price-title" data-en="Pulse Bike" data-ar="بالس بايك">Pulse Bike</h3>
+                <div class="price-original" data-en="SAR 20,000" data-ar="20,000 ريال">SAR 20,000</div>
+                <div class="price-amount" data-en="11,750 SAR" data-ar="11,750 ريال">11,750 SAR</div>
+                <p style="color: #10b981; margin-bottom: 20px; font-weight: bold; font-size: 1.1rem;" data-en="🎉 Launch Special - Save 41%!" data-ar="🎉 عرض الإطلاق - وفر 41%!">🎉 Launch Special - Save 41%!</p>
+                <ul class="price-features">
+                    <li data-en="Hybrid Power System" data-ar="نظام طاقة هجين">Hybrid Power System</li>
+                    <li data-en="Semi-Autonomous Driving" data-ar="قيادة ذاتية جزئية">Semi-Autonomous Driving</li>
+                    <li data-en="Smart App Control" data-ar="تحكم بالتطبيق">Smart App Control</li>
+                    <li data-en="Full Airbag Protection" data-ar="حماية وسادة هوائية">Full Airbag Protection</li>
+                    <li data-en="360° Camera System" data-ar="كاميرات 360 درجة">360° Camera System</li>
+                    <li data-en="Bluetooth Speakers" data-ar="سماعات بلوتوث">Bluetooth Speakers</li>
+                    <li data-en="Night Vision Sensors" data-ar="مستشعرات ليلية">Night Vision Sensors</li>
+                </ul>
+                <button class="cta-button" data-en="🛒 Order Now" data-ar="🛒 اطلب الآن">🛒 Order Now</button>
+            </div>
+
+            <div class="price-card">
+                <h3 class="price-title" data-en="Smart Helmet" data-ar="الخوذة الذكية">Smart Helmet</h3>
+                <div class="price-amount" data-en="1,250 SAR" data-ar="1,250 ريال">1,250 SAR</div>
+                <p style="color: var(--accent-blue); margin-bottom: 20px; font-weight: bold;" data-en="💎 Bundle & Save 15%" data-ar="💎 اشتري مع الدراجة ووفر 15%">💎 Bundle & Save 15%</p>
+                <ul class="price-features">
+                    <li data-en="Night Vision Technology" data-ar="تقنية رؤية ليلية">Night Vision Technology</li>
+                    <li data-en="Bluetooth Connectivity" data-ar="اتصال بلوتوث">Bluetooth Connectivity</li>
+                    <li data-en="Sync with Pulse Bike" data-ar="تزامن مع الدراجة">Sync with Pulse Bike</li>
+                    <li data-en="Premium Comfort Design" data-ar="تصميم مريح فاخر">Premium Comfort Design</li>
+                    <li data-en="Safety Certified" data-ar="معتمد للسلامة">Safety Certified</li>
+                    <li data-en="Lightweight Carbon Fiber" data-ar="ألياف كربون خفيفة">Lightweight Carbon Fiber</li>
+                </ul>
+                <button class="cta-button" data-en="➕ Add to Cart" data-ar="➕ أضف للسلة">➕ Add to Cart</button>
+            </div>
+
+            <div class="price-card">
+                <h3 class="price-title" data-en="Rental Service" data-ar="خدمة التأجير">Rental Service</h3>
+                <div class="price-amount" data-en="15 SAR/hr" data-ar="15 ريال/ساعة">15 SAR/hr</div>
+                <p style="color: var(--gray); margin-bottom: 20px;" data-en="or 250 SAR/day" data-ar="أو 250 ريال/يوم">or 250 SAR/day</p>
+                <ul class="price-features">
+                    <li data-en="Try Before You Buy" data-ar="جرب قبل الشراء">Try Before You Buy</li>
+                    <li data-en="Flexible Duration" data-ar="مدة مرنة">Flexible Duration</li>
+                    <li data-en="All Safety Features Included" data-ar="جميع مميزات السلامة">All Safety Features Included</li>
+                    <li data-en="Smart App Access" data-ar="وصول للتطبيق">Smart App Access</li>
+                    <li data-en="Insurance Covered" data-ar="تأمين شامل">Insurance Covered</li>
+                    <li data-en="24/7 Support" data-ar="دعم على مدار الساعة">24/7 Support</li>
+                </ul>
+                <button class="cta-button" data-en="🚴 Rent Now" data-ar="🚴 استأجر الآن">🚴 Rent Now</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="section">
+        <h2 class="section-title" data-en="Frequently Asked Questions" data-ar="الأسئلة الشائعة">Frequently Asked Questions</h2>
+        
+        <div class="faq-container">
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span data-en="How does the hybrid power system work?" data-ar="كيف يعمل نظام الطاقة الهجين؟">How does the hybrid power system work?</span>
+                    <span class="faq-icon">▼</span>
+                </div>
+                <div class="faq-answer">
+                    <p data-en="The Pulse Bike features three power modes: pedal-only, electric motor-only, or a combination of both. When you pedal, the kinetic energy charges the battery automatically, making it a self-sustaining system. You can switch between modes using the handlebar controls." data-ar="تتميز بالس بايك بثلاثة أوضاع طاقة: البدال فقط، المحرك الكهربائي فقط، أو مزيج من الاثنين. عندما تدوس البدال، تشحن الطاقة الحركية البطارية تلقائياً، مما يجعله نظاماً ذاتي الاستدامة. يمكنك التبديل بين الأوضاع باستخدام أزرار المقود.">The Pulse Bike features three power modes: pedal-only, electric motor-only, or a combination of both. When you pedal, the kinetic energy charges the battery automatically, making it a self-sustaining system. You can switch between modes using the handlebar controls.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span data-en="Is the semi-autonomous mode safe?" data-ar="هل وضع القيادة الذاتية الجزئية آمن؟">Is the semi-autonomous mode safe?</span>
+                    <span class="faq-icon">▼</span>
+                </div>
+                <div class="faq-answer">
+                    <p data-en="Absolutely! The semi-autonomous system uses advanced sensors and AI to assist with navigation and collision avoidance. You always maintain steering control, and the system acts as an intelligent co-pilot. The sensors work 24/7 and can detect obstacles in complete darkness using night vision technology." data-ar="بالتأكيد! يستخدم النظام شبه المستقل مستشعرات متقدمة وذكاء اصطناعي للمساعدة في الملاحة وتجنب الحوادث. أنت تحتفظ دائماً بالتحكم في التوجيه، والنظام يعمل كمساعد طيار ذكي. تعمل المستشعرات على مدار الساعة ويمكنها اكتشاف العقبات في الظلام التام باستخدام تقنية الرؤية الليلية.">Absolutely! The semi-autonomous system uses advanced sensors and AI to assist with navigation and collision avoidance. You always maintain steering control, and the system acts as an intelligent co-pilot. The sensors work 24/7 and can detect obstacles in complete darkness using night vision technology.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span data-en="What happens if someone tries to steal the bike?" data-ar="ماذا يحدث إذا حاول شخص سرقة الدراجة؟">What happens if someone tries to steal the bike?</span>
+                    <span class="faq-icon">▼</span>
+                </div>
+                <div class="faq-answer">
+                    <p data-en="The Pulse Bike has multiple anti-theft features: it emits an extremely loud alarm, sends instant notifications to your phone, activates the GPS tracking system, and all cameras start recording. The bike can be remotely locked via the app, making it immobile. Additionally, the movement sensors detect unauthorized handling immediately." data-ar="تحتوي بالس بايك على ميزات متعددة لمكافحة السرقة: تصدر إنذاراً عالياً جداً، وترسل إشعارات فورية لهاتفك، وتنشط نظام التتبع GPS، وتبدأ جميع الكاميرات بالتسجيل. يمكن قفل الدراجة عن بعد عبر التطبيق مما يجعلها غير قابلة للحركة. بالإضافة إلى ذلك، تكتشف مستشعرات الحركة التعامل غير المصرح به فوراً.">The Pulse Bike has multiple anti-theft features: it emits an extremely loud alarm, sends instant notifications to your phone, activates the GPS tracking system, and all cameras start recording. The bike can be remotely locked via the app, making it immobile. Additionally, the movement sensors detect unauthorized handling immediately.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span data-en="How does the airbag protection work?" data-ar="كيف تعمل حماية الوسادة الهوائية؟">How does the airbag protection work?</span>
+                    <span class="faq-icon">▼</span>
+                </div>
+                <div class="faq-answer">
+                    <p data-en="The airbag system uses advanced sensors to detect imminent collisions or falls. Within milliseconds, airbags deploy to protect both the rider and critical bike components. The system provides comprehensive 360° protection, including head, torso, and limb protection for the rider, as well as shock absorption for the bike frame and electronics." data-ar="يستخدم نظام الوسادة الهوائية مستشعرات متقدمة لاكتشاف الحوادث أو السقوط الوشيك. في غضون أجزاء من الثانية، تنتشر الوسائد الهوائية لحماية الراكب ومكونات الدراجة الحيوية. يوفر النظام حماية شاملة بزاوية 360 درجة، بما في ذلك حماية الرأس والجذع والأطراف للراكب، بالإضافة إلى امتصاص الصدمات لإطار الدراجة والإلكترونيات.">The airbag system uses advanced sensors to detect imminent collisions or falls. Within milliseconds, airbags deploy to protect both the rider and critical bike components. The system provides comprehensive 360° protection, including head, torso, and limb protection for the rider, as well as shock absorption for the bike frame and electronics.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span data-en="What features does the mobile app offer?" data-ar="ما هي المميزات التي يقدمها التطبيق؟">What features does the mobile app offer?</span>
+                    <span class="faq-icon">▼</span>
+                </div>
+                <div class="faq-answer">
+                    <p data-en="The Pulse Bike app is your complete control center: real-time GPS tracking, remote lock/unlock, route navigation, user permission management for shared access, battery status monitoring, ride statistics, maintenance reminders, and access to recorded camera footage. You can also customize bike settings, update firmware, and contact emergency services directly from the app." data-ar="تطبيق بالس بايك هو مركز التحكم الكامل الخاص بك: تتبع GPS في الوقت الفعلي، قفل/فتح عن بعد، ملاحة المسار، إدارة صلاحيات المستخدم للوصول المشترك، مراقبة حالة البطارية، إحصائيات الرحلة، تذكيرات الصيانة، والوصول إلى لقطات الكاميرا المسجلة. يمكنك أيضاً تخصيص إعدادات الدراجة وتحديث البرامج والاتصال بخدمات الطوارئ مباشرة من التطبيق.">The Pulse Bike app is your complete control center: real-time GPS tracking, remote lock/unlock, route navigation, user permission management for shared access, battery status monitoring, ride statistics, maintenance reminders, and access to recorded camera footage. You can also customize bike settings, update firmware, and contact emergency services directly from the app.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span data-en="What's included in the warranty?" data-ar="ما الذي يشمله الضمان؟">What's included in the warranty?</span>
+                    <span class="faq-icon">▼</span>
+                </div>
+                <div class="faq-answer">
+                    <p data-en="Every Pulse Bike comes with a comprehensive 3-year warranty covering all electronic components, battery, motor, sensors, and structural frame. We also provide free software updates for life and 24/7 technical support. The warranty includes one free annual maintenance checkup at our service centers." data-ar="كل دراجة بالس بايك تأتي مع ضمان شامل لمدة 3 سنوات يغطي جميع المكونات الإلكترونية والبطارية والمحرك والمستشعرات والإطار الهيكلي. نوفر أيضاً تحديثات برمجية مجانية مدى الحياة ودعم تقني على مدار الساعة. يشمل الضمان فحص صيانة سنوي مجاني في مراكز الخدمة لدينا.">Every Pulse Bike comes with a comprehensive 3-year warranty covering all electronic components, battery, motor, sensors, and structural frame. We also provide free software updates for life and 24/7 technical support. The warranty includes one free annual maintenance checkup at our service centers.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="section">
+        <h2 class="section-title" data-en="Get In Touch" data-ar="تواصل معنا">Get In Touch</h2>
+        
+        <div class="contact-container">
+            <div class="contact-card">
+                <div class="contact-icon">📞</div>
+                <h3 class="contact-title" data-en="Phone" data-ar="الهاتف">Phone</h3>
+                <p class="contact-info">+966 50 123 4567</p>
+                <p class="contact-info" style="font-size: 0.9rem; margin-top: 10px;" data-en="Available 24/7" data-ar="متاح على مدار الساعة">Available 24/7</p>
+            </div>
+
+            <div class="contact-card">
+                <div class="contact-icon">📧</div>
+                <h3 class="contact-title" data-en="Email" data-ar="البريد الإلكتروني">Email</h3>
+                <p class="contact-info">info@pulsebike.com</p>
+                <p class="contact-info" style="font-size: 0.9rem; margin-top: 10px;" data-en="We reply within 24h" data-ar="نرد خلال 24 ساعة">We reply within 24h</p>
+            </div>
+
+            <div class="contact-card">
+                <div class="contact-icon">📍</div>
+                <h3 class="contact-title" data-en="Location" data-ar="الموقع">Location</h3>
+                <p class="contact-info" data-en="Dammam, Saudi Arabia" data-ar="الدمام، السعودية">Dammam, Saudi Arabia</p>
+                <p class="contact-info" style="font-size: 0.9rem; margin-top: 10px;" data-en="Visit our showroom" data-ar="قم بزيارة معرضنا">Visit our showroom</p>
+            </div>
+
+            <div class="contact-card">
+                <div class="contact-icon">💬</div>
+                <h3 class="contact-title" data-en="Social Media" data-ar="وسائل التواصل">Social Media</h3>
+                <p class="contact-info">@PulseBike</p>
+                <p class="contact-info" style="font-size: 0.9rem; margin-top: 10px;" data-en="Follow us for updates" data-ar="تابعنا للتحديثات">Follow us for updates</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="section">
+        <div class="team-box">
+            <h3 class="team-title" data-en="Project Team" data-ar="فريق المشروع">Project Team</h3>
+            <div class="team-members">
+                <div class="team-member">
+                    <p data-en="Hassan Issa" data-ar="حسان عيسى">Hassan Issa</p>
+                </div>
+                <div class="team-member">
+                    <p data-en="Mahmoud Osama" data-ar="محمود أسامة">Mahmoud Osama</p>
+                </div>
+                <div class="team-member">
+                    <p data-en="Amr Hisham" data-ar="عمرو هشام">Amr Hisham</p>
+                </div>
+                <div class="team-member">
+                    <p data-en="Omar Amir" data-ar="عمر أمير">Omar Amir</p>
+                </div>
+                <div class="team-member">
+                    <p data-en="Mohamed Mostafa" data-ar="محمد مصطفى">Mohamed Mostafa</p>
+                </div>
+            </div>
+            <div class="supervisor">
+                <span data-en="Under the supervision of:" data-ar="تحت إشراف:">Under the supervision of:</span>
+                <p data-en="Professor Mahmoud Saber" data-ar="الأستاذ محمود صابر">Professor Mahmoud Saber</p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        let currentLang = 'en';
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'ar' : 'en';
+            document.documentElement.setAttribute('lang', currentLang);
+            
+            const elements = document.querySelectorAll('[data-en][data-ar]');
+            elements.forEach(el => {
+                el.textContent = el.getAttribute(`data-${currentLang}`);
+            });
+
+            document.getElementById('langText').textContent = currentLang === 'en' ? '🌐 العربية' : '🌐 English';
+        }
+
+        // Scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.feature-card, .spec-item, .price-card, .faq-item, .contact-card').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(50px)';
+            el.style.transition = 'all 0.8s ease-out';
+            observer.observe(el);
+        });
+
+        // FAQ Toggle
+        document.querySelectorAll('.faq-item').forEach(item => {
+            item.querySelector('.faq-question').addEventListener('click', () => {
+                const isActive = item.classList.contains('active');
+                
+                // Close all other FAQs
+                document.querySelectorAll('.faq-item').forEach(otherItem => {
+                    otherItem.classList.remove('active');
+                });
+                
+                // Toggle current FAQ
+                if (!isActive) {
+                    item.classList.add('active');
+                }
+            });
+        });
+
+        // Smooth scroll for buttons
+        document.querySelectorAll('.cta-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                button.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    button.style.transform = '';
+                }, 200);
+            });
+        });
+
+        // Scroll to top functionality
+        const scrollTopBtn = document.querySelector('.scroll-top');
+        
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 500) {
+                scrollTopBtn.classList.add('visible');
+            } else {
+                scrollTopBtn.classList.remove('visible');
+            }
+        });
+
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // Parallax effect removed - was causing visual clutter
+        
+        // Sparkle effect removed - was too distracting
+
+        // Gallery items removed
+
+        // Animated counter removed to reduce visual noise
+
+        // Simplified effects - removed excessive animations
+
+        // Add ripple effect to buttons
+        document.querySelectorAll('.cta-button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                ripple.style.position = 'absolute';
+                ripple.style.borderRadius = '50%';
+                ripple.style.background = 'rgba(255, 255, 255, 0.5)';
+                ripple.style.transform = 'scale(0)';
+                ripple.style.animation = 'ripple 0.6s ease-out';
+                ripple.style.pointerEvents = 'none';
+                
+                this.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 600);
+            });
+        });
+
+        // Add ripple animation
+        const rippleStyle = document.createElement('style');
+        rippleStyle.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(rippleStyle);
+    </script>
+</body>
+</html>
