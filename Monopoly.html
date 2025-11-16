@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎲 Monopoly - مونوبولي المستقبل</title>
+    <!-- ... (CSS كما هو دون تغيير) ... -->
+    <style>
+        /* ... كل الأكواد CSS كما هي ... */
+    </style>
+</head>
+<body>
+    <!-- ... عناصر HTML كما هي ... -->
+
+    <script>
+        // ... تعريف المتغيرات الأساسية كما هي ...
+        var gameState = {
+            players: [],
+            currentPlayerIndex: 0,
+            dice1: 1,
+            dice2: 1,
+            doubles: 0,
+            gameStarted: false
+        };
+
+        var avatars = ['🚗', '🚀', '⛵', '🎩', '🐕', '🐈', '🦁', '🐯'];
+        var avatarColors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12'];
+        var properties = [
+            { id: 0, name: 'إبدأ', type: 'go' },
+            { id: 1, name: 'شارع المدينة', type: 'property', price: 60, rent: [2, 10, 30, 90, 160, 250], color: '#8b4513', group: 1 },
+            // ... باقي العقارات كما هي ...
+            { id: 39, name: 'شارع الذهب', type: 'property', price: 400, rent: [50, 200, 600, 1400, 1700, 2000], color: '#0000ff', group: 8 }
+        ];
+
+        function updatePlayerInputs() {
+            var num = parseInt(document.getElementById('numPlayers').value);
+            var container = document.getElementById('playerInputsContainer');
+            container.innerHTML = '';
+            for (var i = 0; i < num; i++) {
+                var div = document.createElement('div');
+                div.style.marginBottom = '15px';
+                div.innerHTML = '<label style="display: block; font-weight: bold; margin-bottom: 10px;">اللاعب ' + (i + 1) + ':</label><div class="player-input-group"><div class="player-avatar selected" style="background: ' + avatarColors[i] + '" data-avatar="' + avatars[i] + '">' + avatars[i] + '</div><input type="text" class="input-field" id="playerName' + i + '" placeholder="اسم اللاعب ' + (i + 1) + '" value="اللاعب ' + (i + 1) + '"></div>';
+                container.appendChild(div);
+            }
+        }
+
+        function startGame() {
+            var numPlayers = parseInt(document.getElementById('numPlayers').value);
+            var startingMoney = parseInt(document.getElementById('startingMoney').value);
+            gameState.players = [];
+            for (var i = 0; i < numPlayers; i++) {
+                var name = document.getElementById('playerName' + i).value || 'اللاعب ' + (i + 1);
+                var avatarEl = document.querySelectorAll('.player-input-group')[i].querySelector('.player-avatar');
+                var avatar = avatarEl.getAttribute('data-avatar') || avatars[i];
+                gameState.players.push({
+                    id: i,
+                    name: name,
+                    avatar: avatar,
+                    color: avatarColors[i],
+                    money: startingMoney,
+                    position: 0,
+                    properties: [],
+                    inJail: false,
+                    jailTurns: 0,
+                    bankrupt: false
+                });
+            }
+            gameState.currentPlayerIndex = 0;
+            gameState.gameStarted = true;
+            document.getElementById('setupScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            renderBoard();
+            updatePlayersPanel();
+            updateMessage(gameState.players[0].name + ' - دورك!');
+        }
+
+        function renderBoard() {
+            var board = document.getElementById('gameBoard');
+            board.innerHTML = ''; // إصلاح: يجب مسح اللوحة قبل إعادة رسمها
+            var positions = [
+                // ... جدول المواقع كما هو ...
+            ];
+            for (var i = 0; i < properties.length; i++) {
+                var prop = properties[i];
+                var space = document.createElement('div');
+                space.className = 'property-space';
+                space.id = 'space' + i;
+                for (var key in positions[i]) {
+                    space.style[key] = positions[i][key];
+                }
+                var icons = { go: '🏁', jail: '🔒', gotojail: '👮', parking: '🅿️', chance: '❓', community: '📦', tax: '💸' };
+                if (prop.type === 'property') {
+                    space.innerHTML = '<div class="property-color" style="background: ' + prop.color + '"></div>' +
+                        '<div class="property-content">' +
+                            '<div class="property-name">' + prop.name + '</div>' +
+                            '<div class="property-price">' + prop.price + '</div>' +
+                            '<div id="owner' + i + '" class="property-owner" style="display: none;"></div>' +
+                            '<div id="players' + i + '" class="players-on-space"></div>' +
+                        '</div>';
+                } else if (prop.type === 'station') {
+                    space.innerHTML = '<div class="property-content">' +
+                            '<div style="font-size: 1.3em;">🚂</div>' +
+                            '<div class="property-name">' + prop.name + '</div>' +
+                            '<div class="property-price">' + prop.price + '</div>' +
+                            '<div id="owner' + i + '" class="property-owner" style="display: none;"></div>' +
+                            '<div id="players' + i + '" class="players-on-space"></div>' +
+                        '</div>';
+                } else if (prop.type === 'utility') {
+                    space.innerHTML = '<div class="property-content">' +
+                            '<div style="font-size: 1.3em;">' + (prop.name.includes('كهرباء') ? '⚡' : '💧') + '</div>' +
+                            '<div class="property-name">' + prop.name + '</div>' +
+                            '<div class="property-price">' + prop.price + '</div>' +
+                            '<div id="owner' + i + '" class="property-owner" style="display: none;"></div>' +
+                            '<div id="players' + i + '" class="players-on-space"></div>' +
+                        '</div>';
+                } else {
+                    space.innerHTML = '<div class="property-content">' +
+                            '<div style="font-size: 1.5em;">' + (icons[prop.type] || '') + '</div>' +
+                            '<div class="property-name">' + prop.name + '</div>' +
+                            '<div id="players' + i + '" class="players-on-space"></div>' +
+                        '</div>';
+                }
+                board.appendChild(space);
+            }
+            updatePlayerPositions();
+        }
+
+        function updatePlayersPanel() {
+            var panel = document.getElementById('playersPanel');
+            panel.innerHTML = '';
+            for (var i = 0; i < gameState.players.length; i++) {
+                var player = gameState.players[i];
+                var card = document.createElement('div');
+                card.className = 'player-card' + (i === gameState.currentPlayerIndex ? ' active' : '') + (player.bankrupt ? ' bankrupt' : '');
+                card.innerHTML = '<div class="player-header"><div class="player-icon" style="background: ' + player.color + '">' + player.avatar + '</div><div class="player-info"><div class="player-name">' + player.name + '</div><div class="player-status">' + (player.bankrupt ? '💀 مفلس' : player.inJail ? '🔒 سجن' : '✅ نشط') + '</div></div></div><div class="player-stats"><div class="stat-box stat-money"><div style="font-size: 0.75em;">المال</div><div style="font-size: 1.1em; font-weight: bold;">' + player.money + '</div></div><div class="stat-box stat-properties"><div style="font-size: 0.75em;">العقارات</div><div style="font-size: 1.1em; font-weight: bold;">' + player.properties.length + '</div></div></div>';
+                panel.appendChild(card);
+            }
+        }
+
+        // -- في النصوص والرسائل تأكد أن استخدام المتغيرات يتم بشكل صحيح --
+        function handlePropertyLanding(property) {
+            var currentPlayer = gameState.players[gameState.currentPlayerIndex];
+            var owner = null;
+            for (var i = 0; i < gameState.players.length; i++) {
+                if (gameState.players[i].properties.indexOf(property.id) !== -1) {
+                    owner = gameState.players[i];
+                    break;
+                }
+            }
+            if (!owner) {
+                updateMessage(currentPlayer.name + ' على ' + property.name + ' - السعر: ' + property.price);
+                document.getElementById('buyBtn').classList.remove('hidden');
+            } else if (owner.id === currentPlayer.id) {
+                updateMessage(currentPlayer.name + ' على ممتلكاته');
+                setTimeout(function() {
+                    if (gameState.dice1 !== gameState.dice2) nextPlayer();
+                    else updateMessage(currentPlayer.name + ' - العب مرة أخرى!');
+                }, 2000);
+            } else {
+                var rent = calculateRent(property, owner);
+                updateMessage(currentPlayer.name + ' يدفع ' + rent + ' لـ ' + owner.name);
+                if (currentPlayer.money >= rent) {
+                    currentPlayer.money -= rent;
+                    owner.money += rent;
+                    updatePlayersPanel();
+                    setTimeout(function() {
+                        if (gameState.dice1 !== gameState.dice2) nextPlayer();
+                        else updateMessage(currentPlayer.name + ' - العب مرة أخرى!');
+                    }, 2000);
+                } else {
+                    forceSellProperty(rent);
+                }
+            }
+        }
+
+        function showSellModal() {
+            var currentPlayer = gameState.players[gameState.currentPlayerIndex];
+            var list = document.getElementById('sellPropertyList');
+            list.innerHTML = '';
+            for (var i = 0; i < currentPlayer.properties.length; i++) {
+                var propId = currentPlayer.properties[i];
+                var prop = properties[propId];
+                var sellPrice = Math.floor(prop.price * 0.5);
+                var item = document.createElement('div');
+                item.style.cssText = 'padding: 12px; background: #f5f5f5; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;';
+                item.innerHTML = '<div><div style="font-weight: bold;">' + prop.name + '</div><div style="color: #666; font-size: 0.9em;">' + sellPrice + '</div></div><button class="btn-primary" style="width: auto; padding: 8px 16px; margin: 0;" onclick="sellProperty(' + propId + ', ' + sellPrice + ')">بيع</button>';
+                list.appendChild(item);
+            }
+            document.getElementById('sellModal').style.display = 'flex';
+        }
+
+        function forceSellProperty(amountNeeded) {
+            var currentPlayer = gameState.players[gameState.currentPlayerIndex];
+            if (currentPlayer.properties.length === 0) {
+                declareBankrupt();
+                return;
+            }
+            updateMessage(currentPlayer.name + ' يجب بيع عقار! المطلوب: ' + amountNeeded);
+            document.getElementById('sellBtn').classList.remove('hidden');
+        }
+
+        function payAmount(amount) {
+            var currentPlayer = gameState.players[gameState.currentPlayerIndex];
+            if (currentPlayer.money >= amount) {
+                currentPlayer.money -= amount;
+                updateMessage(currentPlayer.name + ' دفع ' + amount);
+                updatePlayersPanel();
+                setTimeout(function() {
+                    if (gameState.dice1 !== gameState.dice2) nextPlayer();
+                    else updateMessage(currentPlayer.name + ' - العب مرة أخرى!');
+                }, 2000);
+            } else {
+                forceSellProperty(amount);
+            }
+        }
+
+        // بقية الأكواد كما هي بدون تغيير في المنطق الأساسي إلا إذا رأيت متغير غير مربوط بالطريقة الصحيحة (مثل النصوص)، اربطها بنفس نمط الجمع +.
+        
+        document.getElementById('numPlayers').addEventListener('change', updatePlayerInputs);
+        document.getElementById('startBtn').addEventListener('click', startGame);
+        document.getElementById('rollBtn').addEventListener('click', rollDice);
+        document.getElementById('buyBtn').addEventListener('click', buyProperty);
+        document.getElementById('sellBtn').addEventListener('click', showSellModal);
+        document.getElementById('resetBtn').addEventListener('click', resetGame);
+        document.getElementById('closeModalBtn').addEventListener('click', function() {
+            document.getElementById('propertyModal').style.display = 'none';
+        });
+        document.getElementById('closeSellBtn').addEventListener('click', function() {
+            document.getElementById('sellModal').style.display = 'none';
+        });
+
+        updatePlayerInputs();
+    </script>
+</body>
+</html>
