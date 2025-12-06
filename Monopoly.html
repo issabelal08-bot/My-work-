@@ -1,235 +1,482 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<!doctype html>
+<html lang="ar">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎲 Monopoly - مونوبولي المستقبل</title>
-    <!-- ... (CSS كما هو دون تغيير) ... -->
-    <style>
-        /* ... كل الأكواد CSS كما هي ... */
-    </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>مونوبولي مبسّط - نسخة مستقبلية</title>
+<style>
+  /* ---- Reset + base ---- */
+  :root{
+    --bg:#070719;
+    --glass: rgba(255,255,255,0.04);
+    --accent:#00e6c3;
+    --accent2:#7c5cff;
+    --danger:#ff4d6d;
+    --board-edge: 18vmin;
+    --font: "Segoe UI", Tahoma, system-ui, Arial;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:var(--font);background:
+    radial-gradient(circle at 10% 10%, rgba(124,92,255,0.06), transparent 10%),
+    linear-gradient(160deg,#030315 0%, #0b0b12 50%, #08101a 100%);
+    color:#e6eef8}
+  .app{display:grid;grid-template-columns: 1fr 360px; gap:16px; padding:18px; min-height:100vh;}
+  /* ---- Board area ---- */
+  .board-wrap{display:flex;align-items:center;justify-content:center;padding:8px}
+  .board{
+    width:min(78vmin,720px);
+    height:min(78vmin,720px);
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,0.04);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.7), 0 0 40px rgba(124,92,255,0.06) inset;
+    position:relative; padding:18px;
+    display:grid; grid-template-columns: 1fr 1fr; align-items:center; justify-items:center;
+  }
+  /* Board cells arranged around center */
+  .cell {
+    position:absolute;
+    width:calc(var(--board-edge) * 0.9);
+    height:calc(var(--board-edge) * 0.22);
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius:8px;
+    border:1px solid rgba(255,255,255,0.03);
+    display:flex;flex-direction:column;justify-content:center;align-items:center;
+    padding:6px; text-align:center; font-size:12px;
+    backdrop-filter: blur(6px);
+  }
+  /* positions */
+  /* bottom row (Start is bottom-right) */
+  .cell.idx-0 { right:18px; bottom:18px; transform-origin:right bottom; transform: translate(0,0) rotate(0deg); width:calc(var(--board-edge) * 1.22); height:calc(var(--board-edge) * 0.22); display:flex;flex-direction:row; gap:8px; justify-content:space-between; padding:8px;}
+  .cell.idx-1 { right:calc(18px + var(--board-edge) * 1.24); bottom:18px; transform-origin:right bottom; transform: rotate(0deg); }
+  .cell.idx-2 { right:calc(18px + var(--board-edge) * 2.44); bottom:18px;}
+  .cell.idx-3 { right:calc(18px + var(--board-edge) * 3.64); bottom:18px;}
+  .cell.idx-4 { right:calc(18px + var(--board-edge) * 4.84); bottom:18px;}
+  /* left column */
+  .cell.idx-5 { left:18px; bottom:calc(18px + var(--board-edge) * 0.22); width:calc(var(--board-edge) * 0.22); height:calc(var(--board-edge) * 1.22); display:flex;flex-direction:column;justify-content:space-between;padding:8px;}
+  .cell.idx-6 { left:18px; bottom:calc(18px + var(--board-edge) * 1.44); }
+  .cell.idx-7 { left:18px; bottom:calc(18px + var(--board-edge) * 2.64); }
+  .cell.idx-8 { left:18px; bottom:calc(18px + var(--board-edge) * 3.84); }
+  /* top row */
+  .cell.idx-9 { left:18px; top:18px; width:calc(var(--board-edge) * 1.22); height:calc(var(--board-edge) * 0.22); display:flex;flex-direction:row; justify-content:space-between; padding:8px;}
+  .cell.idx-10 { left:calc(18px + var(--board-edge) * 1.24); top:18px; }
+  .cell.idx-11 { left:calc(18px + var(--board-edge) * 2.44); top:18px; }
+  .cell.idx-12 { left:calc(18px + var(--board-edge) * 3.64); top:18px; }
+  .cell.idx-13 { left:calc(18px + var(--board-edge) * 4.84); top:18px; }
+  /* right column */
+  .cell.idx-14 { right:18px; top:calc(18px + var(--board-edge) * 0.22); width:calc(var(--board-edge) * 0.22); height:calc(var(--board-edge) * 1.22); display:flex;flex-direction:column;justify-content:space-between;padding:8px;}
+  .cell.idx-15 { right:18px; top:calc(18px + var(--board-edge) * 1.44); }
+  .cell.idx-16 { right:18px; top:calc(18px + var(--board-edge) * 2.64); }
+  .cell.idx-17 { right:18px; top:calc(18px + var(--board-edge) * 3.84); }
+  /* center area */
+  .center{
+    width:calc(100% - calc(var(--board-edge) * 2) - 36px);
+    height:calc(100% - calc(var(--board-edge) * 2) - 36px);
+    border-radius:12px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:12px;
+  }
+  .logo{
+    font-size:20px; font-weight:700; letter-spacing:1px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; color:transparent;
+  }
+  .dice{display:flex;gap:8px;align-items:center}
+  .dice button{background:linear-gradient(180deg,#0a0a14,#0f1020);border:1px solid rgba(255,255,255,0.04);padding:10px 14px;border-radius:10px;color:var(--accent);cursor:pointer;box-shadow:0 6px 18px rgba(124,92,255,0.08)}
+  .dice .value{min-width:40px;text-align:center;font-weight:700;font-size:18px}
+  .playershelf{display:flex;gap:8px;flex-direction:column;align-items:center}
+  /* side panel */
+  .panel{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); padding:14px;border-radius:12px; border:1px solid rgba(255,255,255,0.03); box-shadow: 0 10px 30px rgba(0,0,0,0.6);}
+  .panel h3{margin:0 0 8px 0;color:#cfeff3}
+  .player-list{display:flex;flex-direction:column;gap:8px}
+  .player{display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;background:linear-gradient(90deg, rgba(255,255,255,0.01), transparent);border:1px solid rgba(255,255,255,0.02)}
+  .avatar{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;background:linear-gradient(90deg, rgba(255,255,255,0.02), transparent); border:1px solid rgba(255,255,255,0.03)}
+  .money{font-weight:700;color:var(--accent)}
+  .controls{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+  input[type="number"], input[type="text"], select{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+  button.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;color:#021; padding:10px;border-radius:10px;cursor:pointer}
+  .property-strip{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+  .prop{padding:6px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.02);font-size:12px;min-width:120px}
+  .prop .owner{font-size:11px;opacity:0.9}
+  .status{margin-top:6px;font-size:13px;color:#bcd;}
+  /* animations */
+  .piece{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;background:linear-gradient(90deg,#ffffff0, #0000);backdrop-filter: blur(6px);}
+  .bling{animation:blink 1.2s infinite}
+  @keyframes blink{0%{box-shadow:0 0 0 rgba(0,0,0,0)}50%{box-shadow:0 0 18px rgba(0,230,195,0.12)}100%{box-shadow:0 0 0 rgba(0,0,0,0)}}
+  /* small */
+  .small{font-size:12px;color:#cdd}
+  .footer{margin-top:10px;font-size:12px;color:#889}
+  /* responsive */
+  @media (max-width:980px){
+    .app{grid-template-columns: 1fr;}
+    .panel{order:2}
+  }
+</style>
 </head>
 <body>
-    <!-- ... عناصر HTML كما هي ... -->
+<div class="app">
+  <div class="board-wrap panel" style="flex:1">
+    <div class="board" id="board">
+      <!-- 18 cells arranged around -->
+      <!-- We'll create 18 cells: 0..17 -->
+      <div class="cell idx-0" data-i="0"><div style="display:flex;gap:6px;align-items:center"><strong>Start</strong><span class="small">خُذ 200 عند المرور</span></div></div>
+      <div class="cell idx-1" data-i="1"><div><strong>شارع النيو</strong><div class="small">سعر 100</div></div></div>
+      <div class="cell idx-2" data-i="2"><div><strong>فرصة</strong><div class="small">بطاقة</div></div></div>
+      <div class="cell idx-3" data-i="3"><div><strong>شارع بلازا</strong><div class="small">سعر 120</div></div></div>
+      <div class="cell idx-4" data-i="4"><div><strong>ضرائب</strong><div class="small">دفع 100</div></div></div>
 
-    <script>
-        // ... تعريف المتغيرات الأساسية كما هي ...
-        var gameState = {
-            players: [],
-            currentPlayerIndex: 0,
-            dice1: 1,
-            dice2: 1,
-            doubles: 0,
-            gameStarted: false
-        };
+      <div class="cell idx-5" data-i="5"><div><strong>شارع بيت</strong><div class="small">سعر 140</div></div></div>
+      <div class="cell idx-6" data-i="6"><div><strong>سجن (زور)</strong><div class="small">زور</div></div></div>
+      <div class="cell idx-7" data-i="7"><div><strong>شارع كليك</strong><div class="small">سعر 160</div></div></div>
+      <div class="cell idx-8" data-i="8"><div><strong>موقف حر</strong><div class="small">استراحة</div></div></div>
 
-        var avatars = ['🚗', '🚀', '⛵', '🎩', '🐕', '🐈', '🦁', '🐯'];
-        var avatarColors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12'];
-        var properties = [
-            { id: 0, name: 'إبدأ', type: 'go' },
-            { id: 1, name: 'شارع المدينة', type: 'property', price: 60, rent: [2, 10, 30, 90, 160, 250], color: '#8b4513', group: 1 },
-            // ... باقي العقارات كما هي ...
-            { id: 39, name: 'شارع الذهب', type: 'property', price: 400, rent: [50, 200, 600, 1400, 1700, 2000], color: '#0000ff', group: 8 }
-        ];
+      <div class="cell idx-9" data-i="9"><div><strong>شارع تكنولوجي</strong><div class="small">سعر 180</div></div></div>
+      <div class="cell idx-10" data-i="10"><div><strong>خدمة</strong><div class="small">دفع حسب نرد</div></div></div>
+      <div class="cell idx-11" data-i="11"><div><strong>شارع ماركت</strong><div class="small">سعر 200</div></div></div>
+      <div class="cell idx-12" data-i="12"><div><strong>إذهب للسجن</strong><div class="small">إذهب للسجن</div></div></div>
+      <div class="cell idx-13" data-i="13"><div><strong>شارع هيلث</strong><div class="small">سعر 220</div></div></div>
 
-        function updatePlayerInputs() {
-            var num = parseInt(document.getElementById('numPlayers').value);
-            var container = document.getElementById('playerInputsContainer');
-            container.innerHTML = '';
-            for (var i = 0; i < num; i++) {
-                var div = document.createElement('div');
-                div.style.marginBottom = '15px';
-                div.innerHTML = '<label style="display: block; font-weight: bold; margin-bottom: 10px;">اللاعب ' + (i + 1) + ':</label><div class="player-input-group"><div class="player-avatar selected" style="background: ' + avatarColors[i] + '" data-avatar="' + avatars[i] + '">' + avatars[i] + '</div><input type="text" class="input-field" id="playerName' + i + '" placeholder="اسم اللاعب ' + (i + 1) + '" value="اللاعب ' + (i + 1) + '"></div>';
-                container.appendChild(div);
-            }
+      <div class="cell idx-14" data-i="14"><div><strong>شارع بارك</strong><div class="small">سعر 240</div></div></div>
+      <div class="cell idx-15" data-i="15"><div><strong>فرصة</strong><div class="small">بطاقة</div></div></div>
+      <div class="cell idx-16" data-i="16"><div><strong>شارع سنتر</strong><div class="small">سعر 260</div></div></div>
+      <div class="cell idx-17" data-i="17"><div><strong>سجن (اذهب)</strong><div class="small">تُرسل للسجن</div></div></div>
+
+      <div class="center">
+        <div class="logo">MONOPOLY — FUTURE EDITION</div>
+        <div class="playershelf">
+          <div class="dice" id="diceArea">
+            <div class="value" id="diceDisp">—</div>
+            <button id="rollBtn" class="primary">رمي الزهر</button>
+          </div>
+          <div class="status" id="gameStatus">اضبط اللاعبين وابدأ اللعبة</div>
+        </div>
+        <div class="footer small">واجهة مستقبلية - نسخة مبسطة. (التحكم من اليمين)</div>
+      </div>
+
+    </div>
+  </div>
+
+  <aside class="panel" style="width:360px">
+    <h3>إعداد اللعبة</h3>
+    <div class="small">عدد اللاعبين</div>
+    <select id="playerCount"><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option></select>
+    <div style="display:grid;gap:8px;margin-top:8px" id="playerInputs">
+      <!-- inputs generated by JS -->
+    </div>
+    <div style="margin-top:8px">
+      <div class="small">رصيد ابتدائي</div>
+      <input type="number" id="startMoney" value="1500" />
+    </div>
+    <div class="controls">
+      <button id="startBtn" class="primary">ابدأ اللعبة</button>
+      <button id="resetBtn">إعادة ضبط</button>
+    </div>
+
+    <h3 style="margin-top:12px">لاعبون</h3>
+    <div class="player-list" id="playerList"></div>
+
+    <div style="margin-top:8px">
+      <h3>قائمة العقارات</h3>
+      <div class="property-strip" id="propList"></div>
+    </div>
+
+    <div style="margin-top:12px">
+      <h3>قواعد سريعة</h3>
+      <div class="small">
+        - المرور على Start يعطي 200.<br>
+        - عند الوقوف على عقار غير مملوك يمكن شراؤه بسعره.<br>
+        - الوقوف على عقار مملوك يدفع إيجار إلى المالك.<br>
+        - لو المال سالب، يبيع النظام عقاراتك تلقائياً بنصف السعر حتى يصبح المال موجب أو تفشل.<br>
+        - إن فقدت كل الأصول وبقيت مديوناً => خروج من اللعبة.<br>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script>
+/* Monopoly-like simplified game in a single HTML file.
+   Notes:
+   - 18 spaces (indexes 0..17). Properties at certain indexes.
+   - Basic rules implemented: move, buy, pay rent, bankruptcy auto-sell at 50% price.
+*/
+
+// --- Data model ---
+const BOARD_SIZE = 18;
+const cells = [
+  { type:'start', name:'Start', passMoney:200 },
+  { type:'prop', name:'شارع النيو', price:100, rent:10 },
+  { type:'chance', name:'فرصة' },
+  { type:'prop', name:'شارع بلازا', price:120, rent:12 },
+  { type:'tax', name:'ضرائب', amount:100 },
+  { type:'prop', name:'شارع بيت', price:140, rent:14 },
+  { type:'jail', name:'سجن (زور)' },
+  { type:'prop', name:'شارع كليك', price:160, rent:16 },
+  { type:'free', name:'موقف حر' },
+  { type:'prop', name:'شارع تكنولوجي', price:180, rent:18 },
+  { type:'utility', name:'خدمة', price:150 },
+  { type:'prop', name:'شارع ماركت', price:200, rent:20 },
+  { type:'gotojail', name:'إذهب للسجن' },
+  { type:'prop', name:'شارع هيلث', price:220, rent:22 },
+  { type:'prop', name:'شارع بارك', price:240, rent:24 },
+  { type:'chance', name:'فرصة' },
+  { type:'prop', name:'شارع سنتر', price:260, rent:26 },
+  { type:'jail-go', name:'سجن (اذهب)' }
+];
+
+let game = {
+  players: [],
+  current: 0,
+  started: false
+};
+
+// --- UI refs ---
+const playerCountSel = document.getElementById('playerCount');
+const playerInputsDiv = document.getElementById('playerInputs');
+const startBtn = document.getElementById('startBtn');
+const resetBtn = document.getElementById('resetBtn');
+const playerListDiv = document.getElementById('playerList');
+const propListDiv = document.getElementById('propList');
+const diceDisp = document.getElementById('diceDisp');
+const rollBtn = document.getElementById('rollBtn');
+const statusDiv = document.getElementById('gameStatus');
+const startMoneyInput = document.getElementById('startMoney');
+
+// avatars choices
+const AVATARS = ['🚗','🚀','🛸','🤖','🦾','🎯'];
+
+// build player inputs
+function buildPlayerInputs(){
+  playerInputsDiv.innerHTML='';
+  const count = +playerCountSel.value;
+  for(let i=0;i<count;i++){
+    const div = document.createElement('div');
+    div.innerHTML = `<input placeholder="اسم اللاعب ${i+1}" data-i="${i}" class="pname" value="لاعب ${i+1}"> 
+    <select class="pavatar" data-i="${i}">${AVATARS.map(a=>'<option>'+a+'</option>').join('')}</select>`;
+    playerInputsDiv.appendChild(div);
+  }
+}
+playerCountSel.addEventListener('change', buildPlayerInputs);
+buildPlayerInputs();
+
+// start game
+startBtn.addEventListener('click', ()=>{
+  const count = +playerCountSel.value;
+  const startMoney = Math.max(0, parseInt(startMoneyInput.value) || 1500);
+  const names = Array.from(document.querySelectorAll('.pname')).map(i=>i.value||i.placeholder);
+  const avs = Array.from(document.querySelectorAll('.pavatar')).map(s=>s.value);
+  // init players
+  game.players = [];
+  for(let i=0;i<count;i++){
+    game.players.push({
+      id:i, name:names[i]||('لاعب '+(i+1)), avatar:avs[i]||AVATARS[i],
+      pos:0, money:startMoney, properties:[], inJail:false, bankrupt:false
+    });
+  }
+  game.current = 0; game.started=true;
+  // reset ownership
+  cells.forEach(c=>{ c.owner = null; });
+  renderAll();
+  status(`دور ${game.players[game.current].name} — اضغط "رمي الزهر"`);
+});
+
+// reset
+resetBtn.addEventListener('click', ()=>{
+  location.reload();
+});
+
+// render everything
+function renderAll(){
+  renderPlayers();
+  renderProps();
+  updateBoardPieces();
+}
+
+// players list UI
+function renderPlayers(){
+  playerListDiv.innerHTML='';
+  game.players.forEach((p,idx)=>{
+    const div = document.createElement('div');
+    div.className='player';
+    div.innerHTML = `<div class="avatar">${p.avatar}</div>
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between"><div><strong>${escapeHtml(p.name)}</strong>${p.bankrupt? ' <span style="color:#f88;font-weight:700"> (مفلس)</span>':''}</div><div class="money">${p.money} ¥</div></div>
+        <div class="small">${p.properties.length} ممتلك</div>
+      </div>`;
+    playerListDiv.appendChild(div);
+  });
+}
+
+// properties list
+function renderProps(){
+  propListDiv.innerHTML='';
+  cells.forEach((c,i)=>{
+    if(c.type==='prop' || c.type==='utility'){
+      const el = document.createElement('div');
+      el.className='prop';
+      el.innerHTML = `<div><strong>${c.name}</strong></div>
+        <div class="small">سعر: ${c.price || '-'} | إيجار: ${c.rent || '-'}</div>
+        <div class="owner small">المالك: ${c.owner!=null ? escapeHtml(game.players[c.owner].name) : 'بنك'}</div>`;
+      propListDiv.appendChild(el);
+    }
+  });
+}
+
+// show pieces on board (simple dots injected into cells)
+function updateBoardPieces(){
+  // remove existing pieces
+  document.querySelectorAll('.cell .piece').forEach(n=>n.remove());
+  game.players.forEach(p=>{
+    if(p.bankrupt) return;
+    const idx = p.pos % BOARD_SIZE;
+    const cell = document.querySelector('.cell[data-i="'+idx+'"]');
+    if(cell){
+      const piece = document.createElement('div');
+      piece.className='piece';
+      piece.style.border = '1px solid rgba(255,255,255,0.06)';
+      piece.textContent = p.avatar;
+      piece.title = p.name + ' - ' + p.money + '¥';
+      cell.appendChild(piece);
+    }
+  });
+}
+
+// dice roll
+rollBtn.addEventListener('click', async ()=>{
+  if(!game.started) { status('ابدأ اللعبة أولا'); return; }
+  const player = game.players[game.current];
+  if(player.bankrupt){ nextTurn(); return; }
+  // roll two dice
+  const d1 = 1 + Math.floor(Math.random()*6);
+  const d2 = 1 + Math.floor(Math.random()*6);
+  diceDisp.textContent = d1 + ' + ' + d2;
+  status(`${player.name} رمى ${d1} و ${d2}`);
+  await animateMove(player, d1 + d2);
+  // after move, handle cell
+  handleCell(player);
+});
+
+// movement animation
+function animateMove(player, steps){
+  return new Promise(res=>{
+    let moved=0;
+    const t = setInterval(()=>{
+      player.pos = (player.pos + 1) % BOARD_SIZE;
+      // pass start?
+      if(player.pos === 0){
+        player.money += cells[0].passMoney;
+        status(`${player.name} مر على Start وخذ ${cells[0].passMoney}¥`);
+      }
+      updateBoardPieces();
+      moved++;
+      if(moved>=steps){ clearInterval(t); setTimeout(()=>res(), 350); }
+    }, 220);
+  });
+}
+
+// handle landing on cell
+function handleCell(player){
+  const c = cells[player.pos];
+  if(!c) return;
+  if(c.type==='prop' || c.type==='utility'){
+    if(c.owner==null){
+      // offer to buy
+      // simple modal using confirm (keeps single-file)
+      const buy = confirm(`${player.name} على ${c.name}\nسعر: ${c.price}¥\nهل تريد الشراء؟`);
+      if(buy){
+        if(player.money >= c.price){
+          player.money -= c.price;
+          c.owner = player.id;
+          player.properties.push(player.pos);
+          status(`${player.name} اشترى ${c.name} مقابل ${c.price}¥`);
+        } else {
+          status(`ما فيش فلوس كفاية لشراء ${c.name}`);
         }
+      } else {
+        status(`${player.name} لم يشترِ ${c.name}`);
+      }
+    } else if(c.owner !== player.id){
+      // pay rent (simple fixed rent)
+      const rent = c.rent || Math.max(10, Math.floor((c.price||100)/10));
+      player.money -= rent;
+      game.players[c.owner].money += rent;
+      status(`${player.name} دفع ${rent}¥ إيجار لـ ${game.players[c.owner].name}`);
+    } else {
+      status(`${player.name} على ممتلكاته ${c.name}`);
+    }
+  } else if(c.type==='tax'){
+    player.money -= c.amount || 100;
+    status(`${player.name} دفع ضريبة ${c.amount || 100}¥`);
+  } else if(c.type==='chance'){
+    // small random effect: gain or lose small amount
+    const amt = (Math.random() < 0.5) ? +(50 + Math.floor(Math.random()*100)) : -(50 + Math.floor(Math.random()*100));
+    player.money += amt;
+    status(`${player.name} بطاقة فرصة: ${amt>0? 'حصل على ':'خسر '} ${Math.abs(amt)}¥`);
+  } else if(c.type==='gotojail'){
+    // go to jail position (6)
+    player.pos = 6; player.inJail = true;
+    status(`${player.name} تم إرساله للسجن`);
+  } else if(c.type==='jail' || c.type==='jail-go'){
+    status(`${player.name} في خانة السجن`);
+  } else if(c.type==='free'){
+    status(`${player.name} استراح في Free Parking`);
+  }
+  // after cell handling, check bankruptcy
+  setTimeout(()=>{ checkBankruptcy(player); renderAll(); nextTurn(); }, 300);
+}
 
-        function startGame() {
-            var numPlayers = parseInt(document.getElementById('numPlayers').value);
-            var startingMoney = parseInt(document.getElementById('startingMoney').value);
-            gameState.players = [];
-            for (var i = 0; i < numPlayers; i++) {
-                var name = document.getElementById('playerName' + i).value || 'اللاعب ' + (i + 1);
-                var avatarEl = document.querySelectorAll('.player-input-group')[i].querySelector('.player-avatar');
-                var avatar = avatarEl.getAttribute('data-avatar') || avatars[i];
-                gameState.players.push({
-                    id: i,
-                    name: name,
-                    avatar: avatar,
-                    color: avatarColors[i],
-                    money: startingMoney,
-                    position: 0,
-                    properties: [],
-                    inJail: false,
-                    jailTurns: 0,
-                    bankrupt: false
-                });
-            }
-            gameState.currentPlayerIndex = 0;
-            gameState.gameStarted = true;
-            document.getElementById('setupScreen').style.display = 'none';
-            document.getElementById('gameScreen').style.display = 'block';
-            renderBoard();
-            updatePlayersPanel();
-            updateMessage(gameState.players[0].name + ' - دورك!');
-        }
+// bankruptcy auto-sell routine
+function checkBankruptcy(player){
+  if(player.money >= 0) return;
+  // sell properties one-by-one until non-negative or no properties left
+  while(player.money < 0 && player.properties.length > 0){
+    // sell last property
+    const propIdx = player.properties.pop();
+    const prop = cells[propIdx];
+    const sellPrice = Math.floor((prop.price || 100) * 0.5);
+    player.money += sellPrice;
+    prop.owner = null;
+    status(`${player.name} اضطر يبيع ${prop.name} بسعر ${sellPrice}¥ (نصف السعر)`);
+  }
+  if(player.money < 0){
+    // player eliminated
+    player.bankrupt = true;
+    // release any remaining ownerships just in case
+    player.properties.forEach(idx=>{ cells[idx].owner=null; });
+    player.properties=[];
+    status(`${player.name} خرج من اللعبة (مفلس)`);
+    // check if only one remains -> winner
+    const alive = game.players.filter(p=>!p.bankrupt);
+    if(alive.length === 1){
+      status(`انتصار: ${alive[0].name} فاز!`);
+      game.started = false;
+    }
+  }
+}
 
-        function renderBoard() {
-            var board = document.getElementById('gameBoard');
-            board.innerHTML = ''; // إصلاح: يجب مسح اللوحة قبل إعادة رسمها
-            var positions = [
-                // ... جدول المواقع كما هو ...
-            ];
-            for (var i = 0; i < properties.length; i++) {
-                var prop = properties[i];
-                var space = document.createElement('div');
-                space.className = 'property-space';
-                space.id = 'space' + i;
-                for (var key in positions[i]) {
-                    space.style[key] = positions[i][key];
-                }
-                var icons = { go: '🏁', jail: '🔒', gotojail: '👮', parking: '🅿️', chance: '❓', community: '📦', tax: '💸' };
-                if (prop.type === 'property') {
-                    space.innerHTML = '<div class="property-color" style="background: ' + prop.color + '"></div>' +
-                        '<div class="property-content">' +
-                            '<div class="property-name">' + prop.name + '</div>' +
-                            '<div class="property-price">' + prop.price + '</div>' +
-                            '<div id="owner' + i + '" class="property-owner" style="display: none;"></div>' +
-                            '<div id="players' + i + '" class="players-on-space"></div>' +
-                        '</div>';
-                } else if (prop.type === 'station') {
-                    space.innerHTML = '<div class="property-content">' +
-                            '<div style="font-size: 1.3em;">🚂</div>' +
-                            '<div class="property-name">' + prop.name + '</div>' +
-                            '<div class="property-price">' + prop.price + '</div>' +
-                            '<div id="owner' + i + '" class="property-owner" style="display: none;"></div>' +
-                            '<div id="players' + i + '" class="players-on-space"></div>' +
-                        '</div>';
-                } else if (prop.type === 'utility') {
-                    space.innerHTML = '<div class="property-content">' +
-                            '<div style="font-size: 1.3em;">' + (prop.name.includes('كهرباء') ? '⚡' : '💧') + '</div>' +
-                            '<div class="property-name">' + prop.name + '</div>' +
-                            '<div class="property-price">' + prop.price + '</div>' +
-                            '<div id="owner' + i + '" class="property-owner" style="display: none;"></div>' +
-                            '<div id="players' + i + '" class="players-on-space"></div>' +
-                        '</div>';
-                } else {
-                    space.innerHTML = '<div class="property-content">' +
-                            '<div style="font-size: 1.5em;">' + (icons[prop.type] || '') + '</div>' +
-                            '<div class="property-name">' + prop.name + '</div>' +
-                            '<div id="players' + i + '" class="players-on-space"></div>' +
-                        '</div>';
-                }
-                board.appendChild(space);
-            }
-            updatePlayerPositions();
-        }
+// next turn
+function nextTurn(){
+  // find next non-bankrupt player
+  let next = game.current;
+  const n = game.players.length;
+  for(let i=1;i<=n;i++){
+    const cand = (game.current + i) % n;
+    if(!game.players[cand].bankrupt){ next = cand; break; }
+  }
+  game.current = next;
+  const p = game.players[game.current];
+  if(!game.started) return;
+  status(`دور ${p.name} — اضغط رمي الزهر`);
+  renderAll();
+}
 
-        function updatePlayersPanel() {
-            var panel = document.getElementById('playersPanel');
-            panel.innerHTML = '';
-            for (var i = 0; i < gameState.players.length; i++) {
-                var player = gameState.players[i];
-                var card = document.createElement('div');
-                card.className = 'player-card' + (i === gameState.currentPlayerIndex ? ' active' : '') + (player.bankrupt ? ' bankrupt' : '');
-                card.innerHTML = '<div class="player-header"><div class="player-icon" style="background: ' + player.color + '">' + player.avatar + '</div><div class="player-info"><div class="player-name">' + player.name + '</div><div class="player-status">' + (player.bankrupt ? '💀 مفلس' : player.inJail ? '🔒 سجن' : '✅ نشط') + '</div></div></div><div class="player-stats"><div class="stat-box stat-money"><div style="font-size: 0.75em;">المال</div><div style="font-size: 1.1em; font-weight: bold;">' + player.money + '</div></div><div class="stat-box stat-properties"><div style="font-size: 0.75em;">العقارات</div><div style="font-size: 1.1em; font-weight: bold;">' + player.properties.length + '</div></div></div>';
-                panel.appendChild(card);
-            }
-        }
+// small helper: status
+function status(txt){ statusDiv.textContent = txt; }
 
-        // -- في النصوص والرسائل تأكد أن استخدام المتغيرات يتم بشكل صحيح --
-        function handlePropertyLanding(property) {
-            var currentPlayer = gameState.players[gameState.currentPlayerIndex];
-            var owner = null;
-            for (var i = 0; i < gameState.players.length; i++) {
-                if (gameState.players[i].properties.indexOf(property.id) !== -1) {
-                    owner = gameState.players[i];
-                    break;
-                }
-            }
-            if (!owner) {
-                updateMessage(currentPlayer.name + ' على ' + property.name + ' - السعر: ' + property.price);
-                document.getElementById('buyBtn').classList.remove('hidden');
-            } else if (owner.id === currentPlayer.id) {
-                updateMessage(currentPlayer.name + ' على ممتلكاته');
-                setTimeout(function() {
-                    if (gameState.dice1 !== gameState.dice2) nextPlayer();
-                    else updateMessage(currentPlayer.name + ' - العب مرة أخرى!');
-                }, 2000);
-            } else {
-                var rent = calculateRent(property, owner);
-                updateMessage(currentPlayer.name + ' يدفع ' + rent + ' لـ ' + owner.name);
-                if (currentPlayer.money >= rent) {
-                    currentPlayer.money -= rent;
-                    owner.money += rent;
-                    updatePlayersPanel();
-                    setTimeout(function() {
-                        if (gameState.dice1 !== gameState.dice2) nextPlayer();
-                        else updateMessage(currentPlayer.name + ' - العب مرة أخرى!');
-                    }, 2000);
-                } else {
-                    forceSellProperty(rent);
-                }
-            }
-        }
+// escape
+function escapeHtml(s){ return (s+'').replace(/[&<>"]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c])); }
 
-        function showSellModal() {
-            var currentPlayer = gameState.players[gameState.currentPlayerIndex];
-            var list = document.getElementById('sellPropertyList');
-            list.innerHTML = '';
-            for (var i = 0; i < currentPlayer.properties.length; i++) {
-                var propId = currentPlayer.properties[i];
-                var prop = properties[propId];
-                var sellPrice = Math.floor(prop.price * 0.5);
-                var item = document.createElement('div');
-                item.style.cssText = 'padding: 12px; background: #f5f5f5; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;';
-                item.innerHTML = '<div><div style="font-weight: bold;">' + prop.name + '</div><div style="color: #666; font-size: 0.9em;">' + sellPrice + '</div></div><button class="btn-primary" style="width: auto; padding: 8px 16px; margin: 0;" onclick="sellProperty(' + propId + ', ' + sellPrice + ')">بيع</button>';
-                list.appendChild(item);
-            }
-            document.getElementById('sellModal').style.display = 'flex';
-        }
+// initial small render
+renderAll();
 
-        function forceSellProperty(amountNeeded) {
-            var currentPlayer = gameState.players[gameState.currentPlayerIndex];
-            if (currentPlayer.properties.length === 0) {
-                declareBankrupt();
-                return;
-            }
-            updateMessage(currentPlayer.name + ' يجب بيع عقار! المطلوب: ' + amountNeeded);
-            document.getElementById('sellBtn').classList.remove('hidden');
-        }
-
-        function payAmount(amount) {
-            var currentPlayer = gameState.players[gameState.currentPlayerIndex];
-            if (currentPlayer.money >= amount) {
-                currentPlayer.money -= amount;
-                updateMessage(currentPlayer.name + ' دفع ' + amount);
-                updatePlayersPanel();
-                setTimeout(function() {
-                    if (gameState.dice1 !== gameState.dice2) nextPlayer();
-                    else updateMessage(currentPlayer.name + ' - العب مرة أخرى!');
-                }, 2000);
-            } else {
-                forceSellProperty(amount);
-            }
-        }
-
-        // بقية الأكواد كما هي بدون تغيير في المنطق الأساسي إلا إذا رأيت متغير غير مربوط بالطريقة الصحيحة (مثل النصوص)، اربطها بنفس نمط الجمع +.
-        
-        document.getElementById('numPlayers').addEventListener('change', updatePlayerInputs);
-        document.getElementById('startBtn').addEventListener('click', startGame);
-        document.getElementById('rollBtn').addEventListener('click', rollDice);
-        document.getElementById('buyBtn').addEventListener('click', buyProperty);
-        document.getElementById('sellBtn').addEventListener('click', showSellModal);
-        document.getElementById('resetBtn').addEventListener('click', resetGame);
-        document.getElementById('closeModalBtn').addEventListener('click', function() {
-            document.getElementById('propertyModal').style.display = 'none';
-        });
-        document.getElementById('closeSellBtn').addEventListener('click', function() {
-            document.getElementById('sellModal').style.display = 'none';
-        });
-
-        updatePlayerInputs();
-    </script>
+</script>
 </body>
 </html>
