@@ -53,7 +53,7 @@ body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' result='noise'/%3E%3C/filter%3E%3Crect width='200' height='200' fill='%23000'/%3E%3C/svg%3E");
   pointer-events: none;
   z-index: 0;
   opacity: 0.4;
@@ -333,15 +333,6 @@ body::before {
   height: 7px;
   border-radius: 50%;
   flex-shrink: 0;
-}
-
-.dead-icon {
-  position: absolute;
-  left: 0.5rem;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 1rem;
-  opacity: 0.5;
 }
 
 /* MAIN AREA */
@@ -654,25 +645,10 @@ select.form-input {
 .vote-player-row:last-child { border-bottom: none; }
 
 .vote-name { flex: 1; font-size: 0.85rem; font-weight: 600; }
-.vote-bar-wrap { width: 120px; height: 6px; background: var(--bg4); border-radius: 3px; overflow: hidden; }
-.vote-bar { height: 100%; border-radius: 3px; background: var(--red); transition: width 0.3s; }
-.vote-count { font-size: 0.8rem; font-weight: 700; color: var(--red); min-width: 20px; text-align: right; }
-
-.vote-buttons { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.5rem; }
-.vote-btn {
-  padding: 0.25rem 0.6rem;
-  border-radius: 20px;
-  border: 1px solid var(--border2);
-  background: transparent;
-  color: var(--text2);
-  font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: 'Tajawal', sans-serif;
-  transition: all 0.15s;
-}
-.vote-btn:hover { background: var(--red-bg); border-color: var(--red-border); color: var(--red); }
-.vote-btn.voted { background: var(--red-bg); border-color: var(--red-border); color: var(--red); }
+.vote-controls { display: flex; align-items: center; gap: 0.8rem; }
+.vote-btn { width: 28px; height: 28px; border-radius: 50%; background: var(--bg4); border: 1px solid var(--border2); color: var(--text); font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; font-family: 'Tajawal', sans-serif; font-weight: 700; }
+.vote-btn:hover { background: var(--gold-bg); border-color: var(--gold-border); color: var(--gold); }
+.vote-count { font-size: 0.85rem; font-weight: 700; color: var(--gold); min-width: 30px; text-align: center; }
 
 /* SUMMARY CARDS */
 .summary-row {
@@ -944,6 +920,46 @@ select.form-input {
   flex-wrap: wrap;
   margin-bottom: 1.2rem;
 }
+
+/* HUNTER MODAL */
+.hunter-selection-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 250;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(5px);
+}
+.hunter-selection-modal.show { display: flex; }
+.hunter-modal-box {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 2rem;
+  width: 400px;
+  max-width: 90vw;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.hunter-modal-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem; color: var(--gold); }
+.hunter-targets-list { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1rem; }
+.hunter-target-btn {
+  padding: 0.8rem;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  cursor: pointer;
+  font-family: 'Tajawal', sans-serif;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  text-align: right;
+}
+.hunter-target-btn:hover { background: var(--gold-bg); border-color: var(--gold-border); color: var(--gold); }
+.hunter-modal-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+.hunter-modal-actions .btn { flex: 1; }
 </style>
 </head>
 <body>
@@ -1000,179 +1016,107 @@ select.form-input {
             <th style="width:60px;">إجراء</th>
           </tr>
         </thead>
-        <tbody id="players-tbody"></tbody>
+        <tbody id="players-table-body">
+        </tbody>
       </table>
     </div>
 
-    <div class="section-title" style="margin-bottom: 1rem;">توزيع الأدوار</div>
-    <div class="roles-grid" id="roles-grid"></div>
-
-    <div class="divider"></div>
-
-    <div class="section-title" style="margin-bottom: 1rem;">ترتيب تنفيذ الليل</div>
-    <ul class="night-order-list" id="night-order-display"></ul>
-
-    <div class="divider"></div>
-
     <div class="actions-row">
       <button class="btn btn-primary" onclick="startGame()">🎮 ابدأ اللعبة</button>
-      <button class="btn btn-ghost" onclick="randomAssign()">🎲 توزيع عشوائي</button>
-      <button class="btn btn-ghost" onclick="resetRoleCounts()">↺ صفّر الأدوار</button>
-      <button class="btn btn-danger" onclick="resetGame()">🔄 إعادة تعيين</button>
-    </div>
-  </div>
-
-  <!-- NIGHT PANEL -->
-  <div class="panel" id="panel-night">
-    <div class="win-check-bar">
-      <div class="faction-counter">
-        <div class="fc-label">🏙️ المدينة الأحياء</div>
-        <div class="fc-num" style="color:var(--blue)" id="night-city-count">0</div>
-      </div>
-      <div class="vs-divider">VS</div>
-      <div class="faction-counter">
-        <div class="fc-label">🔴 المافيا الأحياء</div>
-        <div class="fc-num" style="color:var(--red)" id="night-mafia-count">0</div>
-      </div>
-      <div class="vs-divider">|</div>
-      <div class="faction-counter">
-        <div class="fc-label">ليلة رقم</div>
-        <div class="fc-num" style="color:var(--gold)" id="night-num">1</div>
-      </div>
-    </div>
-
-    <div class="section-title" style="margin-bottom: 1rem;">ترتيب التنفيذ</div>
-    <ul class="night-order-list" id="night-order-tracker"></ul>
-
-    <div class="divider"></div>
-    <div class="section-title" style="margin-bottom: 1rem;">إجراءات الليل</div>
-    <div class="night-grid" id="night-actions-grid"></div>
-
-    <div class="divider"></div>
-    <div class="actions-row">
-      <button class="btn btn-primary" onclick="resolveNight()">⚡ تنفيذ إجراءات الليل</button>
-      <button class="btn btn-ghost" onclick="skipNight()">⏭️ تخطي الليل</button>
+      <button class="btn btn-ghost" onclick="resetSetup()">↻ إعادة تعيين</button>
     </div>
   </div>
 
   <!-- DAY PANEL -->
   <div class="panel" id="panel-day">
-    <div class="summary-row">
-      <div class="summary-card">
-        <div class="summary-num" style="color:var(--text)" id="day-total">0</div>
-        <div class="summary-label">إجمالي الأحياء</div>
-      </div>
-      <div class="summary-card">
-        <div class="summary-num" style="color:var(--red)" id="day-dead">0</div>
-        <div class="summary-label">ضحايا الليل</div>
-      </div>
-      <div class="summary-card">
-        <div class="summary-num" style="color:var(--green)" id="day-saved">0</div>
-        <div class="summary-label">تم إنقاذهم</div>
-      </div>
-      <div class="summary-card">
-        <div class="summary-num" style="color:var(--gold)" id="day-num">1</div>
-        <div class="summary-label">رقم اليوم</div>
-      </div>
-    </div>
-
-    <div class="section-title" style="margin-bottom: 1rem;">📢 أحداث الليل</div>
-    <div id="night-results" style="margin-bottom:1.5rem;"></div>
-
-    <div class="section-title" style="margin-bottom: 1rem;">🗳️ التصويت للإعدام</div>
-
-    <div class="vote-tracker">
+    <div class="section-title">إجراءات النهار</div>
+    
+    <div class="vote-tracker" id="vote-section">
+      <h3 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 1rem;">📊 التصويت</h3>
       <div id="vote-list"></div>
-    </div>
-
-    <div class="form-group" style="margin-bottom:1rem;">
-      <label class="form-label">إضافة أصوات يدوياً</label>
-      <div style="display:flex; gap:0.5rem;">
-        <select class="form-input" id="vote-target" style="flex:1;"></select>
-        <select class="form-input" id="vote-voter" style="width:140px;">
-          <option value="">المُصوِّت...</option>
-        </select>
-        <button class="btn btn-danger" onclick="addVote()">+صوت</button>
+      <div class="actions-row">
+        <button class="btn btn-primary" onclick="announceVoteResult()">📢 إعلان النتيجة</button>
       </div>
     </div>
 
-    <div class="actions-row">
-      <button class="btn btn-primary" onclick="executeVote()">⚖️ تنفيذ الإعدام</button>
-      <button class="btn btn-ghost" onclick="clearVotes()">🔄 مسح الأصوات</button>
-      <button class="btn btn-success" onclick="goToNight()">🌙 بدء الليل التالي</button>
+    <div id="vote-result-message" style="background: var(--gold-bg); border: 1px solid var(--gold-border); border-radius: var(--radius); padding: 1rem; margin-bottom: 1rem; display: none;">
+      <p id="vote-result-text"></p>
     </div>
 
     <div class="divider"></div>
-    <div class="section-title" style="margin-bottom:1rem;">إجراءات خاصة</div>
-    <div class="special-actions-grid">
-      <button class="btn btn-ghost" onclick="killPlayer()">💀 إعلان وفاة</button>
-      <button class="btn btn-ghost" onclick="revivePlayer()">💚 إحياء لاعب</button>
-      <button class="btn btn-ghost" onclick="checkWin()">🏆 فحص الفوز</button>
+
+    <div class="section-title">الحالة الحالية</div>
+    <div class="summary-row">
+      <div class="summary-card">
+        <div class="summary-num" id="day-alive">0</div>
+        <div class="summary-label">أحياء</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-num" id="day-dead">0</div>
+        <div class="summary-label">موتى</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-num" id="day-city">0</div>
+        <div class="summary-label">مدينة</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-num" id="day-mafia">0</div>
+        <div class="summary-label">مافيا</div>
+      </div>
     </div>
+
+    <button class="btn btn-primary" onclick="moveToNight()">🌙 انتقل للليل</button>
+  </div>
+
+  <!-- NIGHT PANEL -->
+  <div class="panel" id="panel-night">
+    <div class="section-title">إجراءات الليل</div>
+    <div id="night-actions"></div>
+    
+    <div class="win-check-bar">
+      <div class="faction-counter">
+        <div class="fc-label">مافيا</div>
+        <div class="fc-num" id="night-mafia">0</div>
+      </div>
+      <div class="vs-divider">VS</div>
+      <div class="faction-counter">
+        <div class="fc-label">مدينة</div>
+        <div class="fc-num" id="night-city">0</div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="executeNightActions()">✓ تنفيذ الليل</button>
+    <button class="btn btn-ghost" onclick="moveToDay()">☀️ انتقل للنهار</button>
   </div>
 
   <!-- LOG PANEL -->
   <div class="panel" id="panel-log">
-    <div class="actions-row">
-      <button class="btn btn-ghost" onclick="clearLog()">🗑️ مسح السجل</button>
-      <button class="btn btn-ghost" onclick="exportLog()">📤 تصدير</button>
-    </div>
-    <div id="game-log"></div>
-    <p id="log-empty" style="color:var(--text3); font-size:0.85rem; text-align:center; padding:2rem;">لا توجد أحداث بعد. ابدأ اللعبة أولاً.</p>
+    <div class="section-title">سجل الأحداث</div>
+    <div id="event-log"></div>
   </div>
 
   <!-- ROLES PANEL -->
   <div class="panel" id="panel-roles">
-    <div class="section-title" style="margin-bottom:1rem;">الأدوار في هذه اللعبة</div>
-    <div id="roles-reference"></div>
-
-    <div class="divider"></div>
-    <div class="section-title" style="margin-bottom:1rem;">شروط الفوز</div>
-    <div id="win-conditions"></div>
+    <div class="section-title">قائمة الأدوار</div>
+    <div id="roles-info"></div>
   </div>
 </main>
 
-<!-- SIDEBAR RIGHT: LOG QUICK -->
+<!-- SIDEBAR RIGHT: STATS -->
 <aside class="sidebar sidebar-right">
-  <div class="section-title">آخر الأحداث</div>
-  <div id="quick-log"></div>
-
-  <div class="divider"></div>
-  <div class="section-title">القدرات المستهلكة</div>
-  <div id="used-abilities" style="font-size:0.8rem; color:var(--text2);">لا شيء بعد</div>
-
-  <div class="divider"></div>
-  <div class="section-title">حالة الفصائل</div>
-  <div id="faction-status"></div>
+  <div class="section-title">إحصائيات اللعبة</div>
+  <div id="game-stats"></div>
 </aside>
 
-</div><!-- /app -->
+</div>
 
-<!-- MOBILE BOTTOM NAV -->
-<nav class="mobile-nav">
-  <button class="mobile-nav-btn active" id="mnav-setup" onclick="switchTab('setup');setMobileNav('setup')">
-    <span class="nav-icon">⚙️</span>إعداد
-  </button>
-  <button class="mobile-nav-btn" id="mnav-night" onclick="switchTab('night');setMobileNav('night')">
-    <span class="nav-icon">🌙</span>الليل
-  </button>
-  <button class="mobile-nav-btn" id="mnav-day" onclick="switchTab('day');setMobileNav('day')">
-    <span class="nav-icon">☀️</span>النهار
-  </button>
-  <button class="mobile-nav-btn" id="mnav-log" onclick="switchTab('log');setMobileNav('log')">
-    <span class="nav-icon">📋</span>السجل
-  </button>
-  <button class="mobile-nav-btn" id="mnav-roles" onclick="switchTab('roles');setMobileNav('roles')">
-    <span class="nav-icon">📖</span>الأدوار
-  </button>
-</nav>
-<div class="modal-overlay" id="player-modal" onclick="closeModal()">
-  <div class="modal-box" onclick="event.stopPropagation()">
-    <div class="modal-title" id="modal-title">معلومات اللاعب</div>
-    <div id="modal-content"></div>
-    <div style="margin-top:1rem; display:flex; gap:0.5rem;">
-      <button class="btn btn-danger" onclick="modalKillPlayer()">💀 إعلان وفاة</button>
-      <button class="btn btn-ghost" onclick="closeModal()">إغلاق</button>
+<!-- HUNTER SELECTION MODAL -->
+<div class="hunter-selection-modal" id="hunter-modal">
+  <div class="hunter-modal-box">
+    <div class="hunter-modal-title">الصياد مات، اختر لاعباً ليأخذك معه إلى القبر</div>
+    <div class="hunter-targets-list" id="hunter-targets"></div>
+    <div class="hunter-modal-actions">
+      <button class="btn btn-danger" onclick="cancelHunterAction()">إلغاء</button>
     </div>
   </div>
 </div>
@@ -1180,897 +1124,479 @@ select.form-input {
 <!-- RESULT OVERLAY -->
 <div class="result-overlay" id="result-overlay">
   <div class="result-box">
-    <div class="result-emoji" id="result-emoji">🏆</div>
+    <div class="result-emoji" id="result-emoji">🎉</div>
     <div class="result-title" id="result-title">انتهت اللعبة</div>
-    <div class="result-sub" id="result-sub"></div>
-    <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
-      <button class="btn btn-primary" onclick="document.getElementById('result-overlay').classList.remove('show')">عرض الملخص</button>
-      <button class="btn btn-ghost" onclick="resetGame()">لعبة جديدة</button>
-    </div>
+    <div class="result-sub" id="result-sub">معلومات النتيجة</div>
   </div>
 </div>
 
-<!-- TOAST -->
+<!-- TOAST NOTIFICATION -->
 <div class="toast" id="toast"></div>
 
 <script>
-// ========== STATE ==========
-let state = {
-  started: false,
-  day: 0,
-  night: 0,
-  phase: 'setup',
+// ==================== GAME STATE ====================
+const gameState = {
   players: [],
-  roles: [],
+  phase: 'setup', // setup, day, night
+  roles: {},
   log: [],
-  votes: {},
   nightActions: {},
-  nightResults: { dead: [], saved: [] },
-  usedAbilities: [],
-  modalTarget: null,
+  votes: {},
+  huntPending: false,
+  hunterPlayer: null
 };
 
-// ========== DEFAULT ROLES ==========
-const DEFAULT_ROLES = [
-  { id:'godfather', name:'العراب', faction:'mafia', nightOrder:1, hasNight:true, count:0,
-    desc:'قائد المافيا. يختار الضحية النهائية. أول تحقيق عليه يظهره بريئاً.',
-    win:'تساوي عدد المافيا مع بقية اللاعبين الأحياء.', icon:'👑' },
-  { id:'mafia', name:'مافيا', faction:'mafia', nightOrder:1, hasNight:true, count:0,
-    desc:'يساعدون العراب. يعرفون بعضهم منذ البداية.',
-    win:'تساوي عدد المافيا مع بقية اللاعبين الأحياء.', icon:'🔴' },
-  { id:'doctor', name:'الدكتور', faction:'city', nightOrder:2, hasNight:true, count:0,
-    desc:'يحمي لاعباً كل ليلة. لا يستطيع حماية نفسه ليلتين متتاليتين.',
-    win:'موت آخر فرد من المافيا.', icon:'💊' },
-  { id:'guard', name:'حارس الأمن', faction:'city', nightOrder:3, hasNight:true, count:0,
-    desc:'يحمي لاعباً. إذا تعرض الهدف لهجوم يموت الحارس بدلاً منه.',
-    win:'موت آخر فرد من المافيا.', icon:'🛡️' },
-  { id:'witch', name:'الساحر', faction:'city', nightOrder:4, hasNight:true, count:0,
-    desc:'يمتلك جرعة إحياء واحدة وجرعة قتل واحدة طوال اللعبة.',
-    win:'موت آخر فرد من المافيا.', icon:'🧪' },
-  { id:'detective', name:'المحقق', faction:'city', nightOrder:5, hasNight:true, count:0,
-    desc:'يحقق في لاعب كل ليلة. يحصل على نتيجة: بريء أو مافيا.',
-    win:'موت آخر فرد من المافيا.', icon:'🔍' },
-  { id:'hunter', name:'الصياد', faction:'city', nightOrder:99, hasNight:false, count:0,
-    desc:'عند موته يختار لاعباً يموت معه فوراً.',
-    win:'موت آخر فرد من المافيا.', icon:'🏹' },
-  { id:'jester', name:'المهرج', faction:'neutral', nightOrder:99, hasNight:false, count:0,
-    desc:'هدفه الوحيد أن يتم إعدامه نهاراً بالتصويت.',
-    win:'إذا أُعدم بالتصويت نهاراً يفوز فوراً.', icon:'🤡' },
-  { id:'citizen', name:'المواطن', faction:'city', nightOrder:99, hasNight:false, count:0,
-    desc:'مواطن عادي بلا قدرة ليلية.',
-    win:'موت آخر فرد من المافيا.', icon:'👤' },
-];
+// ==================== ROLES DATABASE ====================
+const rolesDB = {
+  citizen: { name: 'مواطن', faction: 'city', desc: 'دور أساسي بدون قدرات خاصة' },
+  mafia: { name: 'مافيا', faction: 'mafia', desc: 'يقتل شخصاً واحداً كل ليلة' },
+  godfather: { name: 'العراب', faction: 'mafia', desc: 'قائد المافيا (يُعتبر مافيا)' },
+  doctor: { name: 'الطبيب', faction: 'city', desc: 'ينقذ شخصاً واحداً كل ليلة' },
+  detective: { name: 'المحقق', faction: 'city', desc: 'يتحقق من دور لاعب كل ليلة' },
+  hunter: { name: 'الصياد', faction: 'city', desc: 'عند موته يختار لاعباً ليأخذه معه' },
+  witch: { name: 'الساحر', faction: 'city', desc: 'يقتل أو ينقذ شخصاً كل ليلة' }
+};
 
-// ========== INIT ==========
-function init() {
-  renderRolesGrid();
-  generatePlayerSlots();
-  renderNightOrder();
+// ==================== INITIALIZATION ====================
+function generatePlayerSlots() {
+  const count = parseInt(document.getElementById('player-count').value);
+  let html = '';
+  for (let i = 1; i <= count; i++) {
+    html += `
+      <tr>
+        <td>${i}</td>
+        <td><input type="text" class="form-input" id="player-name-${i}" placeholder="اسم اللاعب ${i}"></td>
+        <td>
+          <select class="form-input" id="player-role-${i}" onchange="updatePlayerRole(${i})">
+            <option value="">-- اختر دوراً --</option>
+            ${Object.entries(rolesDB).map(([key, role]) => `<option value="${key}">${role.name}</option>`).join('')}
+          </select>
+        </td>
+        <td class="col-faction" id="faction-${i}"></td>
+        <td><button class="btn btn-danger" onclick="removePlayer(${i})">حذف</button></td>
+      </tr>
+    `;
+  }
+  document.getElementById('players-table-body').innerHTML = html;
+  gameState.players = [];
 }
 
-// ========== ROLES GRID ==========
-function renderRolesGrid() {
-  const grid = document.getElementById('roles-grid');
-  grid.innerHTML = state.roles.map((r,i) => `
-    <div class="role-card ${r.count > 0 ? 'selected' : ''}" id="rolecard-${r.id}">
-      <div class="role-card-faction faction-${r.faction}">${factionName(r.faction)}</div>
-      <div style="font-size:1.3rem; margin-bottom:0.3rem;">${r.icon || '❓'}</div>
-      <div class="role-card-name">${r.name}</div>
-      <div class="role-card-desc">${r.desc}</div>
-      <div class="role-count-control">
-        <button class="count-btn" onclick="changeRoleCount('${r.id}',-1)">−</button>
-        <span class="count-num" id="count-${r.id}">${r.count}</span>
-        <button class="count-btn" onclick="changeRoleCount('${r.id}',1)">+</button>
-        <span style="font-size:0.7rem; color:var(--text3); margin-right:0.3rem;">عدد</span>
-      </div>
-    </div>
-  `).join('');
-}
-
-function changeRoleCount(id, delta) {
-  const r = state.roles.find(x => x.id === id);
-  if (!r) return;
-  r.count = Math.max(0, r.count + delta);
-  document.getElementById('count-' + id).textContent = r.count;
-  const card = document.getElementById('rolecard-' + id);
-  card.classList.toggle('selected', r.count > 0);
-  validateRoleCounts();
-}
-
-function validateRoleCounts() {
-  const total = state.roles.reduce((s, r) => s + r.count, 0);
-  const playerCount = parseInt(document.getElementById('player-count').value) || 0;
-  if (total !== playerCount) {
-    showToast(`مجموع الأدوار: ${total} | اللاعبون: ${playerCount} — يجب أن يتساووا`, 'warn');
+function updatePlayerRole(playerNum) {
+  const roleSelect = document.getElementById(`player-role-${playerNum}`);
+  const factionCell = document.getElementById(`faction-${playerNum}`);
+  const role = roleSelect.value;
+  
+  if (role && rolesDB[role]) {
+    const factionName = rolesDB[role].faction === 'city' ? 'مدينة' : 'مافيا';
+    factionCell.textContent = factionName;
+  } else {
+    factionCell.textContent = '';
   }
 }
 
-function factionName(f) {
-  return { mafia:'المافيا', city:'المدينة', neutral:'مستقل' }[f] || f;
+function removePlayer(playerNum) {
+  document.getElementById(`player-name-${playerNum}`).value = '';
+  document.getElementById(`player-role-${playerNum}`).value = '';
+  document.getElementById(`faction-${playerNum}`).textContent = '';
 }
 
-// ========== PLAYER SLOTS ==========
-function generatePlayerSlots() {
-  const count = parseInt(document.getElementById('player-count').value) || 10;
-  const tbody = document.getElementById('players-tbody');
-
-  // preserve existing names
-  const existing = state.players;
-  state.players = [];
-
+function startGame() {
+  gameState.players = [];
+  const count = parseInt(document.getElementById('player-count').value);
+  
   for (let i = 1; i <= count; i++) {
-    const old = existing.find(p => p.id === i);
-    state.players.push({
+    const name = document.getElementById(`player-name-${i}`).value.trim();
+    const role = document.getElementById(`player-role-${i}`).value;
+    
+    if (!name || !role) continue;
+    
+    gameState.players.push({
       id: i,
-      name: old ? old.name : `لاعب ${i}`,
-      role: old ? old.role : null,
-      faction: old ? old.faction : null,
+      name: name,
+      role: role,
       alive: true,
-      protected: false,
-      notes: '',
+      faction: rolesDB[role].faction
     });
   }
-
-  renderPlayerTable();
-}
-
-function renderPlayerTable() {
-  const tbody = document.getElementById('players-tbody');
-  tbody.innerHTML = state.players.map(p => `
-    <tr>
-      <td style="color:var(--text3); font-weight:700;">${p.id}</td>
-      <td><input type="text" value="${p.name}" onchange="state.players[${p.id-1}].name=this.value; renderSidebar();"></td>
-      <td>
-        ${p.role ? `<span class="role-badge badge-${p.faction}">${p.role}</span>` : '<span style="color:var(--text3); font-size:0.75rem;">غير محدد</span>'}
-      </td>
-      <td>${p.faction ? `<span style="color:var(--${p.faction==='mafia'?'red':p.faction==='neutral'?'orange':'blue'})">${factionName(p.faction)}</span>` : '—'}</td>
-      <td>
-        <button class="btn btn-ghost" style="padding:0.2rem 0.5rem; font-size:0.7rem;" onclick="openPlayerModal(${p.id})">👁</button>
-      </td>
-    </tr>
-  `).join('');
-}
-
-// ========== NIGHT ORDER ==========
-function renderNightOrder() {
-  const sorted = [...state.roles].filter(r => r.hasNight && r.count > 0).sort((a,b) => a.nightOrder - b.nightOrder);
-  const el = document.getElementById('night-order-display');
-  if (!el) return;
-  el.innerHTML = sorted.map((r, i) => `
-    <li class="night-order-item">
-      <div class="order-num">${i+1}</div>
-      <div class="action-icon icon-${r.faction==='mafia'?'red':r.faction==='neutral'?'orange':'blue'}">${r.icon || '❓'}</div>
-      <span style="font-size:0.85rem; font-weight:600;">${r.name}</span>
-    </li>
-  `).join('');
-}
-
-// ========== RANDOM ASSIGN ==========
-function randomAssign() {
-  const count = state.players.length;
-  const totalRoles = state.roles.reduce((s,r) => s + r.count, 0);
-  if (totalRoles !== count) {
-    showToast(`مجموع الأدوار (${totalRoles}) لا يساوي عدد اللاعبين (${count})`, 'error');
+  
+  if (gameState.players.length < 4) {
+    showToast('يجب أن يكون هناك 4 لاعبين على الأقل', 'error');
     return;
   }
-
-  // Build role pool
-  let pool = [];
-  state.roles.forEach(r => {
-    for (let i = 0; i < r.count; i++) pool.push({ role: r.name, faction: r.faction, roleId: r.id });
-  });
-
-  // Shuffle
-  for (let i = pool.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i+1));
-    [pool[i], pool[j]] = [pool[j], pool[i]];
-  }
-
-  state.players.forEach((p, i) => {
-    p.role = pool[i].role;
-    p.faction = pool[i].faction;
-    p.roleId = pool[i].roleId;
-    p.alive = true;
-  });
-
-  renderPlayerTable();
-  renderSidebar();
-  showToast('تم التوزيع العشوائي للأدوار! ✓', 'success');
-}
-
-// ========== START GAME ==========
-function startGame() {
-  const unassigned = state.players.filter(p => !p.role);
-  if (unassigned.length > 0) {
-    showToast('بعض اللاعبين لا يملكون أدواراً. استخدم التوزيع العشوائي.', 'warn');
-    return;
-  }
-
-  state.started = true;
-  state.night = 1;
-  state.day = 1;
-  state.phase = 'night';
-
-  addLog('system', `🎮 بدأت اللعبة بـ ${state.players.length} لاعب`, 'tag-system');
-
-  renderSidebar();
-  renderNightPanel();
-  renderRolesReference();
-  renderFactionStatus();
-  updateHeader();
+  
+  gameState.phase = 'night';
+  gameState.votes = {};
+  initializeVotes();
   switchTab('night');
-  showToast('بدأت اللعبة! الليلة الأولى...', 'success');
+  updateUI();
 }
 
-// ========== NIGHT PANEL ==========
-function renderNightPanel() {
-  document.getElementById('night-num').textContent = state.night;
-  document.getElementById('night-city-count').textContent = state.players.filter(p => p.alive && p.faction !== 'mafia' && p.faction !== 'neutral').length;
-  document.getElementById('night-mafia-count').textContent = state.players.filter(p => p.alive && p.faction === 'mafia').length;
-
-  // Order tracker
-  const sorted = [...state.roles].filter(r => r.hasNight && r.count > 0).sort((a,b) => a.nightOrder - b.nightOrder);
-  document.getElementById('night-order-tracker').innerHTML = sorted.map((r, i) => `
-    <li class="night-order-item" id="night-step-${r.id}">
-      <div class="order-num">${i+1}</div>
-      <div class="action-icon icon-${r.faction==='mafia'?'red':r.faction==='neutral'?'orange':'blue'}">${r.icon}</div>
-      <span style="font-size:0.85rem; font-weight:600;">${r.name}</span>
-    </li>
-  `).join('');
-
-  // Action cards
-  const alive = state.players.filter(p => p.alive);
-  const aliveOptions = alive.map(p => `<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');
-  const noneOption = '<option value="">— لا أحد —</option>';
-
-  const grid = document.getElementById('night-actions-grid');
-  grid.innerHTML = '';
-
-  sorted.forEach(r => {
-    const playersWithRole = state.players.filter(p => p.alive && p.roleId === r.id);
-    if (playersWithRole.length === 0) return;
-
-    let actionHTML = '';
-
-    if (r.id === 'mafia' || r.id === 'godfather') {
-      if (grid.querySelector('[data-mafia]')) return;
-      actionHTML = `
-        <div class="night-action-card" data-mafia="1">
-          <div class="night-action-title">
-            <div class="action-icon icon-red">🔴</div>
-            هجوم المافيا
-          </div>
-          <div class="night-action-subtitle">العراب + المافيا يختارون الضحية معاً</div>
-          <div class="form-group">
-            <label class="form-label">الضحية المختارة</label>
-            <select class="form-input" id="action-mafia">${noneOption}${aliveOptions}</select>
-          </div>
-        </div>`;
-    } else if (r.id === 'doctor') {
-      actionHTML = `
-        <div class="night-action-card">
-          <div class="night-action-title"><div class="action-icon icon-green">💊</div>الدكتور</div>
-          <div class="night-action-subtitle">اختر من تحمي هذه الليلة</div>
-          <div class="form-group">
-            <label class="form-label">الهدف المحمي</label>
-            <select class="form-input" id="action-doctor">${noneOption}${aliveOptions}</select>
-          </div>
-        </div>`;
-    } else if (r.id === 'guard') {
-      actionHTML = `
-        <div class="night-action-card">
-          <div class="night-action-title"><div class="action-icon icon-blue">🛡️</div>حارس الأمن</div>
-          <div class="night-action-subtitle">يحمي هدفاً ويموت عنه إن هُوجم</div>
-          <div class="form-group">
-            <label class="form-label">الهدف المحمي</label>
-            <select class="form-input" id="action-guard">${noneOption}${aliveOptions}</select>
-          </div>
-        </div>`;
-    } else if (r.id === 'detective') {
-      actionHTML = `
-        <div class="night-action-card">
-          <div class="night-action-title"><div class="action-icon icon-purple">🔍</div>المحقق</div>
-          <div class="night-action-subtitle">يحقق في لاعب ويعرف هويته</div>
-          <div class="form-group">
-            <label class="form-label">الهدف المحقق به</label>
-            <select class="form-input" id="action-detective">${noneOption}${aliveOptions}</select>
-          </div>
-          <div id="detective-result" style="margin-top:0.8rem; font-size:0.8rem; min-height:20px;"></div>
-          <button class="btn btn-ghost" style="margin-top:0.5rem;" onclick="revealDetective()">🔍 كشف النتيجة (للمشرف فقط)</button>
-        </div>`;
-    } else if (r.id === 'witch') {
-      const witchPlayer = playersWithRole[0];
-      const witchUsed = state.usedAbilities.filter(a => a.includes('witch'));
-      const healUsed = witchUsed.some(a => a.includes('heal'));
-      const killUsed = witchUsed.some(a => a.includes('kill'));
-      actionHTML = `
-        <div class="night-action-card">
-          <div class="night-action-title"><div class="action-icon icon-purple">🧪</div>الساحر</div>
-          <div class="night-action-subtitle">جرعة إحياء: ${healUsed?'✗ مستخدمة':'✓ متاحة'} | جرعة قتل: ${killUsed?'✗ مستخدمة':'✓ متاحة'}</div>
-          ${!healUsed ? `
-          <div class="form-group" style="margin-bottom:0.7rem;">
-            <label class="form-label">🩺 إحياء</label>
-            <select class="form-input" id="action-witch-heal">${noneOption}${state.players.filter(p=>!p.alive).map(p=>`<option value="${p.id}">${p.id}. ${p.name} ✝</option>`).join('')}</select>
-          </div>` : ''}
-          ${!killUsed ? `
-          <div class="form-group">
-            <label class="form-label">☠️ قتل</label>
-            <select class="form-input" id="action-witch-kill">${noneOption}${aliveOptions}</select>
-          </div>` : ''}
-        </div>`;
-    } else {
-      // Custom role
-      actionHTML = `
-        <div class="night-action-card">
-          <div class="night-action-title"><div class="action-icon icon-gold">${r.icon || '❓'}</div>${r.name}</div>
-          <div class="night-action-subtitle">${r.desc}</div>
-          <div class="form-group">
-            <label class="form-label">الهدف</label>
-            <select class="form-input" id="action-custom-${r.id}">${noneOption}${aliveOptions}</select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">ملاحظة</label>
-            <input type="text" class="form-input" id="action-note-${r.id}" placeholder="اختياري...">
-          </div>
-        </div>`;
-    }
-
-    if (actionHTML) grid.insertAdjacentHTML('beforeend', actionHTML);
+function initializeVotes() {
+  gameState.votes = {};
+  gameState.players.forEach(p => {
+    if (p.alive) gameState.votes[p.id] = 0;
   });
 }
 
-// ========== DETECTIVE REVEAL ==========
-function revealDetective() {
-  const sel = document.getElementById('action-detective');
-  if (!sel || !sel.value) return;
-  const target = state.players.find(p => p.id == sel.value);
-  if (!target) return;
-
-  // Godfather appears innocent on first investigation
-  let result;
-  const godfatherInvests = state.usedAbilities.filter(a => a.includes('detect-godfather'));
-  if (target.roleId === 'godfather' && godfatherInvests.length === 0) {
-    result = '✅ بريء (العراب يظهر بريئاً في أول تحقيق)';
-    state.usedAbilities.push('detect-godfather');
-  } else {
-    result = target.faction === 'mafia'
-      ? `🔴 مافيا! (${target.role})`
-      : `✅ بريء — ${target.role}`;
-  }
-
-  document.getElementById('detective-result').innerHTML =
-    `<div style="padding:0.5rem; border-radius:6px; background:var(--bg3); border:1px solid var(--border2);">
-      <span style="font-weight:700;">${target.name}:</span> ${result}
-    </div>`;
-}
-
-// ========== RESOLVE NIGHT ==========
-function resolveNight() {
-  const mafiaTarget = document.getElementById('action-mafia')?.value;
-  const doctorTarget = document.getElementById('action-doctor')?.value;
-  const guardTarget = document.getElementById('action-guard')?.value;
-  const witchHeal = document.getElementById('action-witch-heal')?.value;
-  const witchKill = document.getElementById('action-witch-kill')?.value;
-  const detectTarget = document.getElementById('action-detective')?.value;
-
-  let dead = [];
-  let saved = [];
-  let events = [];
-
-  // Guard: if mafia targets guard's ward, guard dies instead
-  if (guardTarget && mafiaTarget && guardTarget == mafiaTarget) {
-    const guard = state.players.find(p => p.alive && p.roleId === 'guard');
-    if (guard) {
-      guard.alive = false;
-      dead.push(guard);
-      events.push(`🛡️ حارس الأمن <strong>${guard.name}</strong> مات حماية لـ <strong>${state.players.find(p=>p.id==guardTarget)?.name}</strong>`);
-      addLog('death', `💀 ${guard.name} (حارس الأمن) مات دفاعاً عن لاعبه`, 'tag-death');
-    }
-  }
-
-  // Witch kill
-  if (witchKill) {
-    const wTarget = state.players.find(p => p.id == witchKill);
-    if (wTarget && wTarget.alive) {
-      const isDoctorSaved = doctorTarget == witchKill;
-      if (!isDoctorSaved) {
-        wTarget.alive = false;
-        dead.push(wTarget);
-        events.push(`🧪 الساحر استخدم جرعة القتل على <strong>${wTarget.name}</strong>`);
-        addLog('death', `💀 ${wTarget.name} (${wTarget.role}) قتله الساحر`, 'tag-death');
-        state.usedAbilities.push('witch-kill');
-      } else {
-        saved.push(wTarget);
-        events.push(`💊 الدكتور أنقذ <strong>${wTarget.name}</strong> من جرعة الساحر`);
-      }
-    }
-  }
-
-  // Witch heal
-  if (witchHeal) {
-    const wRevive = state.players.find(p => p.id == witchHeal && !p.alive);
-    if (wRevive) {
-      wRevive.alive = true;
-      events.push(`🧪 الساحر أحيا <strong>${wRevive.name}</strong>!`);
-      addLog('save', `💚 ${wRevive.name} (${wRevive.role}) تم إحياؤه بالساحر`, 'tag-save');
-      state.usedAbilities.push('witch-heal');
-    }
-  }
-
-  // Mafia attack
-  if (mafiaTarget) {
-    const target = state.players.find(p => p.id == mafiaTarget);
-    if (target && target.alive) {
-      const guardProtected = guardTarget == mafiaTarget;
-      const doctorProtected = doctorTarget == mafiaTarget;
-      if (!guardProtected) {
-        if (doctorProtected) {
-          saved.push(target);
-          events.push(`💊 الدكتور أنقذ <strong>${target.name}</strong> من هجوم المافيا`);
-          addLog('save', `💚 ${target.name} نجا بفضل الدكتور`, 'tag-save');
-        } else {
-          target.alive = false;
-          dead.push(target);
-          events.push(`🔴 المافيا قتلت <strong>${target.name}</strong>`);
-          addLog('death', `💀 ${target.name} (${target.role}) قُتل من المافيا`, 'tag-death');
-        }
-      }
-    }
-  }
-
-  // Detective log (secret)
-  if (detectTarget) {
-    addLog('night', `🔍 المحقق حقق في لاعب — النتيجة سرية`, 'tag-night');
-  }
-
-  // Store results
-  state.nightResults = { dead, saved, events };
-  state.night++;
-
-  addLog('night', `🌙 انتهت الليلة ${state.night - 1}`, 'tag-night');
-
-  // Check Hunter
-  dead.forEach(p => {
-    if (p.roleId === 'hunter') {
-      showToast(`💀 ${p.name} هو الصياد! يجب أن يختار لاعباً يموت معه.`, 'warn');
-    }
-  });
-
-  renderSidebar();
-  renderDayPanel(events);
-  updateHeader();
-  checkWinConditions();
-  switchTab('day');
-  setMobileNav('day');
-}
-
-// ========== SKIP NIGHT ==========
-function skipNight() {
-  state.nightResults = { dead: [], saved: [], events: [] };
-  state.night++;
-  renderDayPanel(['لم تحدث أي أحداث هذه الليلة']);
-  switchTab('day');
-}
-
-// ========== DAY PANEL ==========
-function renderDayPanel(events) {
-  document.getElementById('day-num').textContent = state.day;
-  document.getElementById('day-total').textContent = state.players.filter(p => p.alive).length;
-  document.getElementById('day-dead').textContent = (state.nightResults.dead || []).length;
-  document.getElementById('day-saved').textContent = (state.nightResults.saved || []).length;
-
-  // Night results
-  const nr = document.getElementById('night-results');
-  if (!events || events.length === 0) {
-    nr.innerHTML = '<div class="log-entry"><div class="log-content" style="color:var(--text2);">هادئة كانت الليلة... لا أحداث.</div></div>';
-  } else {
-    nr.innerHTML = events.map(e => `
-      <div class="log-entry">
-        <div class="log-content log-text">${e}</div>
-      </div>`).join('');
-  }
-
-  // Vote targets
-  const alive = state.players.filter(p => p.alive);
-  const voteTarget = document.getElementById('vote-target');
-  voteTarget.innerHTML = '<option value="">اختر مرشحاً...</option>' + alive.map(p => `<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');
-
-  const voteVoter = document.getElementById('vote-voter');
-  voteVoter.innerHTML = '<option value="">المُصوِّت...</option>' + alive.map(p => `<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');
-
-  state.votes = {};
-  renderVoteList();
-}
-
-// ========== VOTING ==========
-function renderVoteList() {
-  const alive = state.players.filter(p => p.alive);
-  const maxVotes = Math.max(1, ...Object.values(state.votes).length ? Object.entries(state.votes).map(([,v])=>v.length) : [1]);
-  const voteList = document.getElementById('vote-list');
-  voteList.innerHTML = alive.map(p => {
-    const votesFor = Object.entries(state.votes).find(([id]) => id == p.id)?.[1] || [];
-    const count = votesFor.length;
-    const width = Math.round((count / maxVotes) * 100);
-    return `
+// ==================== VOTING SYSTEM (NEW) ====================
+function renderVoteTracker() {
+  let html = '';
+  gameState.players.forEach(p => {
+    if (!p.alive) return;
+    
+    html += `
       <div class="vote-player-row">
-        <span class="player-num ${p.faction}">${p.id}</span>
-        <span class="vote-name">${p.name}</span>
-        <div class="vote-bar-wrap"><div class="vote-bar" style="width:${width}%"></div></div>
-        <span class="vote-count">${count || ''}</span>
-        <button class="vote-btn" onclick="quickVote(${p.id})">+صوت</button>
-      </div>`;
-  }).join('');
+        <div class="vote-name">${p.name}</div>
+        <div class="vote-controls">
+          <button class="vote-btn" onclick="decrementVote(${p.id})">−</button>
+          <div class="vote-count">${gameState.votes[p.id] || 0}</div>
+          <button class="vote-btn" onclick="incrementVote(${p.id})">+</button>
+        </div>
+      </div>
+    `;
+  });
+  document.getElementById('vote-list').innerHTML = html;
 }
 
-function quickVote(targetId) {
-  if (!state.votes[targetId]) state.votes[targetId] = [];
-  state.votes[targetId].push('quick');
-  renderVoteList();
+function incrementVote(playerId) {
+  gameState.votes[playerId] = (gameState.votes[playerId] || 0) + 1;
+  renderVoteTracker();
 }
 
-function addVote() {
-  const target = document.getElementById('vote-target').value;
-  const voter = document.getElementById('vote-voter').value;
-  if (!target) { showToast('اختر المرشح أولاً', 'warn'); return; }
-  if (!state.votes[target]) state.votes[target] = [];
-  state.votes[target].push(voter || 'unknown');
-  renderVoteList();
-  addLog('vote', `🗳️ صوت ضد ${state.players.find(p=>p.id==target)?.name}`, 'tag-vote');
+function decrementVote(playerId) {
+  if ((gameState.votes[playerId] || 0) > 0) {
+    gameState.votes[playerId]--;
+  }
+  renderVoteTracker();
 }
 
-function clearVotes() {
-  state.votes = {};
-  renderVoteList();
-}
-
-function executeVote() {
-  const entries = Object.entries(state.votes);
-  if (entries.length === 0) { showToast('لا أصوات بعد', 'warn'); return; }
-
-  const sorted = entries.sort((a,b) => b[1].length - a[1].length);
-  const [topId, topVotes] = sorted[0];
-
-  if (topVotes.length === 0) { showToast('لا أصوات كافية', 'warn'); return; }
-
-  const target = state.players.find(p => p.id == topId);
-  if (!target || !target.alive) { showToast('اللاعب غير موجود أو ميت بالفعل', 'error'); return; }
-
-  target.alive = false;
-  addLog('death', `⚖️ ${target.name} (${target.role}) أُعدم بتصويت النهار بـ ${topVotes.length} صوت`, 'tag-death');
-  showToast(`⚖️ تم إعدام ${target.name} — ${target.role}`, 'warn');
-
-  // Check Jester win
-  if (target.roleId === 'jester') {
-    showResult('🤡', 'فاز المهرج!', `${target.name} تم إعدامه بالتصويت — المهرج يفوز فوراً!`, '#f59e42');
-    addLog('system', `🏆 فاز المهرج! ${target.name}`, 'tag-system');
+function announceVoteResult() {
+  const alivePlayers = gameState.players.filter(p => p.alive);
+  let maxVotes = 0;
+  let targetPlayers = [];
+  
+  alivePlayers.forEach(p => {
+    const votes = gameState.votes[p.id] || 0;
+    if (votes > maxVotes) {
+      maxVotes = votes;
+      targetPlayers = [p];
+    } else if (votes === maxVotes && votes > 0) {
+      targetPlayers.push(p);
+    }
+  });
+  
+  if (targetPlayers.length === 0) {
+    showToast('لم يتم التصويت على أحد', 'warn');
     return;
   }
-
-  // Hunter trigger
-  if (target.roleId === 'hunter') {
-    showToast(`🏹 ${target.name} كان الصياد! سيختار لاعباً يموت معه.`, 'warn');
-    addLog('death', `🏹 الصياد ${target.name} أُعدم — يجب أن يختار هدفاً ليموت معه`, 'tag-death');
+  
+  if (targetPlayers.length > 1) {
+    const resultMsg = `تعادل بين: ${targetPlayers.map(p => p.name).join(', ')}. الرجاء إعادة التصويت أو كسر التعادل يدويا.`;
+    document.getElementById('vote-result-text').textContent = resultMsg;
+    document.getElementById('vote-result-message').style.display = 'block';
+    showToast('تعادل في التصويت!', 'warn');
+    return;
   }
-
-  state.day++;
-  renderSidebar();
-  updateHeader();
-  renderFactionStatus();
-  checkWinConditions();
+  
+  const targetPlayer = targetPlayers[0];
+  killPlayer(targetPlayer.id, `إعدام بالتصويت في النهار`);
+  
+  // إذا كان الصياد فعّل قدرته
+  if (targetPlayer.role === 'hunter') {
+    gameState.huntPending = true;
+    gameState.hunterPlayer = targetPlayer.id;
+    showHunterModal();
+  } else {
+    // تحقق من شروط الفوز
+    checkWinCondition();
+    moveToNight();
+  }
+  
+  document.getElementById('vote-result-message').style.display = 'none';
 }
 
-// ========== GO TO NIGHT ==========
-function goToNight() {
-  state.phase = 'night';
-  renderNightPanel();
-  switchTab('night');
-  setMobileNav('night');
-  addLog('night', `🌙 بدأت الليلة ${state.night}`, 'tag-night');
+// ==================== HUNTER SYSTEM ====================
+function showHunterModal() {
+  const hunters = gameState.players.filter(p => p.alive && p.id !== gameState.hunterPlayer);
+  let html = '';
+  
+  hunters.forEach(p => {
+    html += `
+      <button class="hunter-target-btn" onclick="hunterSelectTarget(${p.id})">
+        ${p.name} (${rolesDB[p.role].name})
+      </button>
+    `;
+  });
+  
+  document.getElementById('hunter-targets').innerHTML = html;
+  document.getElementById('hunter-modal').classList.add('show');
 }
 
-// ========== KILL / REVIVE ==========
-function killPlayer() {
-  const alive = state.players.filter(p => p.alive);
-  const name = prompt(`اختر لاعباً للقتل:\n${alive.map(p => `${p.id}. ${p.name}`).join('\n')}\n\nأدخل الرقم:`);
-  if (!name) return;
-  const p = state.players.find(x => x.id == parseInt(name));
-  if (!p || !p.alive) { showToast('لاعب غير صالح', 'error'); return; }
-  p.alive = false;
-  addLog('death', `💀 ${p.name} (${p.role}) أُعلن وفاته`, 'tag-death');
-  renderSidebar();
-  updateHeader();
-  checkWinConditions();
+function hunterSelectTarget(targetId) {
+  killPlayer(targetId, `قتل بواسطة الصياد قبل موته`);
+  document.getElementById('hunter-modal').classList.remove('show');
+  gameState.huntPending = false;
+  checkWinCondition();
 }
 
-function revivePlayer() {
-  const dead = state.players.filter(p => !p.alive);
-  if (dead.length === 0) { showToast('لا يوجد موتى', 'warn'); return; }
-  const name = prompt(`اختر لاعباً للإحياء:\n${dead.map(p => `${p.id}. ${p.name}`).join('\n')}\n\nأدخل الرقم:`);
-  if (!name) return;
-  const p = state.players.find(x => x.id == parseInt(name));
-  if (!p || p.alive) { showToast('لاعب غير صالح', 'error'); return; }
-  p.alive = true;
-  addLog('save', `💚 ${p.name} (${p.role}) أُحيي`, 'tag-save');
-  renderSidebar();
-  updateHeader();
+function cancelHunterAction() {
+  document.getElementById('hunter-modal').classList.remove('show');
+  gameState.huntPending = false;
+  checkWinCondition();
 }
 
-// ========== WIN CHECK ==========
-function checkWin() { checkWinConditions(true); }
+// ==================== NIGHT ACTIONS ====================
+function renderNightActions() {
+  let html = '';
+  const alive = gameState.players.filter(p => p.alive);
+  
+  // المافيا
+  const mafia = alive.filter(p => p.faction === 'mafia');
+  if (mafia.length > 0) {
+    html += `
+      <div class="night-action-card">
+        <div class="night-action-title"><div class="action-icon icon-red">🔪</div> المافيا</div>
+        <div class="night-action-subtitle">اختر لاعباً للاغتيال</div>
+        <select class="form-input" id="mafia-target" onchange="setNightAction('mafia_kill', this.value)">
+          <option value="">-- اختر الهدف --</option>
+          ${getMafiaValidTargets().map(p => `<option value="${p.id}">${p.name}</option>`).join('')}
+        </select>
+      </div>
+    `;
+  }
+  
+  // الطبيب
+  const doctors = alive.filter(p => p.role === 'doctor');
+  if (doctors.length > 0) {
+    html += `
+      <div class="night-action-card">
+        <div class="night-action-title"><div class="action-icon icon-green">⚕️</div> الطبيب</div>
+        <div class="night-action-subtitle">اختر لاعباً لإنقاذه</div>
+        <select class="form-input" id="doctor-target" onchange="setNightAction('doctor_save', this.value)">
+          <option value="">-- اختر الهدف --</option>
+          ${alive.map(p => `<option value="${p.id}">${p.name}</option>`).join('')}
+        </select>
+      </div>
+    `;
+  }
+  
+  // المحقق
+  const detectives = alive.filter(p => p.role === 'detective');
+  if (detectives.length > 0) {
+    html += `
+      <div class="night-action-card">
+        <div class="night-action-title"><div class="action-icon icon-blue">🔍</div> المحقق</div>
+        <div class="night-action-subtitle">تحقق من دور لاعب</div>
+        <select class="form-input" id="detective-target" onchange="setNightAction('detective_check', this.value)">
+          <option value="">-- اختر الهدف --</option>
+          ${alive.map(p => `<option value="${p.id}">${p.name}</option>`).join('')}
+        </select>
+      </div>
+    `;
+  }
+  
+  document.getElementById('night-actions').innerHTML = html;
+  updateFactionCounts();
+}
 
-function checkWinConditions(showAlways = false) {
-  const alivePlayers = state.players.filter(p => p.alive);
-  const aliveMafia = alivePlayers.filter(p => p.faction === 'mafia');
-  const aliveOthers = alivePlayers.filter(p => p.faction !== 'mafia');
+function getMafiaValidTargets() {
+  // استبعد أفراد المافيا من أهداف المافيا
+  return gameState.players.filter(p => p.alive && p.faction !== 'mafia');
+}
 
-  // Mafia win
-  if (aliveMafia.length >= aliveOthers.length && aliveMafia.length > 0) {
-    showResult('🔴', 'فازت المافيا!', `المافيا تساوت مع باقي اللاعبين (${aliveMafia.length} مقابل ${aliveOthers.length})`, '#e24b4a');
-    addLog('system', `🏆 فوز المافيا!`, 'tag-system');
+function setNightAction(action, playerId) {
+  if (!playerId) {
+    delete gameState.nightActions[action];
+  } else {
+    gameState.nightActions[action] = parseInt(playerId);
+  }
+}
+
+function executeNightActions() {
+  const mafiaKill = gameState.nightActions['mafia_kill'];
+  const doctorSave = gameState.nightActions['doctor_save'];
+  
+  if (mafiaKill && mafiaKill !== doctorSave) {
+    killPlayer(mafiaKill, 'قتل بواسطة المافيا ليلاً');
+  }
+  
+  gameState.nightActions = {};
+  checkWinCondition();
+}
+
+// ==================== PLAYER MANAGEMENT ====================
+function killPlayer(playerId, reason) {
+  const player = gameState.players.find(p => p.id === playerId);
+  if (!player) return;
+  
+  player.alive = false;
+  addLog(`${player.name} (${rolesDB[player.role].name}) مات - ${reason}`, 'death');
+}
+
+function checkWinCondition() {
+  const alive = gameState.players.filter(p => p.alive);
+  const aliveCity = alive.filter(p => p.faction === 'city');
+  const aliveMafia = alive.filter(p => p.faction === 'mafia');
+  
+  if (aliveMafia.length === 0) {
+    endGame('المدينة', 'فازت المدينة! لا توجد مافيا متبقية.');
     return true;
   }
-
-  // City win
-  if (aliveMafia.length === 0 && alivePlayers.length > 0) {
-    showResult('🏙️', 'فازت المدينة!', `تم القضاء على جميع أفراد المافيا!`, '#4a8fe2');
-    addLog('system', `🏆 فوز المدينة!`, 'tag-system');
+  
+  if (aliveMafia.length >= aliveCity.length) {
+    endGame('المافيا', 'فازت المافيا! السيطرة على المدينة.');
     return true;
   }
-
-  if (showAlways) {
-    showToast(`المافيا: ${aliveMafia.length} | الآخرون: ${aliveOthers.length} — اللعبة مستمرة`, 'success');
-  }
+  
   return false;
 }
 
-// ========== RESULT OVERLAY ==========
-function showResult(emoji, title, sub, color) {
-  document.getElementById('result-emoji').textContent = emoji;
-  document.getElementById('result-title').textContent = title;
-  document.getElementById('result-title').style.color = color || 'var(--gold)';
-  document.getElementById('result-sub').textContent = sub;
+function endGame(winner, message) {
+  gameState.phase = 'end';
+  document.getElementById('result-title').textContent = 'فاز: ' + winner;
+  document.getElementById('result-sub').textContent = message;
   document.getElementById('result-overlay').classList.add('show');
+  addLog(message, 'system');
 }
 
-// ========== SIDEBAR ==========
-function renderSidebar() {
-  const sidebar = document.getElementById('players-sidebar');
-  sidebar.innerHTML = state.players.map(p => `
-    <div class="player-card ${p.alive ? '' : 'dead'}" onclick="openPlayerModal(${p.id})">
-      <div class="player-num ${p.faction || ''}">${p.id}</div>
-      <div class="player-info">
-        <div class="player-name">${p.name}${p.alive ? '' : ' ✝'}</div>
-        <div class="player-role">${p.role || 'غير محدد'}</div>
-      </div>
-      <div class="player-status" style="background:${p.alive ? 'var(--green)' : 'var(--red)'}; box-shadow:0 0 5px ${p.alive ? 'var(--green)' : 'var(--red)'}"></div>
-    </div>
-  `).join('');
+// ==================== PHASE TRANSITIONS ====================
+function moveToDay() {
+  gameState.phase = 'day';
+  initializeVotes();
+  renderVoteTracker();
+  updateUI();
 }
 
-// ========== PLAYER MODAL ==========
-function openPlayerModal(id) {
-  const p = state.players.find(x => x.id === id);
-  if (!p) return;
-  state.modalTarget = id;
-  document.getElementById('modal-title').textContent = `${p.id}. ${p.name}`;
-  document.getElementById('modal-content').innerHTML = `
-    <div class="modal-row"><span class="modal-key">الدور</span><span class="modal-val">${p.role || '—'}</span></div>
-    <div class="modal-row"><span class="modal-key">الفصيل</span><span class="modal-val" style="color:var(--${p.faction==='mafia'?'red':p.faction==='neutral'?'orange':'blue'})">${factionName(p.faction || '—')}</span></div>
-    <div class="modal-row"><span class="modal-key">الحالة</span><span class="modal-val" style="color:var(--${p.alive?'green':'red'})">${p.alive ? '✅ حي' : '💀 ميت'}</span></div>
-    <div class="modal-row"><span class="modal-key">محمي الليلة؟</span><span class="modal-val">${p.protected ? 'نعم ✓' : 'لا'}</span></div>
-  `;
-  document.getElementById('player-modal').classList.add('show');
+function moveToNight() {
+  gameState.phase = 'night';
+  renderNightActions();
+  updateUI();
 }
 
-function closeModal() { document.getElementById('player-modal').classList.remove('show'); }
-
-function modalKillPlayer() {
-  const p = state.players.find(x => x.id === state.modalTarget);
-  if (!p) return;
-  if (!p.alive) { showToast('اللاعب ميت بالفعل', 'warn'); return; }
-  p.alive = false;
-  addLog('death', `💀 ${p.name} (${p.role}) أُعلن وفاته يدوياً`, 'tag-death');
-  renderSidebar();
-  updateHeader();
-  closeModal();
-  checkWinConditions();
+// ==================== UI UPDATES ====================
+function updateUI() {
+  updatePlayerList();
+  updateGameStats();
+  updatePhaseBadge();
+  
+  if (gameState.phase === 'day') {
+    renderVoteTracker();
+  } else if (gameState.phase === 'night') {
+    renderNightActions();
+  }
 }
 
-// ========== LOG ==========
-function addLog(type, text, tagClass) {
-  const now = new Date();
-  const time = `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
-  const entry = { type, text, tagClass, time, day: state.day, night: state.night };
-  state.log.unshift(entry);
-
-  const el = document.getElementById('game-log');
-  const logHtml = `
-    <div class="log-entry">
-      <div class="log-time">${time}</div>
-      <div class="log-content">
-        <div><span class="log-tag ${tagClass}">${type}</span></div>
-        <div class="log-text">${text}</div>
-      </div>
-    </div>`;
-  el.insertAdjacentHTML('afterbegin', logHtml);
-  document.getElementById('log-empty').style.display = 'none';
-
-  // Quick log (sidebar)
-  const ql = document.getElementById('quick-log');
-  ql.insertAdjacentHTML('afterbegin', logHtml);
-  // Keep only last 5
-  while (ql.children.length > 5) ql.removeChild(ql.lastChild);
-}
-
-function clearLog() {
-  state.log = [];
-  document.getElementById('game-log').innerHTML = '';
-  document.getElementById('quick-log').innerHTML = '';
-  document.getElementById('log-empty').style.display = 'block';
-}
-
-function exportLog() {
-  const text = state.log.map(e => `[${e.time}] [${e.type.toUpperCase()}] ${e.text.replace(/<[^>]+>/g,'')}`).join('\n');
-  const blob = new Blob([text], { type: 'text/plain' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `mafia-log-day${state.day}.txt`;
-  a.click();
-}
-
-// ========== ROLES REFERENCE ==========
-function renderRolesReference() {
-  const el = document.getElementById('roles-reference');
-  const inGame = state.roles.filter(r => r.count > 0);
-  el.innerHTML = inGame.map(r => `
-    <div class="log-entry" style="margin-bottom:0.5rem;">
-      <div style="font-size:1.2rem; flex-shrink:0;">${r.icon || '❓'}</div>
-      <div class="log-content">
-        <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.3rem;">
-          <span style="font-weight:700; font-size:0.9rem;">${r.name}</span>
-          <span class="role-badge badge-${r.faction}">${factionName(r.faction)}</span>
-          <span style="color:var(--text3); font-size:0.75rem;">× ${r.count}</span>
+function updatePlayerList() {
+  let html = '';
+  gameState.players.forEach(p => {
+    const statusDot = p.alive ? 
+      `<div class="player-status" style="background: ${p.faction === 'mafia' ? 'var(--red)' : 'var(--green)'}"></div>` 
+      : '';
+    
+    const classes = p.alive ? 'player-card' : 'player-card dead';
+    html += `
+      <div class="${classes}">
+        <div class="player-num ${p.faction === 'mafia' ? 'mafia' : 'city'}">${p.id}</div>
+        <div class="player-info">
+          <div class="player-name">${p.name}</div>
+          <div class="player-role">${rolesDB[p.role].name}</div>
         </div>
-        <div style="font-size:0.8rem; color:var(--text2); line-height:1.5;">${r.desc}</div>
-        <div style="font-size:0.75rem; color:var(--gold); margin-top:0.3rem;">🏆 ${r.win}</div>
+        ${statusDot}
       </div>
-    </div>
-  `).join('');
-
-  const wc = document.getElementById('win-conditions');
-  const factions = [...new Set(inGame.map(r => r.faction))];
-  wc.innerHTML = factions.map(f => {
-    const fRoles = inGame.filter(r => r.faction === f);
-    return `
-      <div class="win-cond-row">
-        <span class="role-badge badge-${f}">${factionName(f)}</span>
-        <span style="color:var(--text2); font-size:0.82rem;">${fRoles[0]?.win || '—'}</span>
-      </div>`;
-  }).join('');
+    `;
+  });
+  document.getElementById('players-sidebar').innerHTML = html;
 }
 
-// ========== FACTION STATUS ==========
-function renderFactionStatus() {
-  const el = document.getElementById('faction-status');
-  const mafia = state.players.filter(p => p.faction === 'mafia');
-  const city = state.players.filter(p => p.faction === 'city');
-  const neutral = state.players.filter(p => p.faction === 'neutral');
-
-  const factionBlock = (label, players, color) => `
-    <div style="margin-bottom:0.8rem;">
-      <div style="font-size:0.7rem; color:var(--text3); font-weight:700; margin-bottom:0.3rem;">${label}</div>
-      ${players.map(p => `
-        <div style="display:flex; align-items:center; gap:0.4rem; padding:0.2rem 0; font-size:0.78rem;">
-          <div style="width:6px;height:6px;border-radius:50%;background:${p.alive?color:'var(--text3)'}"></div>
-          <span style="${p.alive?'':'text-decoration:line-through; opacity:0.4'}">${p.name}</span>
-        </div>`).join('')}
-    </div>`;
-
-  el.innerHTML = factionBlock('🔴 المافيا', mafia, 'var(--red)') +
-    factionBlock('🏙️ المدينة', city, 'var(--green)') +
-    (neutral.length ? factionBlock('⚪ مستقل', neutral, 'var(--orange)') : '');
-}
-
-// ========== HEADER ==========
-function updateHeader() {
-  const alive = state.players.filter(p => p.alive).length;
-  const dead = state.players.filter(p => !p.alive).length;
-  const cityAlive = state.players.filter(p => p.alive && p.faction !== 'mafia' && p.faction !== 'neutral').length;
-  const mafiaAlive = state.players.filter(p => p.alive && p.faction === 'mafia').length;
+function updateGameStats() {
+  const alive = gameState.players.filter(p => p.alive).length;
+  const dead = gameState.players.filter(p => !p.alive).length;
+  const city = gameState.players.filter(p => p.alive && p.faction === 'city').length;
+  const mafia = gameState.players.filter(p => p.alive && p.faction === 'mafia').length;
+  
   document.getElementById('hdr-alive').textContent = alive;
   document.getElementById('hdr-dead').textContent = dead;
-  document.getElementById('hdr-city').textContent = cityAlive;
-  document.getElementById('hdr-mafia').textContent = mafiaAlive;
-  document.getElementById('phase-badge').textContent = state.phase === 'night' ? `🌙 الليلة ${state.night}` : `☀️ النهار ${state.day}`;
+  document.getElementById('hdr-city').textContent = city;
+  document.getElementById('hdr-mafia').textContent = mafia;
+  
+  document.getElementById('day-alive').textContent = alive;
+  document.getElementById('day-dead').textContent = dead;
+  document.getElementById('day-city').textContent = city;
+  document.getElementById('day-mafia').textContent = mafia;
+  
+  document.getElementById('night-mafia').textContent = mafia;
+  document.getElementById('night-city').textContent = city;
 }
 
-// ========== CUSTOM ROLE ==========
-function addCustomRole() {
-  const name = document.getElementById('custom-role-name').value.trim();
-  const faction = document.getElementById('custom-role-faction').value;
-  const order = parseInt(document.getElementById('custom-role-order').value) || 5;
-  const hasNight = document.getElementById('custom-role-night').value === 'yes';
-  const desc = document.getElementById('custom-role-desc').value.trim();
-  const win = document.getElementById('custom-role-win').value.trim();
-
-  if (!name) { showToast('أدخل اسم الدور', 'warn'); return; }
-
-  const newRole = {
-    id: 'custom_' + Date.now(),
-    name, faction, nightOrder: order, hasNight, count: 1,
-    desc: desc || 'دور مخصص',
-    win: win || 'شرط فوز مخصص',
-    icon: '⭐'
-  };
-
-  state.roles.push(newRole);
-  renderRolesGrid();
-  renderNightOrder();
-  showToast(`تم إضافة دور "${name}" ✓`, 'success');
-
-  document.getElementById('custom-role-name').value = '';
-  document.getElementById('custom-role-desc').value = '';
-  document.getElementById('custom-role-win').value = '';
+function updateFactionCounts() {
+  const alive = gameState.players.filter(p => p.alive);
+  const city = alive.filter(p => p.faction === 'city').length;
+  const mafia = alive.filter(p => p.faction === 'mafia').length;
+  
+  document.getElementById('night-mafia').textContent = mafia;
+  document.getElementById('night-city').textContent = city;
 }
 
-// ========== RESET ROLE COUNTS ==========
-function resetRoleCounts() {
-  state.roles.forEach(r => { r.count = 0; });
-  renderRolesGrid();
-  renderNightOrder();
-  showToast('تم تصفير جميع الأدوار', 'success');
+function updatePhaseBadge() {
+  const phases = { setup: 'إعداد اللعبة', day: 'النهار - التصويت', night: 'الليل - الإجراءات', end: 'نهاية اللعبة' };
+  document.getElementById('phase-badge').textContent = phases[gameState.phase] || 'غير معروف';
 }
 
-// ========== RESET ==========
-function resetGame() {
-  if (!confirm('هل تريد إعادة تعيين اللعبة بالكامل؟')) return;
-  state = {
-    started: false, day: 0, night: 0, phase: 'setup',
-    players: [], roles: JSON.parse(JSON.stringify(DEFAULT_ROLES)),
-    log: [], votes: {}, nightActions: {}, nightResults: { dead: [], saved: [] },
-    usedAbilities: [], modalTarget: null,
-  };
-  document.getElementById('game-log').innerHTML = '';
-  document.getElementById('quick-log').innerHTML = '';
-  document.getElementById('log-empty').style.display = 'block';
-  document.getElementById('players-sidebar').innerHTML = '';
-  document.getElementById('hdr-alive').textContent = '0';
-  document.getElementById('hdr-dead').textContent = '0';
-  document.getElementById('phase-badge').textContent = 'إعداد اللعبة';
-  init();
-  switchTab('setup');
-  showToast('تم إعادة تعيين اللعبة', 'success');
-}
-
-// ========== TABS ==========
-function switchTab(tab) {
+function switchTab(tabName) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('panel-' + tab).classList.add('active');
-  document.querySelectorAll('.tab').forEach(t => {
-    if (t.getAttribute('onclick')?.includes(`'${tab}'`)) t.classList.add('active');
+  
+  event.target.classList.add('active');
+  document.getElementById(`panel-${tabName}`).classList.add('active');
+}
+
+// ==================== LOGGING ====================
+function addLog(message, tag = 'system') {
+  const time = new Date().toLocaleTimeString('ar-SA');
+  gameState.log.push({ time, message, tag });
+  renderLog();
+}
+
+function renderLog() {
+  const tagMap = { night: 'tag-night', day: 'tag-day', death: 'tag-death', save: 'tag-save', vote: 'tag-vote', system: 'tag-system' };
+  const tagText = { night: 'ليل', day: 'نهار', death: 'موت', save: 'إنقاذ', vote: 'تصويت', system: 'نظام' };
+  
+  let html = '';
+  gameState.log.forEach(entry => {
+    html += `
+      <div class="log-entry">
+        <div class="log-time">${entry.time}</div>
+        <div class="log-content">
+          <div class="log-tag ${tagMap[entry.tag] || 'tag-system'}">${tagText[entry.tag] || 'نظام'}</div>
+          <div class="log-text">${entry.message}</div>
+        </div>
+      </div>
+    `;
   });
+  document.getElementById('event-log').innerHTML = html;
 }
 
-function setMobileNav(tab) {
-  document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.remove('active'));
-  const btn = document.getElementById('mnav-' + tab);
-  if (btn) btn.classList.add('active');
+// ==================== UTILITIES ====================
+function resetSetup() {
+  gameState.players = [];
+  gameState.log = [];
+  gameState.phase = 'setup';
+  generatePlayerSlots();
+  updateUI();
 }
 
-// ========== TOAST ==========
-function showToast(msg, type = 'success') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = `toast ${type} show`;
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => t.classList.remove('show'), 3000);
+function showToast(message, type = 'info') {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.className = `toast show ${type}`;
+  setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
-// ========== BOOT ==========
-state.roles = JSON.parse(JSON.stringify(DEFAULT_ROLES));
-init();
-renderSidebar();
+// ==================== INITIALIZATION ====================
+document.addEventListener('DOMContentLoaded', () => {
+  generatePlayerSlots();
+  updateUI();
+});
 </script>
 </body>
 </html>
