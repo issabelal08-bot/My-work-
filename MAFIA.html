@@ -732,11 +732,11 @@ select.form-input {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.92);
+  background: rgba(0,0,0,0.7);
   z-index: 150;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(5px);
 }
 .modal-overlay.show { display: flex; }
 .modal-box {
@@ -936,6 +936,7 @@ select.form-input {
 .badge-city { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-border); }
 .badge-special { background: var(--purple-bg); color: var(--purple); border: 1px solid var(--purple-border); }
 .badge-neutral { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-border); }
+
 /* ACTIONS ROW */
 .actions-row {
   display: flex;
@@ -994,9 +995,9 @@ select.form-input {
           <tr>
             <th style="width:40px;">#</th>
             <th>الاسم المستعار</th>
-            <th>الدور <span style="color:var(--text3); font-weight:400; font-size:0.6rem;">(مخفي)</span></th>
-            <th class="col-faction">الفصيل <span style="color:var(--text3); font-weight:400; font-size:0.6rem;">(مخفي)</span></th>
-            <th style="width:60px;">كشف</th>
+            <th>الدور</th>
+            <th class="col-faction">الفصيل</th>
+            <th style="width:60px;">إجراء</th>
           </tr>
         </thead>
         <tbody id="players-tbody"></tbody>
@@ -1103,8 +1104,6 @@ select.form-input {
       <button class="btn btn-ghost" onclick="killPlayer()">💀 إعلان وفاة</button>
       <button class="btn btn-ghost" onclick="revivePlayer()">💚 إحياء لاعب</button>
       <button class="btn btn-ghost" onclick="checkWin()">🏆 فحص الفوز</button>
-      <button class="btn btn-ghost" style="border-color:var(--red-border);color:var(--red);" onclick="activateBomberSacrifice()">💣 المتفجر يفجّر نفسه</button>
-      <button class="btn btn-ghost" style="border-color:var(--gold-border);color:var(--gold);" onclick="sunDayAction()">☀️ الشمس تبحث عن القمر</button>
     </div>
   </div>
 
@@ -1167,7 +1166,10 @@ select.form-input {
   <div class="modal-box" onclick="event.stopPropagation()">
     <div class="modal-title" id="modal-title">معلومات اللاعب</div>
     <div id="modal-content"></div>
-    <div style="margin-top:1rem; display:flex; gap:0.5rem; flex-wrap:wrap;" id="modal-actions"></div>
+    <div style="margin-top:1rem; display:flex; gap:0.5rem;">
+      <button class="btn btn-danger" onclick="modalKillPlayer()">💀 إعلان وفاة</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إغلاق</button>
+    </div>
   </div>
 </div>
 
@@ -1184,22 +1186,6 @@ select.form-input {
       <select class="form-input" id="hunter-target-select"></select>
     </div>
     <button class="btn btn-danger" style="width:100%;" onclick="confirmHunterKill()">🏹 تأكيد الاختيار</button>
-  </div>
-</div>
-
-<!-- BOMBER MODAL -->
-<div class="modal-overlay" id="bomber-modal">
-  <div class="modal-box" onclick="event.stopPropagation()">
-    <div style="text-align:center; margin-bottom:1rem;">
-      <div style="font-size:2.5rem;">💣</div>
-      <div class="modal-title" style="border:none; text-align:center; color:var(--red);">المتفجر!</div>
-      <div style="font-size:0.85rem; color:var(--text2); margin-bottom:1rem;" id="bomber-modal-desc">اختر لاعباً يأخذه معه</div>
-    </div>
-    <div class="form-group" style="margin-bottom:1rem;">
-      <label class="form-label">اختر الهدف</label>
-      <select class="form-input" id="bomber-target-select"></select>
-    </div>
-    <button class="btn btn-danger" style="width:100%;" onclick="confirmBomberKill()">💣 تأكيد</button>
   </div>
 </div>
 
@@ -1244,14 +1230,8 @@ const DEFAULT_ROLES = [
   { id:'mafia', name:'مافيا', faction:'mafia', nightOrder:1, hasNight:true, count:0,
     desc:'يساعدون العراب. يعرفون بعضهم منذ البداية.',
     win:'تساوي عدد المافيا مع بقية اللاعبين الأحياء.', icon:'🔴' },
-  { id:'gangster', name:'رجل العصابة', faction:'mafia', nightOrder:2, hasNight:true, count:0,
-    desc:'يهدد لاعباً كل ليلة — اللاعب المهدد لا يستطيع التصويت في النهار التالي (تأثير يوم واحد فقط).',
-    win:'تساوي عدد المافيا مع بقية اللاعبين الأحياء.', icon:'🗡️' },
-  { id:'bomber', name:'المتفجر', faction:'mafia', nightOrder:99, hasNight:false, count:0,
-    desc:'يمكنه التضحية بنفسه نهاراً قبل التصويت ليأخذ لاعباً معه. وإذا أُعدم يختار لاعباً يموت معه.',
-    win:'تساوي عدد المافيا مع بقية اللاعبين الأحياء.', icon:'💣' },
-  { id:'doctor', name:'الدكتور', faction:'city', nightOrder:3, hasNight:true, count:0,
-    desc:'يحمي لاعباً كل ليلة. لا يستطيع حماية نفسه ليلتين متتاليتين. لا يحمي العمدة بعد كشفه.',
+  { id:'doctor', name:'الدكتور', faction:'city', nightOrder:2, hasNight:true, count:0,
+    desc:'يحمي لاعباً كل ليلة. لا يستطيع حماية نفسه ليلتين متتاليتين.',
     win:'موت آخر فرد من المافيا.', icon:'💊' },
   { id:'detective', name:'المحقق', faction:'city', nightOrder:5, hasNight:true, count:0,
     desc:'يحقق في لاعب كل ليلة. يحصل على نتيجة: بريء أو مافيا.',
@@ -1259,30 +1239,18 @@ const DEFAULT_ROLES = [
   { id:'hunter', name:'الصياد', faction:'city', nightOrder:99, hasNight:false, count:0,
     desc:'عند موته يختار لاعباً يموت معه فوراً.',
     win:'موت آخر فرد من المافيا.', icon:'🏹' },
-  { id:'guard', name:'حارس الأمن', faction:'city', nightOrder:4, hasNight:true, count:0,
+  { id:'guard', name:'حارس الأمن', faction:'city', nightOrder:3, hasNight:true, count:0,
     desc:'يحمي لاعباً. إذا تعرض الهدف لهجوم يموت الحارس بدلاً منه.',
     win:'موت آخر فرد من المافيا.', icon:'🛡️' },
-  { id:'witch', name:'الساحر', faction:'city', nightOrder:6, hasNight:true, count:0,
+  { id:'witch', name:'الساحر', faction:'city', nightOrder:4, hasNight:true, count:0,
     desc:'يمتلك جرعة إحياء واحدة وجرعة قتل واحدة طوال اللعبة.',
     win:'موت آخر فرد من المافيا.', icon:'🧪' },
-  { id:'sniper', name:'القناص', faction:'city', nightOrder:7, hasNight:true, count:0,
-    desc:'يطلق النار ليلاً — إن أصاب مافيا مات الهدف ويبقى القناص. إن أصاب بريئاً ماتا معاً. رصاصة واحدة لـ10 لاعبين أو أقل، رصاصتان لأكثر من 10.',
-    win:'موت آخر فرد من المافيا.', icon:'🎯' },
-  { id:'mayor', name:'العمدة', faction:'city', nightOrder:99, hasNight:false, count:0,
-    desc:'يبدأ متخفياً. عند كشف نفسه يصبح صوته في التصويت = 3 أصوات. لا يمكن للدكتور حمايته بعد الكشف.',
-    win:'موت آخر فرد من المافيا.', icon:'🏛️' },
   { id:'citizen', name:'المواطن', faction:'city', nightOrder:99, hasNight:false, count:0,
     desc:'مواطن عادي بلا قدرة ليلية.',
     win:'موت آخر فرد من المافيا.', icon:'👤' },
   { id:'jester', name:'المهرج', faction:'neutral', nightOrder:99, hasNight:false, count:0,
     desc:'هدفه الوحيد أن يتم إعدامه نهاراً بالتصويت.',
     win:'إذا أُعدم بالتصويت نهاراً يفوز فوراً.', icon:'🤡' },
-  { id:'sun', name:'الشمس', faction:'neutral', nightOrder:99, hasNight:false, count:0,
-    desc:'يبحث عن القمر أثناء النهار — مرة كل يوم يحاول التعرف على لاعب. إذا اكتشف الشمس والقمر بعضهما يفوزان فوراً.',
-    win:'اكتشاف الشمس والقمر لبعضهما يفوزان فوراً.', icon:'☀️' },
-  { id:'moon', name:'القمر', faction:'neutral', nightOrder:8, hasNight:true, count:0,
-    desc:'يبحث عن الشمس أثناء الليل — مرة كل ليلة يحاول التعرف على لاعب. إذا اكتشف الشمس والقمر بعضهما يفوزان فوراً.',
-    win:'اكتشاف الشمس والقمر لبعضهما يفوزان فوراً.', icon:'🌙' },
 ];
 
 // ========== INIT ==========
@@ -1295,35 +1263,20 @@ function init() {
 // ========== ROLES GRID ==========
 function renderRolesGrid() {
   const grid = document.getElementById('roles-grid');
-  const factions = [
-    { key:'mafia', label:'🔴 فصيل المافيا', border:'var(--red-border)', color:'var(--red)' },
-    { key:'city',  label:'🏙️ فصيل المدينة', border:'var(--blue-border)', color:'var(--blue)' },
-    { key:'neutral', label:'⚪ الفصيل المستقل', border:'var(--orange-border)', color:'var(--orange)' },
-  ];
-
-  grid.innerHTML = factions.map(f => {
-    const fRoles = state.roles.filter(r => r.faction === f.key);
-    if (!fRoles.length) return '';
-    return `
-      <div style="grid-column:1/-1; padding:0.5rem 0.8rem; background:var(--bg3); border:1px solid ${f.border}; border-radius:var(--radius-sm); margin-bottom:0.3rem;">
-        <span style="font-size:0.75rem; font-weight:900; color:${f.color}; text-transform:uppercase; letter-spacing:1px;">${f.label}</span>
+  grid.innerHTML = state.roles.map((r,i) => `
+    <div class="role-card ${r.count > 0 ? 'selected' : ''}" id="rolecard-${r.id}">
+      <div class="role-card-faction faction-${r.faction}">${factionName(r.faction)}</div>
+      <div style="font-size:1.3rem; margin-bottom:0.3rem;">${r.icon || '❓'}</div>
+      <div class="role-card-name">${r.name}</div>
+      <div class="role-card-desc">${r.desc}</div>
+      <div class="role-count-control">
+        <button class="count-btn" onclick="changeRoleCount('${r.id}',-1)">−</button>
+        <span class="count-num" id="count-${r.id}">${r.count}</span>
+        <button class="count-btn" onclick="changeRoleCount('${r.id}',1)">+</button>
+        <span style="font-size:0.7rem; color:var(--text3); margin-right:0.3rem;">عدد</span>
       </div>
-      ${fRoles.map(r => `
-        <div class="role-card ${r.count > 0 ? 'selected' : ''}" id="rolecard-${r.id}">
-          <div class="role-card-faction faction-${r.faction}">${factionName(r.faction)}</div>
-          <div style="font-size:1.3rem; margin-bottom:0.3rem;">${r.icon || '❓'}</div>
-          <div class="role-card-name">${r.name}</div>
-          <div class="role-card-desc">${r.desc}</div>
-          <div class="role-count-control">
-            <button class="count-btn" onclick="changeRoleCount('${r.id}',-1)">−</button>
-            <span class="count-num" id="count-${r.id}">${r.count}</span>
-            <button class="count-btn" onclick="changeRoleCount('${r.id}',1)">+</button>
-            <span style="font-size:0.7rem; color:var(--text3); margin-right:0.3rem;">عدد</span>
-          </div>
-        </div>
-      `).join('')}
-    `;
-  }).join('');
+    </div>
+  `).join('');
 }
 
 function changeRoleCount(id, delta) {
@@ -1388,21 +1341,11 @@ function renderPlayerTable() {
   tbody.innerHTML = state.players.map(p => `
     <tr>
       <td style="color:var(--text3); font-weight:700;">${p.id}</td>
+      <td><input type="text" value="${p.name}" onchange="state.players[${p.id-1}].name=this.value; renderSidebar();" style="${p.alive?'':'opacity:0.5; text-decoration:line-through;'}"></td>
       <td>
-        <input type="text" value="${p.name}"
-          onchange="(function(v){ var pl=state.players.find(function(x){return x.id===${p.id};}); if(pl) pl.name=v; renderSidebar(); })(this.value)"
-          style="${p.alive?'':'opacity:0.45; text-decoration:line-through;'}">
+        ${p.role ? `<span class="role-badge badge-${p.faction}">${p.role}</span>` : '<span style="color:var(--text3); font-size:0.75rem;">غير محدد</span>'}
       </td>
-      <td>
-        ${p.role
-          ? `<span style="color:var(--text3); font-size:0.8rem; letter-spacing:2px; cursor:pointer;" onclick="openPlayerModal(${p.id})" title="اضغط للكشف">● ● ●</span>`
-          : '<span style="color:var(--text3); font-size:0.75rem;">—</span>'}
-      </td>
-      <td class="col-faction">
-        ${p.faction
-          ? `<span style="color:var(--text3); font-size:0.8rem; letter-spacing:2px;">● ●</span>`
-          : '—'}
-      </td>
+      <td>${p.faction ? `<span style="color:var(--${p.faction==='mafia'?'red':p.faction==='neutral'?'orange':'blue'})">${factionName(p.faction)}</span>` : '—'}</td>
       <td>
         <button class="btn btn-ghost" style="padding:0.2rem 0.5rem; font-size:0.7rem;" onclick="openPlayerModal(${p.id})">👁</button>
       </td>
@@ -1450,11 +1393,6 @@ function randomAssign() {
     p.faction = pool[i].faction;
     p.roleId = pool[i].roleId;
     p.alive = true;
-    p.votingBlocked = false;
-    p.mayorRevealed = false;
-    p.mayorVoteWeight = 1;
-    if (pool[i].roleId === 'sniper')
-      p.sniperBullets = state.players.length > 10 ? 2 : 1;
   });
 
   renderPlayerTable();
@@ -1582,43 +1520,10 @@ function renderNightPanel() {
             <select class="form-input" id="action-witch-kill">${noneOption}${aliveOptions}</select>
           </div>` : ''}
         </div>`;
-    } else if (r.id === 'moon') {
-      actionHTML = `
-        <div class="night-action-card">
-          <div class="night-action-title"><div class="action-icon icon-purple">🌙</div>القمر</div>
-          <div class="night-action-subtitle">يحاول التعرف على لاعب — هل هو الشمس؟</div>
-          <div class="form-group">
-            <label class="form-label">اللاعب المستهدف</label>
-            <select class="form-input" id="action-moon">${noneOption}${aliveOptions}</select>
-          </div>
-          <div id="moon-result" style="margin-top:0.8rem; font-size:0.8rem; min-height:20px;"></div>
-          <button class="btn btn-ghost" style="margin-top:0.5rem;" onclick="revealMoon()">🌙 كشف النتيجة (للمشرف)</button>
-        </div>`;
-    } else if (r.id === 'gangster') {
-      actionHTML = `
-        <div class="night-action-card">
-          <div class="night-action-title"><div class="action-icon icon-red">🗡️</div>رجل العصابة</div>
-          <div class="night-action-subtitle">يهدد لاعباً — لن يستطيع التصويت غداً</div>
-          <div class="form-group">
-            <label class="form-label">الهدف المهدَّد</label>
-            <select class="form-input" id="action-gangster">${noneOption}${nonMafiaOptions}</select>
-          </div>
-        </div>`;
-    } else if (r.id === 'sniper') {
-      const sp = playersWithRole[0];
-      if (sp && sp.sniperBullets === undefined)
-        sp.sniperBullets = state.players.length > 10 ? 2 : 1;
-      const rem = sp?.sniperBullets ?? 0;
-      actionHTML = `
-        <div class="night-action-card">
-          <div class="night-action-title"><div class="action-icon icon-blue">🎯</div>القناص</div>
-          <div class="night-action-subtitle">رصاصات متبقية: <strong style="color:var(--gold)">${rem}</strong> — إن أصاب بريئاً مات معه</div>
-          <div class="form-group">
-            <label class="form-label">الهدف</label>
-            <select class="form-input" id="action-sniper">${rem > 0 ? noneOption + aliveOptions : '<option value="">— نفدت الرصاصات —</option>'}</select>
-          </div>
-        </div>`;
     } else {
+      actionHTML = `
+        <div class="night-action-card">
+          <div class="night-action-title"><div class="action-icon icon-gold">${r.icon || '❓'}</div>${r.name}</div>
           <div class="night-action-subtitle">${r.desc}</div>
           <div class="form-group">
             <label class="form-label">الهدف</label>
@@ -1634,8 +1539,6 @@ function renderNightPanel() {
     if (actionHTML) grid.insertAdjacentHTML('beforeend', actionHTML);
   });
 }
-
-// gangster + sniper handled inside resolveNight
 
 // ========== DETECTIVE REVEAL ==========
 function revealDetective() {
@@ -1661,41 +1564,6 @@ function revealDetective() {
     `<div style="padding:0.5rem; border-radius:6px; background:var(--bg3); border:1px solid var(--border2);">
       <strong>${target.name}:</strong> ${result}
     </div>`;
-}
-
-// ========== MOON REVEAL ==========
-function revealMoon() {
-  const sel = document.getElementById('action-moon');
-  if (!sel || !sel.value) return;
-  const target = state.players.find(p => p.id == sel.value);
-  if (!target) return;
-  const isSun = target.roleId === 'sun';
-  const result = isSun ? '☀️ هذا هو الشمس! — تحقق من الشمس أيضاً' : `❌ ليس الشمس — دوره: ${target.role}`;
-  document.getElementById('moon-result').innerHTML =
-    `<div style="padding:0.5rem; border-radius:6px; background:var(--bg3); border:1px solid var(--border2);">
-      <strong>${target.name}:</strong> ${result}
-    </div>`;
-}
-
-// ========== SUN DAY ACTION ==========
-function sunTryFindMoon(targetId) {
-  const target = state.players.find(p => p.id == targetId);
-  const sunPlayer = state.players.find(p => p.alive && p.roleId === 'sun');
-  if (!target || !sunPlayer) return;
-  if (target.roleId === 'moon') {
-    sunPlayer.foundPartner = true;
-    const moonPlayer = target;
-    addLog('day', `الشمس: وجدت القمر (${moonPlayer.name})!`, 'tag-day');
-    if (moonPlayer.foundPartner) {
-      addLog('system', `الشمس والقمر اكتشفا بعضهما — يفوزان فوراً!`, 'tag-system');
-      showResult('☀️🌙', 'فاز الشمس والقمر!', 'اكتشف الاثنان بعضهما وفازا معاً!', '#f59e42');
-    } else {
-      showToast('الشمس وجدت القمر! ينتظر القمر أن يجدها هو أيضاً', 'success');
-    }
-  } else {
-    addLog('day', `الشمس: حاولت التعرف على ${target.name} — ليس القمر`, 'tag-day');
-    showToast(`${target.name} ليس القمر`, 'warn');
-  }
 }
 
 // ========== RESOLVE NIGHT ==========
@@ -1786,63 +1654,12 @@ function resolveNight() {
 
   if (detectTarget) {
     const dt = state.players.find(p => p.id == detectTarget);
-    addLog('night', `تحقيق المحقق: استهدف ${dt?.name || '؟'} — النتيجة ظهرت للمشرف فقط`, 'tag-night');
+    // detective result is secret — logged internally only for GM
+    addLog('night', `المحقق: حقّق في ${dt?.name || '؟'} — النتيجة ظهرت للمشرف فقط`, 'tag-night');
   }
 
-  // 5. Gangster: block target's vote next day
-  const gangsterTarget = document.getElementById('action-gangster')?.value;
-  if (gangsterTarget) {
-    const gTarget = state.players.find(p => p.id == gangsterTarget);
-    if (gTarget && gTarget.alive) {
-      gTarget.votingBlocked = true;
-      addLog('night', `رجل العصابة: هدَّد ${gTarget.name} — لن يستطيع التصويت غداً`, 'tag-night');
-    }
-  }
-
-  // 6. Sniper shot
-  const sniperTarget = document.getElementById('action-sniper')?.value;
-  if (sniperTarget) {
-    const sniperPlayer = state.players.find(p => p.alive && p.roleId === 'sniper');
-    const sTarget = state.players.find(p => p.id == sniperTarget);
-    if (sniperPlayer && sTarget && sTarget.alive && sniperPlayer.sniperBullets > 0) {
-      sniperPlayer.sniperBullets--;
-      if (sTarget.faction === 'mafia') {
-        sTarget.alive = false;
-        dead.push(sTarget);
-        events.push(`القناص أطلق النار على ${sTarget.name} وأصاب هدفاً من المافيا — مات الهدف وبقي القناص`);
-        addLog('death', `وفاة: ${sTarget.name} (${sTarget.role}) — أصابه القناص، وكان من المافيا، رصاصات القناص المتبقية: ${sniperPlayer.sniperBullets}`, 'tag-death');
-      } else {
-        sTarget.alive = false;
-        sniperPlayer.alive = false;
-        dead.push(sTarget);
-        dead.push(sniperPlayer);
-        events.push(`القناص أطلق النار على ${sTarget.name} لكنه كان بريئاً — ماتا معاً`);
-        addLog('death', `وفاة مزدوجة: القناص ${sniperPlayer.name} أصاب البريء ${sTarget.name} (${sTarget.role}) — ماتا معاً`, 'tag-death');
-      }
-    }
-  }
-
-  // 7. Moon tries to find Sun
-  const moonTarget = document.getElementById('action-moon')?.value;
-  if (moonTarget) {
-    const mTarget = state.players.find(p => p.id == moonTarget);
-    const moonPlayer = state.players.find(p => p.alive && p.roleId === 'moon');
-    if (mTarget && moonPlayer) {
-      if (mTarget.roleId === 'sun') {
-        moonPlayer.foundPartner = true;
-        const sunPlayer = mTarget;
-        if (sunPlayer.foundPartner) {
-          // Both found each other
-          addLog('system', `الشمس والقمر اكتشفا بعضهما — يفوزان فوراً!`, 'tag-system');
-          showResult('☀️🌙', 'فاز الشمس والقمر!', 'اكتشف الاثنان بعضهما وفازا معاً!', '#f59e42');
-        } else {
-          addLog('night', `القمر: وجد الشمس! ينتظر تأكيد الشمس له خلال النهار`, 'tag-night');
-        }
-      } else {
-        addLog('night', `القمر: حاول التعرف على ${mTarget.name} — ليس الشمس`, 'tag-night');
-      }
-    }
-  }
+  state.nightResults = { dead, saved };
+  state.night++;
   addLog('night', `انتهت الليلة ${state.night - 1} — وفيات: ${dead.length} | إنقاذات: ${saved.length}`, 'tag-night');
 
   renderSidebar();
@@ -1898,44 +1715,28 @@ function renderDayPanel(events) {
 // ========== VOTING ==========
 function renderVoteList() {
   const alive = state.players.filter(p => p.alive);
-
-  // Build vote entries including "no one"
-  const entries = [
-    { id: 'none', name: '🚫 لا أحد', faction: 'none', isNone: true },
-    ...alive
-  ];
-
-  // Compute weighted counts (mayor ×3)
-  const getWeightedCount = (p) => {
-    const base = state.votes[p.id || 'none'] || 0;
-    return base;
-  };
-
-  const allCounts = entries.map(e => state.votes[e.id || 'none'] || 0);
-  const totalVotes = allCounts.reduce((s,c) => s+c, 0);
+  const allCounts = alive.map(p => state.votes[p.id] || 0);
+  const totalVotes = allCounts.reduce((s, c) => s + c, 0);
   const maxVotes = Math.max(1, ...allCounts);
 
   document.getElementById('vote-list').innerHTML = `
     <div style="display:flex; justify-content:space-between; align-items:center; padding:0.4rem 0.2rem; margin-bottom:0.5rem; border-bottom:1px solid var(--border);">
       <span style="font-size:0.75rem; color:var(--text3); font-weight:700;">اللاعب</span>
-      <span style="font-size:0.75rem; color:var(--text3); font-weight:700;">مجموع: <span style="color:var(--gold);">${totalVotes}</span> / ${alive.length}</span>
+      <span style="font-size:0.75rem; color:var(--text3); font-weight:700;">مجموع الأصوات: <span style="color:var(--gold);">${totalVotes}</span> / ${alive.length}</span>
     </div>
-    ${entries.map(p => {
-      const vid = p.isNone ? 'none' : p.id;
-      const count = state.votes[vid] || 0;
+    ${alive.map(p => {
+      const count = state.votes[p.id] || 0;
       const pct = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
       const width = Math.round((count / maxVotes) * 100);
-      const blocked = !p.isNone && p.votingBlocked;
-      const mayorMark = !p.isNone && p.mayorRevealed ? ' 🏛️×3' : '';
       return `
-        <div class="vote-player-row" style="${blocked ? 'opacity:0.45;' : ''}">
-          <span class="player-num ${p.faction || ''}" style="${p.isNone ? 'background:var(--bg4);color:var(--text3);' : ''}">${p.isNone ? '—' : p.id}</span>
-          <span class="vote-name">${p.name}${mayorMark}${blocked ? ' <span style="font-size:0.65rem;color:var(--orange);">[محظور]</span>' : ''}</span>
-          <div class="vote-bar-wrap"><div class="vote-bar" style="width:${count?width:0}%; background:${p.isNone?'var(--text3)':'var(--red)'}"></div></div>
+        <div class="vote-player-row">
+          <span class="player-num ${p.faction || ''}">${p.id}</span>
+          <span class="vote-name">${p.name}</span>
+          <div class="vote-bar-wrap"><div class="vote-bar" style="width:${count?width:0}%"></div></div>
           <span style="font-size:0.75rem; color:var(--text3); min-width:32px; text-align:center;">${count > 0 ? pct+'%' : ''}</span>
           <span class="vote-count" style="min-width:24px; text-align:center;">${count}</span>
-          <button class="vote-btn" onclick="changeVote('${vid}',-1)">−</button>
-          <button class="vote-btn" onclick="changeVote('${vid}',1)" style="background:var(--red-bg);border-color:var(--red-border);color:var(--red);">+</button>
+          <button class="vote-btn" onclick="changeVote(${p.id},-1)">−</button>
+          <button class="vote-btn" onclick="changeVote(${p.id},1)" style="background:var(--red-bg);border-color:var(--red-border);color:var(--red);">+</button>
         </div>`;
     }).join('')}`;
 }
@@ -1953,16 +1754,7 @@ function clearVotes() {
 
 function declareResult() {
   const alive = state.players.filter(p => p.alive);
-
-  // Build weighted vote entries including "none"
-  const entries = [
-    { id:'none', name:'لا أحد', isNone:true, count: state.votes['none'] || 0 },
-    ...alive.map(p => ({
-      id: p.id, name: p.name, p,
-      isNone: false,
-      count: state.votes[p.id] || 0
-    }))
-  ].filter(e => e.count > 0);
+  const entries = alive.map(p => ({ p, count: state.votes[p.id] || 0 })).filter(e => e.count > 0);
 
   if (entries.length === 0) { showToast('لا توجد أصوات بعد', 'warn'); return; }
 
@@ -1971,26 +1763,14 @@ function declareResult() {
   const tied = entries.filter(e => e.count === top.count);
 
   if (tied.length > 1) {
-    const names = tied.map(e => e.name).join(' / ');
+    const names = tied.map(e => e.p.name).join(' / ');
     showToast(`تعادل بين: ${names} — أعد التصويت أو كسر التعادل يدوياً`, 'warn');
-    return;
-  }
-
-  // Clear vote blocks from previous gangster
-  alive.forEach(p => { p.votingBlocked = false; });
-
-  // "No one" wins
-  if (top.isNone) {
-    addLog('vote', `التصويت: قرر أهل المدينة عدم إعدام أي شخص هذا اليوم (${top.count} صوت لخيار "لا أحد")`, 'tag-vote');
-    showToast('لم يتم إعدام أحد — اليوم انتهى بسلام', 'success');
-    state.day++;
-    renderVoteList();
     return;
   }
 
   const target = top.p;
   target.alive = false;
-  addLog('vote', `إعدام: ${target.name} (${target.role}) — حصل على ${top.count} صوت من أصل ${alive.length} لاعب`, 'tag-vote');
+  addLog('vote', `إعدام: ${target.name} (${target.role}) — حصل على ${top.count} صوت من أصل ${alive.length} لاعب وكان الأعلى تصويتاً`, 'tag-vote');
   showToast(`⚖️ تم إعدام ${target.name} — ${target.role}`, 'warn');
 
   // Jester win
@@ -2003,15 +1783,12 @@ function declareResult() {
 
   renderSidebar(); updateHeader(); renderFactionStatus();
 
-  // Bomber executed — picks a target
-  if (target.roleId === 'bomber') {
-    showBomberModal(() => { state.day++; checkWinConditions(); });
-    return;
-  }
-
   // Hunter executed during day
   if (target.roleId === 'hunter') {
-    showHunterModal(() => { state.day++; checkWinConditions(); });
+    showHunterModal(() => {
+      state.day++;
+      checkWinConditions();
+    });
     return;
   }
 
@@ -2049,44 +1826,6 @@ function confirmHunterKill() {
   if (state._hunterCallback) { state._hunterCallback(); state._hunterCallback = null; }
 }
 
-// ========== BOMBER MODAL ==========
-function showBomberModal(callback, desc = 'اختر لاعباً يأخذه معه — القدرة إجبارية') {
-  const aliveOthers = state.players.filter(p => p.alive && p.roleId !== 'bomber');
-  if (!aliveOthers.length) { if (callback) callback(); return; }
-  document.getElementById('bomber-modal-desc').textContent = desc;
-  document.getElementById('bomber-target-select').innerHTML =
-    aliveOthers.map(p => `<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');
-  document.getElementById('bomber-modal').classList.add('show');
-  state._bomberCallback = callback;
-}
-
-function confirmBomberKill() {
-  const sel = document.getElementById('bomber-target-select');
-  if (!sel.value) { showToast('اختر لاعباً', 'warn'); return; }
-  const target = state.players.find(p => p.id == sel.value);
-  if (!target || !target.alive) { showToast('لاعب غير صالح', 'error'); return; }
-  target.alive = false;
-  addLog('death', `قدرة المتفجر: ${target.name} (${target.role}) — اختاره المتفجر ليموت معه`, 'tag-death');
-  showToast(`💣 ${target.name} مات بقدرة المتفجر`, 'warn');
-  document.getElementById('bomber-modal').classList.remove('show');
-  renderSidebar(); updateHeader(); renderFactionStatus(); checkWinConditions();
-  if (state._bomberCallback) { state._bomberCallback(); state._bomberCallback = null; }
-}
-
-function activateBomberSacrifice() {
-  const bomber = state.players.find(p => p.alive && p.roleId === 'bomber');
-  if (!bomber) { showToast('لا يوجد متفجر حي في اللعبة', 'warn'); return; }
-  if (bomber.bomberUsed) { showToast('المتفجر استخدم قدرته بالفعل', 'warn'); return; }
-  bomber.alive = false;
-  bomber.bomberUsed = true;
-  addLog('death', `المتفجر ${bomber.name} فجّر نفسه — ينتهي النهار فوراً ويختار هدفاً يموت معه`, 'tag-death');
-  renderSidebar(); updateHeader();
-  showBomberModal(() => {
-    showToast('انتهى النهار بتفجير المتفجر — ابدأ الليل التالي', 'warn');
-    checkWinConditions();
-  }, 'المتفجر فجّر نفسه — اختر لاعباً يأخذه معه');
-}
-
 // ========== GO TO NIGHT ==========
 function goToNight() {
   state.phase = 'night';
@@ -2120,15 +1859,6 @@ function revivePlayer() {
   renderSidebar(); updateHeader();
 }
 
-function sunDayAction() {
-  const sunPlayer = state.players.find(p => p.alive && p.roleId === 'sun');
-  if (!sunPlayer) { showToast('لا يوجد لاعب الشمس حي', 'warn'); return; }
-  const alive = state.players.filter(p => p.alive && p.id !== sunPlayer.id);
-  const targetId = prompt(`الشمس تبحث عن القمر:\n${alive.map(p=>`${p.id}. ${p.name}`).join('\n')}\n\nأدخل رقم اللاعب:`);
-  if (!targetId) return;
-  sunTryFindMoon(parseInt(targetId));
-}
-
 // ========== WIN CHECK ==========
 function checkWin() { checkWinConditions(true); }
 
@@ -2136,15 +1866,6 @@ function checkWinConditions(showAlways = false) {
   const alivePlayers = state.players.filter(p => p.alive);
   const aliveMafia = alivePlayers.filter(p => p.faction === 'mafia');
   const aliveOthers = alivePlayers.filter(p => p.faction !== 'mafia');
-
-  // Sun & Moon win — check if both found each other
-  const sunP = state.players.find(p => p.roleId === 'sun');
-  const moonP = state.players.find(p => p.roleId === 'moon');
-  if (sunP && moonP && sunP.foundPartner && moonP.foundPartner) {
-    showResult('☀️🌙', 'فاز الشمس والقمر!', 'اكتشف الاثنان بعضهما وفازا معاً!', '#f59e42');
-    addLog('system', `فوز الشمس والقمر!`, 'tag-system');
-    return true;
-  }
 
   if (aliveMafia.length >= aliveOthers.length && aliveMafia.length > 0) {
     showResult('🔴', 'فازت المافيا!', `المافيا (${aliveMafia.length}) تساوت مع باقي اللاعبين (${aliveOthers.length})`, '#e24b4a');
@@ -2169,7 +1890,7 @@ function showResult(emoji, title, sub, color) {
   document.getElementById('result-overlay').classList.add('show');
 }
 
-// ========== SIDEBAR — roles hidden ==========
+// ========== SIDEBAR — no cross symbol ==========
 function renderSidebar() {
   const sidebar = document.getElementById('players-sidebar');
   sidebar.innerHTML = state.players.map(p => `
@@ -2177,10 +1898,7 @@ function renderSidebar() {
       <div class="player-num ${p.faction || ''}">${p.id}</div>
       <div class="player-info">
         <div class="player-name">${p.name}</div>
-        <div class="player-role" style="color:var(--text3); letter-spacing:2px; font-size:0.7rem;">
-          ${p.role ? '● ● ●' : 'غير محدد'}
-          ${p.alive ? '' : ' · <span style="color:var(--red);font-size:0.65rem;letter-spacing:0;">ميت</span>'}
-        </div>
+        <div class="player-role">${p.role || 'غير محدد'}${p.alive ? '' : ' · <span style="color:var(--red);font-size:0.65rem;">ميت</span>'}</div>
       </div>
       <div class="player-status" style="background:${p.alive ? 'var(--green)' : 'var(--red)'}; box-shadow:0 0 5px ${p.alive ? 'var(--green)' : 'var(--red)'}"></div>
     </div>
@@ -2193,31 +1911,12 @@ function openPlayerModal(id) {
   if (!p) return;
   state.modalTarget = id;
   document.getElementById('modal-title').textContent = `${p.id}. ${p.name}`;
-
-  const mayorRevealed = p.roleId === 'mayor' && p.mayorRevealed;
-  const blockedLabel = p.votingBlocked ? ' <span style="color:var(--orange);font-size:0.7rem;">[محظور التصويت]</span>' : '';
-  const sniperBullets = p.roleId === 'sniper' ? ` (رصاصات: ${p.sniperBullets ?? '?'})` : '';
-
   document.getElementById('modal-content').innerHTML = `
-    <div class="modal-row"><span class="modal-key">الدور</span><span class="modal-val">${p.role || '—'}${sniperBullets}</span></div>
+    <div class="modal-row"><span class="modal-key">الدور</span><span class="modal-val">${p.role || '—'}</span></div>
     <div class="modal-row"><span class="modal-key">الفصيل</span><span class="modal-val" style="color:var(--${p.faction==='mafia'?'red':p.faction==='neutral'?'orange':'blue'})">${factionName(p.faction || '—')}</span></div>
     <div class="modal-row"><span class="modal-key">الحالة</span><span class="modal-val" style="color:var(--${p.alive?'green':'red'})">${p.alive ? '✅ حي' : '💀 ميت'}</span></div>
     <div class="modal-row"><span class="modal-key">محمي الليلة؟</span><span class="modal-val">${p.protected ? 'نعم ✓' : 'لا'}</span></div>
-    ${p.roleId==='mayor' ? `<div class="modal-row"><span class="modal-key">العمدة مكشوف؟</span><span class="modal-val">${mayorRevealed ? 'نعم — صوته ×3' : 'لا — متخفٍ'}</span></div>` : ''}
-    ${p.votingBlocked ? `<div class="modal-row"><span class="modal-key">التصويت</span><span class="modal-val" style="color:var(--orange);">محظور هذا اليوم</span></div>` : ''}
   `;
-
-  const actions = document.getElementById('modal-actions');
-  actions.innerHTML = '';
-  if (p.alive) {
-    actions.innerHTML += `<button class="btn btn-danger" onclick="modalKillPlayer()">💀 إعلان وفاة</button>`;
-    if (p.roleId === 'mayor' && !p.mayorRevealed)
-      actions.innerHTML += `<button class="btn btn-ghost" style="border-color:var(--gold-border);color:var(--gold);" onclick="modalRevealMayor()">🏛️ كشف العمدة</button>`;
-  } else {
-    actions.innerHTML += `<button class="btn btn-success" onclick="modalRevivePlayer()">💚 إحياء اللاعب</button>`;
-  }
-  actions.innerHTML += `<button class="btn btn-ghost" onclick="closeModal()">إغلاق</button>`;
-
   document.getElementById('player-modal').classList.add('show');
 }
 
@@ -2225,29 +1924,14 @@ function closeModal() { document.getElementById('player-modal').classList.remove
 
 function modalKillPlayer() {
   const p = state.players.find(x => x.id === state.modalTarget);
-  if (!p || !p.alive) return;
+  if (!p) return;
+  if (!p.alive) { showToast('اللاعب ميت بالفعل', 'warn'); return; }
   p.alive = false;
-  addLog('death', `${p.name} (${p.role}) — أُعلن وفاته يدوياً من قِبل المشرف`, 'tag-death');
-  renderSidebar(); updateHeader(); closeModal(); checkWinConditions();
-}
-
-function modalRevivePlayer() {
-  const p = state.players.find(x => x.id === state.modalTarget);
-  if (!p || p.alive) return;
-  p.alive = true;
-  addLog('save', `المشرف أحيا اللاعب ${p.name} (${p.role}) — عاد إلى اللعبة`, 'tag-save');
-  showToast(`💚 ${p.name} عاد إلى الحياة`, 'success');
-  renderSidebar(); updateHeader(); closeModal(); checkWinConditions();
-}
-
-function modalRevealMayor() {
-  const p = state.players.find(x => x.id === state.modalTarget);
-  if (!p || !p.alive || p.roleId !== 'mayor') return;
-  p.mayorRevealed = true;
-  p.mayorVoteWeight = 3;
-  addLog('day', `العمدة ${p.name} كشف عن نفسه — صوته يساوي الآن 3 أصوات في التصويت`, 'tag-day');
-  showToast(`🏛️ ${p.name} كشف عن نفسه — صوته ×3`, 'success');
+  addLog('death', `${p.name} (${p.role}) أُعلن وفاته يدوياً`, 'tag-death');
+  renderSidebar();
+  updateHeader();
   closeModal();
+  checkWinConditions();
 }
 
 // ========== LOG ==========
