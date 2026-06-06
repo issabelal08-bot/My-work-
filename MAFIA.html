@@ -984,7 +984,7 @@ select.form-input {
     <div class="setup-grid">
       <div class="form-group" style="grid-column: 1/-1;">
         <label class="form-label">عدد اللاعبين</label>
-        <input type="number" class="form-input" id="player-count" value="10" min="4" max="30" onchange="generatePlayerSlots()">
+        <input type="number" class="form-input" id="player-count" value="10" min="4" max="30" onchange="generatePlayerSlots(); validateRoleCounts();">
       </div>
     </div>
 
@@ -1006,6 +1006,14 @@ select.form-input {
 
     <div class="section-title" style="margin-bottom: 1rem;">توزيع الأدوار</div>
     <div class="roles-grid" id="roles-grid"></div>
+    <div style="display:flex; align-items:center; gap:0.8rem; padding:0.7rem 1rem; background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius-sm); margin-bottom:0.5rem;">
+      <span style="font-size:0.8rem; color:var(--text2);">مجموع الأدوار:</span>
+      <span id="roles-total-count" style="font-size:1.1rem; font-weight:900; color:var(--gold);">0</span>
+      <span style="font-size:0.8rem; color:var(--text3);">من</span>
+      <span id="roles-player-count" style="font-size:1.1rem; font-weight:900; color:var(--text2);">0</span>
+      <span style="font-size:0.8rem; color:var(--text3);">لاعب</span>
+      <span id="roles-match-indicator" style="margin-right:auto; font-size:0.8rem; font-weight:700;"></span>
+    </div>
 
     <div class="divider"></div>
 
@@ -1284,8 +1292,18 @@ function changeRoleCount(id, delta) {
 function validateRoleCounts() {
   const total = state.roles.reduce((s, r) => s + r.count, 0);
   const playerCount = parseInt(document.getElementById('player-count').value) || 0;
-  if (total !== playerCount) {
-    showToast(`مجموع الأدوار: ${total} | اللاعبون: ${playerCount} — يجب أن يتساووا`, 'warn');
+  document.getElementById('roles-total-count').textContent = total;
+  document.getElementById('roles-player-count').textContent = playerCount;
+  const ind = document.getElementById('roles-match-indicator');
+  if (total === playerCount && total > 0) {
+    ind.textContent = '✓ مطابق';
+    ind.style.color = 'var(--green)';
+  } else if (total > playerCount) {
+    ind.textContent = `زيادة ${total - playerCount}`;
+    ind.style.color = 'var(--red)';
+  } else {
+    ind.textContent = total === 0 ? '' : `ناقص ${playerCount - total}`;
+    ind.style.color = 'var(--gold)';
   }
 }
 
@@ -2039,6 +2057,7 @@ function resetRoleCounts() {
   state.roles.forEach(r => { r.count = 0; });
   renderRolesGrid();
   renderNightOrder();
+  validateRoleCounts();
   showToast('تم تصفير جميع الأدوار', 'success');
 }
 
