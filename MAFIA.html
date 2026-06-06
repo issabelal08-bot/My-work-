@@ -147,6 +147,134 @@ body::before {
   border-right: 1px solid var(--border);
 }
 
+@media (max-width: 1100px) {
+  .app { grid-template-columns: 220px 1fr; }
+  .sidebar-right { display: none; }
+}
+
+@media (max-width: 768px) {
+  /* hide both sidebars on mobile */
+  .sidebar { display: none; }
+  .app { grid-template-columns: 1fr; }
+
+  /* header compact */
+  .header { padding: 0.6rem 1rem; gap: 0.5rem; }
+  .logo { font-size: 1.1rem; }
+  .header-stats { gap: 0.4rem; margin-right: auto; flex-wrap: wrap; }
+  .stat-pill { font-size: 0.7rem; padding: 0.2rem 0.5rem; }
+  .phase-badge { font-size: 0.7rem; padding: 0.2rem 0.6rem; white-space: nowrap; }
+
+  /* main padding */
+  .main { padding: 0.8rem 0.8rem 5rem; }
+
+  /* tabs: scrollable horizontal */
+  .tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 0.2rem;
+    flex-wrap: nowrap;
+    padding-bottom: 0;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { padding: 0.4rem 0.7rem; font-size: 0.78rem; white-space: nowrap; flex-shrink: 0; }
+
+  /* setup grid single col */
+  .setup-grid { grid-template-columns: 1fr; }
+
+  /* roles grid 2 col */
+  .roles-grid { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
+  .role-card { padding: 0.7rem; }
+  .role-card-desc { font-size: 0.7rem; }
+
+  /* night grid single col */
+  .night-grid { grid-template-columns: 1fr; }
+
+  /* summary 2x2 */
+  .summary-row { grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+  .summary-num { font-size: 1.4rem; }
+
+  /* players table: hide faction col */
+  .players-table .col-faction { display: none; }
+
+  /* vote bar narrower */
+  .vote-bar-wrap { width: 70px; }
+
+  /* action buttons full width */
+  .actions-row { flex-direction: column; }
+  .actions-row .btn { width: 100%; justify-content: center; }
+
+  /* win check bar stack */
+  .win-check-bar { flex-wrap: wrap; gap: 0.5rem; }
+  .faction-counter { flex: 1 1 40%; }
+
+  /* bottom nav bar */
+  .mobile-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg2);
+    border-top: 1px solid var(--border2);
+    z-index: 200;
+    backdrop-filter: blur(20px);
+  }
+
+  .mobile-nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 0.3rem;
+    background: transparent;
+    border: none;
+    color: var(--text3);
+    font-family: 'Tajawal', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 700;
+    cursor: pointer;
+    gap: 0.2rem;
+    transition: color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-nav-btn .nav-icon { font-size: 1.3rem; line-height: 1; }
+  .mobile-nav-btn.active { color: var(--gold); }
+  .mobile-nav-btn:active { background: var(--bg3); }
+
+  /* modal full screen on mobile */
+  .modal-box {
+    width: 95vw;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  /* result box compact */
+  .result-box { padding: 2rem 1.2rem; }
+  .result-emoji { font-size: 3rem; }
+  .result-title { font-size: 1.5rem; }
+
+  /* players table responsive */
+  .players-table { font-size: 0.78rem; }
+  .players-table th, .players-table td { padding: 0.4rem 0.4rem; }
+
+  /* role card count buttons bigger tap target */
+  .count-btn { width: 32px; height: 32px; font-size: 1.1rem; }
+
+  /* form inputs bigger on mobile */
+  .form-input { font-size: 1rem; padding: 0.7rem 0.8rem; }
+  select.form-input { font-size: 1rem; }
+
+  /* night action cards full width */
+  .night-action-card { padding: 1rem; }
+}
+
+@media (min-width: 769px) {
+  .mobile-nav { display: none; }
+}
+
 .section-title {
   font-size: 0.7rem;
   font-weight: 700;
@@ -645,19 +773,6 @@ select.form-input {
 }
 .win-cond-row:last-child { border-bottom: none; }
 
-/* RESPONSIVE TWEAKS */
-@media (max-width: 1100px) {
-  .app { grid-template-columns: 240px 1fr 260px; }
-}
-
-@media (max-width: 900px) {
-  .app { grid-template-columns: 1fr; }
-  .sidebar { display: none; }
-  .setup-grid { grid-template-columns: 1fr; }
-  .night-grid { grid-template-columns: 1fr; }
-  .summary-row { grid-template-columns: 1fr 1fr; }
-}
-
 /* SCROLLBAR */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -881,7 +996,7 @@ select.form-input {
             <th style="width:40px;">#</th>
             <th>الاسم المستعار</th>
             <th>الدور</th>
-            <th>الفصيل</th>
+            <th class="col-faction">الفصيل</th>
             <th style="width:60px;">إجراء</th>
           </tr>
         </thead>
@@ -1033,7 +1148,24 @@ select.form-input {
 
 </div><!-- /app -->
 
-<!-- PLAYER MODAL -->
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mobile-nav">
+  <button class="mobile-nav-btn active" id="mnav-setup" onclick="switchTab('setup');setMobileNav('setup')">
+    <span class="nav-icon">⚙️</span>إعداد
+  </button>
+  <button class="mobile-nav-btn" id="mnav-night" onclick="switchTab('night');setMobileNav('night')">
+    <span class="nav-icon">🌙</span>الليل
+  </button>
+  <button class="mobile-nav-btn" id="mnav-day" onclick="switchTab('day');setMobileNav('day')">
+    <span class="nav-icon">☀️</span>النهار
+  </button>
+  <button class="mobile-nav-btn" id="mnav-log" onclick="switchTab('log');setMobileNav('log')">
+    <span class="nav-icon">📋</span>السجل
+  </button>
+  <button class="mobile-nav-btn" id="mnav-roles" onclick="switchTab('roles');setMobileNav('roles')">
+    <span class="nav-icon">📖</span>الأدوار
+  </button>
+</nav>
 <div class="modal-overlay" id="player-modal" onclick="closeModal()">
   <div class="modal-box" onclick="event.stopPropagation()">
     <div class="modal-title" id="modal-title">معلومات اللاعب</div>
@@ -1509,6 +1641,7 @@ function resolveNight() {
   updateHeader();
   checkWinConditions();
   switchTab('day');
+  setMobileNav('day');
 }
 
 // ========== SKIP NIGHT ==========
@@ -1631,6 +1764,7 @@ function goToNight() {
   state.phase = 'night';
   renderNightPanel();
   switchTab('night');
+  setMobileNav('night');
   addLog('night', `🌙 بدأت الليلة ${state.night}`, 'tag-night');
 }
 
@@ -1912,13 +2046,16 @@ function resetGame() {
 function switchTab(tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  event?.target?.classList.add('active');
   document.getElementById('panel-' + tab).classList.add('active');
-
-  // Fix: find tab button by data
   document.querySelectorAll('.tab').forEach(t => {
     if (t.getAttribute('onclick')?.includes(`'${tab}'`)) t.classList.add('active');
   });
+}
+
+function setMobileNav(tab) {
+  document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('mnav-' + tab);
+  if (btn) btn.classList.add('active');
 }
 
 // ========== TOAST ==========
