@@ -1233,24 +1233,24 @@ const DEFAULT_ROLES = [
   { id:'doctor', name:'الدكتور', faction:'city', nightOrder:2, hasNight:true, count:0,
     desc:'يحمي لاعباً كل ليلة. لا يستطيع حماية نفسه ليلتين متتاليتين.',
     win:'موت آخر فرد من المافيا.', icon:'💊' },
-  { id:'guard', name:'حارس الأمن', faction:'city', nightOrder:3, hasNight:true, count:0,
-    desc:'يحمي لاعباً. إذا تعرض الهدف لهجوم يموت الحارس بدلاً منه.',
-    win:'موت آخر فرد من المافيا.', icon:'🛡️' },
-  { id:'witch', name:'الساحر', faction:'city', nightOrder:4, hasNight:true, count:0,
-    desc:'يمتلك جرعة إحياء واحدة وجرعة قتل واحدة طوال اللعبة.',
-    win:'موت آخر فرد من المافيا.', icon:'🧪' },
   { id:'detective', name:'المحقق', faction:'city', nightOrder:5, hasNight:true, count:0,
     desc:'يحقق في لاعب كل ليلة. يحصل على نتيجة: بريء أو مافيا.',
     win:'موت آخر فرد من المافيا.', icon:'🔍' },
   { id:'hunter', name:'الصياد', faction:'city', nightOrder:99, hasNight:false, count:0,
     desc:'عند موته يختار لاعباً يموت معه فوراً.',
     win:'موت آخر فرد من المافيا.', icon:'🏹' },
-  { id:'jester', name:'المهرج', faction:'neutral', nightOrder:99, hasNight:false, count:0,
-    desc:'هدفه الوحيد أن يتم إعدامه نهاراً بالتصويت.',
-    win:'إذا أُعدم بالتصويت نهاراً يفوز فوراً.', icon:'🤡' },
+  { id:'guard', name:'حارس الأمن', faction:'city', nightOrder:3, hasNight:true, count:0,
+    desc:'يحمي لاعباً. إذا تعرض الهدف لهجوم يموت الحارس بدلاً منه.',
+    win:'موت آخر فرد من المافيا.', icon:'🛡️' },
+  { id:'witch', name:'الساحر', faction:'city', nightOrder:4, hasNight:true, count:0,
+    desc:'يمتلك جرعة إحياء واحدة وجرعة قتل واحدة طوال اللعبة.',
+    win:'موت آخر فرد من المافيا.', icon:'🧪' },
   { id:'citizen', name:'المواطن', faction:'city', nightOrder:99, hasNight:false, count:0,
     desc:'مواطن عادي بلا قدرة ليلية.',
     win:'موت آخر فرد من المافيا.', icon:'👤' },
+  { id:'jester', name:'المهرج', faction:'neutral', nightOrder:99, hasNight:false, count:0,
+    desc:'هدفه الوحيد أن يتم إعدامه نهاراً بالتصويت.',
+    win:'إذا أُعدم بالتصويت نهاراً يفوز فوراً.', icon:'🤡' },
 ];
 
 // ========== INIT ==========
@@ -1547,13 +1547,19 @@ function revealDetective() {
   const target = state.players.find(p => p.id == sel.value);
   if (!target) return;
   const godfatherInvests = state.usedAbilities.filter(a => a.includes('detect-godfather'));
-  let result;
+  let result, logResult;
   if (target.roleId === 'godfather' && godfatherInvests.length === 0) {
     result = '✅ بريء (العراب يظهر بريئاً في أول تحقيق)';
+    logResult = `النتيجة: بريء — ملاحظة: هو في الحقيقة العراب لكن يظهر بريئاً في أول تحقيق`;
     state.usedAbilities.push('detect-godfather');
+  } else if (target.faction === 'mafia') {
+    result = `🔴 مافيا! — دوره: ${target.role}`;
+    logResult = `النتيجة: مافيا — دوره الحقيقي: ${target.role}`;
   } else {
-    result = target.faction === 'mafia' ? `🔴 مافيا! (${target.role})` : `✅ بريء — ${target.role}`;
+    result = `✅ بريء — دوره: ${target.role}`;
+    logResult = `النتيجة: بريء — دوره: ${target.role}`;
   }
+  addLog('night', `تحقيق المحقق: استهدف ${target.name} — ${logResult}`, 'tag-night');
   document.getElementById('detective-result').innerHTML =
     `<div style="padding:0.5rem; border-radius:6px; background:var(--bg3); border:1px solid var(--border2);">
       <strong>${target.name}:</strong> ${result}
@@ -1591,8 +1597,8 @@ function resolveNight() {
       guard.alive = false;
       dead.push(guard);
       const wardName = state.players.find(p => p.id == guardTarget)?.name || '';
-      events.push(`محاولة اغتيال على ${wardName} — تصدّى لها الحارس ومات`);
-      addLog('death', `الحارس ${guard.name} مات دفاعاً`, 'tag-death');
+      events.push(`المافيا حاولت اغتيال ${wardName} — حارس الأمن (${guard.name}) تصدّى للهجوم ومات بدلاً منه`);
+      addLog('death', `حارس الأمن: ${guard.name} — مات دفاعاً عن ${wardName} بعد تصدّيه لهجوم المافيا`, 'tag-death');
     }
   }
 
@@ -1602,12 +1608,13 @@ function resolveNight() {
     if (wTarget && wTarget.alive) {
       if (doctorTarget == witchKill) {
         saved.push(wTarget);
-        events.push(`محاولة قتل فشلت — تم إنقاذ ${wTarget.name}`);
+        events.push(`الساحر استخدم جرعة القتل على ${wTarget.name} — الدكتور كان يحميه فنجا من الموت`);
+        addLog('save', `إنقاذ: ${wTarget.name} — الساحر حاول قتله لكن الدكتور كان يحميه في نفس الوقت`, 'tag-save');
       } else {
         wTarget.alive = false;
         dead.push(wTarget);
-        events.push(`${wTarget.name} لقي حتفه خلال الليل`);
-        addLog('death', `${wTarget.name} (${wTarget.role}) قتله الساحر`, 'tag-death');
+        events.push(`الساحر استخدم جرعة القتل على ${wTarget.name} — مات فوراً`);
+        addLog('death', `وفاة: ${wTarget.name} (${wTarget.role}) — قتله الساحر بجرعة القتل، لم يكن أحد يحميه`, 'tag-death');
         state.usedAbilities.push('witch-kill');
       }
     }
@@ -1618,8 +1625,8 @@ function resolveNight() {
     const wRevive = state.players.find(p => p.id == witchHeal && !p.alive);
     if (wRevive) {
       wRevive.alive = true;
-      events.push(`أُحيي لاعب خلال الليل`);
-      addLog('save', `${wRevive.name} (${wRevive.role}) أُحيي بالساحر`, 'tag-save');
+      events.push(`الساحر استخدم جرعة الإحياء على ${wRevive.name} — عاد إلى الحياة`);
+      addLog('save', `إحياء: ${wRevive.name} (${wRevive.role}) — الساحر استخدم جرعة الإحياء عليه وعاد للعبة`, 'tag-save');
       state.usedAbilities.push('witch-heal');
     }
   }
@@ -1633,23 +1640,27 @@ function resolveNight() {
       if (!guardProtected) {
         if (doctorProtected) {
           saved.push(target);
-          events.push(`محاولة اغتيال فشلت — تم إنقاذ ${target.name}`);
-          addLog('save', `${target.name} نجا بفضل الدكتور`, 'tag-save');
+          events.push(`المافيا حاولت اغتيال ${target.name} — الدكتور كان يحميه فنجا من الموت`);
+          addLog('save', `إنقاذ: ${target.name} (${target.role}) — المافيا استهدفته لكن الدكتور كان يحميه في نفس الوقت`, 'tag-save');
         } else {
           target.alive = false;
           dead.push(target);
-          events.push(`${target.name} لقي حتفه خلال الليل`);
-          addLog('death', `${target.name} (${target.role}) اغتالته المافيا`, 'tag-death');
+          events.push(`المافيا اغتالت ${target.name} — مات ولم يكن أحد يحميه`);
+          addLog('death', `وفاة: ${target.name} (${target.role}) — اغتالته المافيا، لم يكن الدكتور أو الحارس يحميانه`, 'tag-death');
         }
       }
     }
   }
 
-  if (detectTarget) addLog('night', `المحقق حقق في لاعب — النتيجة سرية`, 'tag-night');
+  if (detectTarget) {
+    const dt = state.players.find(p => p.id == detectTarget);
+    // detective result is secret — logged internally only for GM
+    addLog('night', `المحقق: حقّق في ${dt?.name || '؟'} — النتيجة ظهرت للمشرف فقط`, 'tag-night');
+  }
 
   state.nightResults = { dead, saved };
   state.night++;
-  addLog('night', `انتهت الليلة ${state.night - 1} — ${dead.length} وفاة`, 'tag-night');
+  addLog('night', `انتهت الليلة ${state.night - 1} — وفيات: ${dead.length} | إنقاذات: ${saved.length}`, 'tag-night');
 
   renderSidebar();
   updateHeader();
@@ -1705,21 +1716,29 @@ function renderDayPanel(events) {
 function renderVoteList() {
   const alive = state.players.filter(p => p.alive);
   const allCounts = alive.map(p => state.votes[p.id] || 0);
+  const totalVotes = allCounts.reduce((s, c) => s + c, 0);
   const maxVotes = Math.max(1, ...allCounts);
 
-  document.getElementById('vote-list').innerHTML = alive.map(p => {
-    const count = state.votes[p.id] || 0;
-    const width = Math.round((count / maxVotes) * 100);
-    return `
-      <div class="vote-player-row">
-        <span class="player-num ${p.faction || ''}">${p.id}</span>
-        <span class="vote-name">${p.name}</span>
-        <div class="vote-bar-wrap"><div class="vote-bar" style="width:${count?width:0}%"></div></div>
-        <span class="vote-count" style="min-width:28px; text-align:center;">${count || 0}</span>
-        <button class="vote-btn" onclick="changeVote(${p.id},-1)">−</button>
-        <button class="vote-btn" onclick="changeVote(${p.id},1)" style="background:var(--red-bg);border-color:var(--red-border);color:var(--red);">+</button>
-      </div>`;
-  }).join('');
+  document.getElementById('vote-list').innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:0.4rem 0.2rem; margin-bottom:0.5rem; border-bottom:1px solid var(--border);">
+      <span style="font-size:0.75rem; color:var(--text3); font-weight:700;">اللاعب</span>
+      <span style="font-size:0.75rem; color:var(--text3); font-weight:700;">مجموع الأصوات: <span style="color:var(--gold);">${totalVotes}</span> / ${alive.length}</span>
+    </div>
+    ${alive.map(p => {
+      const count = state.votes[p.id] || 0;
+      const pct = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
+      const width = Math.round((count / maxVotes) * 100);
+      return `
+        <div class="vote-player-row">
+          <span class="player-num ${p.faction || ''}">${p.id}</span>
+          <span class="vote-name">${p.name}</span>
+          <div class="vote-bar-wrap"><div class="vote-bar" style="width:${count?width:0}%"></div></div>
+          <span style="font-size:0.75rem; color:var(--text3); min-width:32px; text-align:center;">${count > 0 ? pct+'%' : ''}</span>
+          <span class="vote-count" style="min-width:24px; text-align:center;">${count}</span>
+          <button class="vote-btn" onclick="changeVote(${p.id},-1)">−</button>
+          <button class="vote-btn" onclick="changeVote(${p.id},1)" style="background:var(--red-bg);border-color:var(--red-border);color:var(--red);">+</button>
+        </div>`;
+    }).join('')}`;
 }
 
 function changeVote(playerId, delta) {
@@ -1751,7 +1770,7 @@ function declareResult() {
 
   const target = top.p;
   target.alive = false;
-  addLog('vote', `${target.name} (${target.role}) أُعدم بـ ${top.count} صوت`, 'tag-vote');
+  addLog('vote', `إعدام: ${target.name} (${target.role}) — حصل على ${top.count} صوت من أصل ${alive.length} لاعب وكان الأعلى تصويتاً`, 'tag-vote');
   showToast(`⚖️ تم إعدام ${target.name} — ${target.role}`, 'warn');
 
   // Jester win
@@ -1797,7 +1816,7 @@ function confirmHunterKill() {
   if (!target || !target.alive) { showToast('لاعب غير صالح', 'error'); return; }
 
   target.alive = false;
-  addLog('death', `الصياد أخذ ${target.name} (${target.role}) معه`, 'tag-death');
+  addLog('death', `قدرة الصياد: ${target.name} (${target.role}) — الصياد اختاره ليموت معه قبل رحيله`, 'tag-death');
   showToast(`🏹 ${target.name} مات بقدرة الصياد`, 'warn');
 
   document.getElementById('hunter-modal').classList.remove('show');
@@ -1919,25 +1938,33 @@ function modalKillPlayer() {
 function addLog(type, text, tagClass) {
   const now = new Date();
   const time = `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
-  const entry = { type, text, tagClass, time, day: state.day, night: state.night };
+  const phase = state.phase === 'night' ? `ليلة ${state.night}` : `نهار ${state.day}`;
+  const entry = { type, text, tagClass, time, phase };
   state.log.unshift(entry);
 
-  const el = document.getElementById('game-log');
+  const labelMap = {
+    'tag-death': 'وفاة', 'tag-save': 'إنقاذ', 'tag-vote': 'تصويت',
+    'tag-night': 'ليل', 'tag-day': 'نهار', 'tag-system': 'نظام'
+  };
+  const label = labelMap[tagClass] || type;
+
   const logHtml = `
     <div class="log-entry">
-      <div class="log-time">${time}</div>
+      <div class="log-time" style="min-width:54px;">
+        <div>${time}</div>
+        <div style="font-size:0.6rem; color:var(--text3); margin-top:2px;">${phase}</div>
+      </div>
       <div class="log-content">
-        <div><span class="log-tag ${tagClass}">${type}</span></div>
+        <div><span class="log-tag ${tagClass}">${label}</span></div>
         <div class="log-text">${text}</div>
       </div>
     </div>`;
-  el.insertAdjacentHTML('afterbegin', logHtml);
+
+  document.getElementById('game-log').insertAdjacentHTML('afterbegin', logHtml);
   document.getElementById('log-empty').style.display = 'none';
 
-  // Quick log (sidebar)
   const ql = document.getElementById('quick-log');
   ql.insertAdjacentHTML('afterbegin', logHtml);
-  // Keep only last 5
   while (ql.children.length > 5) ql.removeChild(ql.lastChild);
 }
 
