@@ -254,9 +254,10 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
     <div class="section-title" style="margin-bottom:1rem">&#x625;&#x62C;&#x631;&#x627;&#x621;&#x627;&#x62A; &#x627;&#x644;&#x644;&#x64A;&#x644;</div>
     <div class="night-grid" id="night-actions-grid"></div>
     <div class="divider"></div>
+    <div id="night-special-actions"></div>
     <div class="actions-row">
-      <button class="btn btn-primary" onclick="resolveNight()">&#x26A1; &#x62A;&#x646;&#x641;&#x64A;&#x630; &#x625;&#x62C;&#x631;&#x627;&#x621;&#x627;&#x62A; &#x627;&#x644;&#x644;&#x64A;&#x644;</button>
-      <button class="btn btn-ghost" onclick="skipNight()">&#x23ED;&#xFE0F; &#x62A;&#x62E;&#x637;&#x64A; &#x627;&#x644;&#x644;&#x64A;&#x644;</button>
+      <button class="btn btn-primary" onclick="resolveNight()">⚡ تنفيذ إجراءات الليل</button>
+      <button class="btn btn-ghost" onclick="skipNight()">⏭️ تخطي الليل</button>
     </div>
   </div>
   <div class="panel" id="panel-day">
@@ -277,12 +278,10 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
     </div>
     <div class="divider"></div>
     <div class="section-title" style="margin-bottom:1rem">&#x625;&#x62C;&#x631;&#x627;&#x621;&#x627;&#x62A; &#x62E;&#x627;&#x635;&#x629;</div>
-    <div class="special-actions-grid">
-      <button class="btn btn-ghost" onclick="killPlayer()">&#x1F480; &#x625;&#x639;&#x644;&#x627;&#x646; &#x648;&#x641;&#x627;&#x629;</button>
-      <button class="btn btn-ghost" onclick="revivePlayer()">&#x1F49A; &#x625;&#x62D;&#x64A;&#x627;&#x621; &#x644;&#x627;&#x639;&#x628;</button>
-      <button class="btn btn-ghost" onclick="checkWin()">&#x1F3C6; &#x641;&#x62D;&#x635; &#x627;&#x644;&#x641;&#x648;&#x632;</button>
-      <button class="btn btn-ghost" style="border-color:var(--red-border);color:var(--red)" onclick="activateBomberSacrifice()">&#x1F4A3; &#x627;&#x644;&#x645;&#x62A;&#x641;&#x62C;&#x631; &#x64A;&#x641;&#x62C;&#x651;&#x631; &#x646;&#x641;&#x633;&#x647;</button>
-      <button class="btn btn-ghost" style="border-color:var(--gold-border);color:var(--gold)" onclick="sunDayAction()">&#x2600;&#xFE0F; &#x627;&#x644;&#x634;&#x645;&#x633; &#x62A;&#x628;&#x62D;&#x62B;</button>
+    <div class="special-actions-grid" id="special-actions-grid">
+      <button class="btn btn-ghost" onclick="killPlayer()">💀 إعلان وفاة</button>
+      <button class="btn btn-ghost" onclick="revivePlayer()">💚 إحياء لاعب</button>
+      <button class="btn btn-ghost" onclick="checkWin()">🏆 فحص الفوز</button>
     </div>
   </div>
   <div class="panel" id="panel-log">
@@ -419,17 +418,70 @@ function renderNightPanel(){
   sorted.forEach(r=>{
     const pwr=state.players.filter(p=>p.alive&&p.roleId===r.id);if(!pwr.length)return;
     let h='';
-    if(r.id==='mafia'||r.id==='godfather'){if(grid.querySelector('[data-mafia]'))return;h=`<div class="night-action-card" data-mafia="1"><div class="night-action-title"><div class="action-icon icon-red">🔴</div>هجوم المافيا</div><div class="night-action-subtitle">أعضاء المافيا مستبعدون تلقائياً</div><div class="form-group"><label class="form-label">الضحية</label><select class="form-input" id="action-mafia">${none}${nmOpts}</select></div></div>`;}
-    else if(r.id==='gangster'){h=`<div class="night-action-card"><div class="night-action-title"><div class="action-icon icon-red">🗡️</div>رجل العصابة</div><div class="night-action-subtitle">يهدد لاعباً — لن يستطيع التصويت غداً</div><div class="form-group"><label class="form-label">الهدف المهدَّد</label><select class="form-input" id="action-gangster">${none}${nmOpts}</select></div></div>`;}
-    else if(r.id==='doctor'){h=`<div class="night-action-card"><div class="night-action-title"><div class="action-icon icon-green">💊</div>الدكتور</div><div class="night-action-subtitle">اختر من تحمي هذه الليلة</div><div class="form-group"><label class="form-label">الهدف المحمي</label><select class="form-input" id="action-doctor">${none}${aOpts}</select></div></div>`;}
-    else if(r.id==='guard'){h=`<div class="night-action-card"><div class="night-action-title"><div class="action-icon icon-blue">🛡️</div>حارس الأمن</div><div class="night-action-subtitle">يحمي هدفاً ويموت عنه إن هُوجم</div><div class="form-group"><label class="form-label">الهدف المحمي</label><select class="form-input" id="action-guard">${none}${aOpts}</select></div></div>`;}
-    else if(r.id==='detective'){h=`<div class="night-action-card"><div class="night-action-title"><div class="action-icon icon-purple">🔍</div>المحقق</div><div class="night-action-subtitle">يحقق في لاعب ويعرف هويته</div><div class="form-group"><label class="form-label">الهدف</label><select class="form-input" id="action-detective">${none}${aOpts}</select></div><div id="detective-result" style="margin-top:0.8rem;font-size:0.8rem;min-height:20px"></div><button class="btn btn-ghost" style="margin-top:0.5rem" onclick="revealDetective()">🔍 كشف النتيجة (للمشرف)</button></div>`;}
+    // MAFIA GROUP: godfather + mafia + gangster + bomber all share one attack card
+    if(r.id==='mafia'||r.id==='godfather'||r.id==='gangster'||r.id==='bomber'){
+      if(grid.querySelector('[data-mafia]'))return;
+      // gangster threat options (exclude self = gangster player)
+      const gangPlayer=state.players.find(p=>p.alive&&p.roleId==='gangster');
+      const gangOpts=nonMafia.filter(p=>p.id!==(gangPlayer?.id)).map(p=>`<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');
+      const hasGangster=state.players.some(p=>p.alive&&p.roleId==='gangster');
+      h=`<div class="night-action-card" data-mafia="1">
+        <div class="night-action-title"><div class="action-icon icon-red">🔴</div>المافيا — إجراءات الليل</div>
+        <div class="night-action-subtitle">أعضاء المافيا مستبعدون من قائمة الأهداف</div>
+        <div class="form-group"><label class="form-label">🗡️ الاغتيال (العراب + المافيا)</label><select class="form-input" id="action-mafia">${none}${nmOpts}</select></div>
+        ${hasGangster?`<div class="form-group" style="margin-top:0.7rem"><label class="form-label">🗡️ تهديد رجل العصابة</label><select class="form-input" id="action-gangster">${none}${gangOpts}</select></div>`:''}
+      </div>`;
+    }
+    else if(r.id==='doctor'){
+      // Exclude mayor if revealed
+      const mayorRevealed=state.players.some(p=>p.alive&&p.roleId==='mayor'&&p.mayorRevealed);
+      const docOpts=alive.filter(p=>!(mayorRevealed&&p.roleId==='mayor')).map(p=>`<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');
+      h=`<div class="night-action-card"><div class="night-action-title"><div class="action-icon icon-green">💊</div>الدكتور</div>
+        <div class="night-action-subtitle">اختر من تحمي هذه الليلة${mayorRevealed?' — العمدة المكشوف لا يمكن حمايته':''}</div>
+        <div class="form-group"><label class="form-label">الهدف المحمي</label><select class="form-input" id="action-doctor">${none}${docOpts}</select></div></div>`;}
+    else if(r.id==='guard'){
+      // Guard cannot protect self
+      const guardPlayer=pwr[0];
+      const guardOpts=alive.filter(p=>p.id!==guardPlayer?.id).map(p=>`<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');
+      h=`<div class="night-action-card"><div class="night-action-title"><div class="action-icon icon-blue">🛡️</div>حارس الأمن</div>
+        <div class="night-action-subtitle">يحمي هدفاً ويموت عنه إن هُوجم — لا يستطيع حماية نفسه</div>
+        <div class="form-group"><label class="form-label">الهدف المحمي</label><select class="form-input" id="action-guard">${none}${guardOpts}</select></div></div>`;}
+    else if(r.id==='detective'){
+      // Detective cannot investigate self
+      const detPlayer=pwr[0];
+      const detOpts=alive.filter(p=>p.id!==detPlayer?.id).map(p=>`<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');
+      h=`<div class="night-action-card"><div class="night-action-title"><div class="action-icon icon-purple">🔍</div>المحقق</div>
+        <div class="night-action-subtitle">يحقق في لاعب ويعرف هويته — لا يستطيع التحقيق في نفسه</div>
+        <div class="form-group"><label class="form-label">الهدف</label><select class="form-input" id="action-detective">${none}${detOpts}</select></div>
+        <div id="detective-result" style="margin-top:0.8rem;font-size:0.8rem;min-height:20px"></div>
+        <button class="btn btn-ghost" style="margin-top:0.5rem" onclick="revealDetective()">🔍 كشف النتيجة (للمشرف)</button></div>`;}
     else if(r.id==='witch'){const hu=state.usedAbilities.includes('witch-heal');const ku=state.usedAbilities.includes('witch-kill');const dOpts=state.players.filter(p=>!p.alive).map(p=>`<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');h=`<div class="night-action-card"><div class="night-action-title"><div class="action-icon icon-purple">🧪</div>الساحر</div><div class="night-action-subtitle">إحياء: ${hu?'✗ مستخدمة':'✓ متاحة'} | قتل: ${ku?'✗ مستخدمة':'✓ متاحة'}</div>${!hu?`<div class="form-group" style="margin-bottom:0.7rem"><label class="form-label">🩺 إحياء لاعب</label><select class="form-input" id="action-witch-heal">${none}${dOpts}</select></div>`:''}${!ku?`<div class="form-group"><label class="form-label">☠️ قتل لاعب</label><select class="form-input" id="action-witch-kill">${none}${aOpts}</select></div>`:''}</div>`;}
-    else if(r.id==='sniper'){const sp=pwr[0];if(sp&&sp.sniperBullets===undefined)sp.sniperBullets=state.players.length>10?2:1;const rem=sp?.sniperBullets??0;h=`<div class="night-action-card"><div class="night-action-title"><div class="action-icon icon-blue">🎯</div>القناص</div><div class="night-action-subtitle">رصاصات متبقية: <strong style="color:var(--gold)">${rem}</strong> — إن أصاب بريئاً مات معه</div><div class="form-group"><label class="form-label">الهدف</label><select class="form-input" id="action-sniper">${rem>0?none+aOpts:'<option value="">— نفدت الرصاصات —</option>'}</select></div></div>`;}
-    else if(r.id==='moon'){h=`<div class="night-action-card"><div class="night-action-title"><div class="action-icon icon-purple">🌙</div>القمر</div><div class="night-action-subtitle">يحاول التعرف على لاعب — هل هو الشمس؟</div><div class="form-group"><label class="form-label">اللاعب المستهدف</label><select class="form-input" id="action-moon">${none}${aOpts}</select></div><div id="moon-result" style="margin-top:0.8rem;font-size:0.8rem;min-height:20px"></div><button class="btn btn-ghost" style="margin-top:0.5rem" onclick="revealMoon()">🌙 كشف النتيجة (للمشرف)</button></div>`;}
+    else if(r.id==='sniper'){
+      // Sniper cannot target self
+      const sp=pwr[0];if(sp&&sp.sniperBullets===undefined)sp.sniperBullets=state.players.length>10?2:1;
+      const rem=sp?.sniperBullets??0;
+      const sniperOpts=alive.filter(p=>p.id!==sp?.id).map(p=>`<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');
+      h=`<div class="night-action-card"><div class="night-action-title"><div class="action-icon icon-blue">🎯</div>القناص</div>
+        <div class="night-action-subtitle">رصاصات متبقية: <strong style="color:var(--gold)">${rem}</strong> — إن أصاب بريئاً مات معه — لا يستطيع إطلاق النار على نفسه</div>
+        <div class="form-group"><label class="form-label">الهدف</label><select class="form-input" id="action-sniper">${rem>0?none+sniperOpts:'<option value="">— نفدت الرصاصات —</option>'}</select></div></div>`;}
+    else if(r.id==='moon'){
+      // Moon cannot target self
+      const moonP=pwr[0];
+      const moonOpts=alive.filter(p=>p.id!==moonP?.id).map(p=>`<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');
+      h=`<div class="night-action-card"><div class="night-action-title"><div class="action-icon icon-purple">🌙</div>القمر</div>
+        <div class="night-action-subtitle">يحاول التعرف على لاعب — هل هو الشمس؟ لا يستطيع اختيار نفسه</div>
+        <div class="form-group"><label class="form-label">اللاعب المستهدف</label><select class="form-input" id="action-moon">${none}${moonOpts}</select></div>
+        <div id="moon-result" style="margin-top:0.8rem;font-size:0.8rem;min-height:20px"></div>
+        <button class="btn btn-ghost" style="margin-top:0.5rem" onclick="revealMoon()">🌙 كشف النتيجة (للمشرف)</button></div>`;}
     else{h=`<div class="night-action-card"><div class="night-action-title"><div class="action-icon icon-gold">${r.icon||'❓'}</div>${r.name}</div><div class="night-action-subtitle">${r.desc}</div><div class="form-group"><label class="form-label">الهدف</label><select class="form-input" id="action-custom-${r.id}">${none}${aOpts}</select></div></div>`;}
     if(h)grid.insertAdjacentHTML('beforeend',h);
   });
+  // Night special actions: bomber button if alive bomber exists
+  const nsa=document.getElementById('night-special-actions');
+  if(nsa){
+    const bomberAlive=state.players.find(p=>p.alive&&p.roleId==='bomber'&&!p.bomberUsed);
+    nsa.innerHTML=bomberAlive?`<div class="divider"></div><div class="section-title" style="margin-bottom:0.8rem">إجراءات خاصة بالليل</div><div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1rem"><button class="btn btn-ghost" style="border-color:var(--red-border);color:var(--red)" onclick="activateBomberSacrifice()">💣 المتفجر يفجّر نفسه</button></div>`:'';
+  }
 }
 function revealDetective(){const s=document.getElementById('action-detective');if(!s||!s.value)return;const t=state.players.find(p=>p.id==s.value);if(!t)return;const gi=state.usedAbilities.filter(a=>a==='detect-godfather').length;let res,logR;if(t.roleId==='godfather'&&gi===0){res='✅ بريء (العراب يظهر بريئاً في أول تحقيق)';logR='النتيجة: بريء — هو في الحقيقة العراب لكن يظهر بريئاً في التحقيق الأول';state.usedAbilities.push('detect-godfather');}else if(t.faction==='mafia'){res=`🔴 مافيا! — دوره: ${t.role}`;logR=`النتيجة: مافيا — دوره الحقيقي: ${t.role}`;}else{res=`✅ بريء — دوره: ${t.role}`;logR=`النتيجة: بريء — دوره: ${t.role}`;}addLog('night',`تحقيق المحقق: استهدف ${t.name} — ${logR}`,'tag-night');document.getElementById('detective-result').innerHTML=`<div style="padding:0.5rem;border-radius:6px;background:var(--bg3);border:1px solid var(--border2)"><strong>${t.name}:</strong> ${res}</div>`;}
 function revealMoon(){const s=document.getElementById('action-moon');if(!s||!s.value)return;const t=state.players.find(p=>p.id==s.value);if(!t)return;document.getElementById('moon-result').innerHTML=`<div style="padding:0.5rem;border-radius:6px;background:var(--bg3);border:1px solid var(--border2)"><strong>${t.name}:</strong> ${t.roleId==='sun'?'☀️ هذا هو الشمس!':` ❌ ليس الشمس — دوره: ${t.role}`}</div>`;}
@@ -448,8 +500,15 @@ function resolveNight(){
   state.nightResults={dead,saved};state.night++;
   addLog('night',`انتهت الليلة ${state.night-1} — وفيات: ${dead.length} | إنقاذات: ${saved.length}`,'tag-night');
   renderSidebar();updateHeader();
+  // Check if bomber died at night — show bomber modal before day
+  const bomberDead=dead.find(p=>p.roleId==='bomber');
   const hD=dead.find(p=>p.roleId==='hunter');
-  if(hD){showHunterModal(()=>{renderDayPanel(events);checkWinConditions();switchTab('day');setMobileNav('day');});}else{renderDayPanel(events);checkWinConditions();switchTab('day');setMobileNav('day');}
+  const doDay=()=>{renderDayPanel(events);checkWinConditions();switchTab('day');setMobileNav('day');};
+  if(bomberDead&&!bomberDead.bomberUsed){
+    bomberDead.bomberUsed=true;
+    showBomberModal(()=>{if(hD){showHunterModal(doDay);}else{doDay();}},'المتفجر اغتيل ليلاً — اختر لاعباً يأخذه معه');
+  } else if(hD){showHunterModal(doDay);}
+  else{doDay();}
 }
 function skipNight(){state.nightResults={dead:[],saved:[]};state.night++;renderDayPanel(['لم تحدث أي أحداث هذه الليلة']);switchTab('day');setMobileNav('day');}
 function renderDayPanel(events){
@@ -460,6 +519,21 @@ function renderDayPanel(events){
   const nr=document.getElementById('night-results');
   nr.innerHTML=(!events||!events.length)?'<div class="log-entry"><div class="log-content" style="color:var(--text2)">ليلة هادئة — لا أحداث.</div></div>':events.map(e=>`<div class="log-entry"><div class="log-content log-text">• ${e}</div></div>`).join('');
   state.votes={};renderVoteList();
+  // Dynamic special action buttons
+  const grid=document.getElementById('special-actions-grid');
+  let btns=`<button class="btn btn-ghost" onclick="killPlayer()">💀 إعلان وفاة</button>
+    <button class="btn btn-ghost" onclick="revivePlayer()">💚 إحياء لاعب</button>
+    <button class="btn btn-ghost" onclick="checkWin()">🏆 فحص الفوز</button>`;
+  // Bomber button: only if alive bomber with unused ability
+  const bomberAlive=state.players.find(p=>p.alive&&p.roleId==='bomber'&&!p.bomberUsed);
+  if(bomberAlive) btns+=`<button class="btn btn-ghost" style="border-color:var(--red-border);color:var(--red)" onclick="activateBomberSacrifice()">💣 المتفجر يفجّر نفسه</button>`;
+  // Sun button: only if alive sun exists
+  const sunAlive=state.players.find(p=>p.alive&&p.roleId==='sun');
+  if(sunAlive) btns+=`<button class="btn btn-ghost" style="border-color:var(--gold-border);color:var(--gold)" onclick="sunDayAction()">☀️ الشمس تبحث عن القمر</button>`;
+  // Mayor reveal button: only if alive unrevealed mayor
+  const mayorHidden=state.players.find(p=>p.alive&&p.roleId==='mayor'&&!p.mayorRevealed);
+  if(mayorHidden) btns+=`<button class="btn btn-ghost" style="border-color:var(--gold-border);color:var(--gold)" onclick="revealMayorPublic()">🏛️ كشف العمدة</button>`;
+  grid.innerHTML=btns;
 }
 function renderVoteList(){
   const alive=state.players.filter(p=>p.alive);
@@ -491,7 +565,8 @@ function confirmHunterKill(){const s=document.getElementById('hunter-target-sele
 function showBomberModal(cb,desc){const al=state.players.filter(p=>p.alive&&p.roleId!=='bomber');if(!al.length){if(cb)cb();return;}document.getElementById('bomber-modal-desc').textContent=desc||'اختر لاعباً يأخذه معه — القدرة إجبارية';document.getElementById('bomber-target-select').innerHTML=al.map(p=>`<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');document.getElementById('bomber-modal').classList.add('show');state._bomberCb=cb;}
 function confirmBomberKill(){const s=document.getElementById('bomber-target-select');if(!s.value){showToast('اختر لاعباً','warn');return;}const t=state.players.find(p=>p.id==s.value);if(!t||!t.alive){showToast('لاعب غير صالح','error');return;}t.alive=false;addLog('death',`قدرة المتفجر: ${t.name} (${t.role}) — اختاره المتفجر ليموت معه`,'tag-death');showToast(`💣 ${t.name} مات بقدرة المتفجر`,'warn');document.getElementById('bomber-modal').classList.remove('show');renderSidebar();updateHeader();renderFactionStatus();checkWinConditions();if(state._bomberCb){state._bomberCb();state._bomberCb=null;}}
 function activateBomberSacrifice(){const b=state.players.find(p=>p.alive&&p.roleId==='bomber');if(!b){showToast('لا يوجد متفجر حي','warn');return;}if(b.bomberUsed){showToast('المتفجر استخدم قدرته بالفعل','warn');return;}b.alive=false;b.bomberUsed=true;addLog('death',`المتفجر ${b.name} فجّر نفسه — ينتهي النهار فوراً`,'tag-death');renderSidebar();updateHeader();showBomberModal(()=>{showToast('انتهى النهار — ابدأ الليل التالي','warn');checkWinConditions();},'المتفجر فجّر نفسه — اختر لاعباً يأخذه معه');}
-function sunDayAction(){const sun=state.players.find(p=>p.alive&&p.roleId==='sun');if(!sun){showToast('لا يوجد لاعب الشمس حي','warn');return;}const al=state.players.filter(p=>p.alive&&p.id!==sun.id);const tid=prompt(`الشمس تبحث عن القمر:\n${al.map(p=>`${p.id}. ${p.name}`).join('\n')}\n\nأدخل رقم اللاعب:`);if(!tid)return;const t=state.players.find(p=>p.id==parseInt(tid));if(!t){showToast('لاعب غير صالح','error');return;}if(t.roleId==='moon'){sun.foundPartner=true;addLog('day',`الشمس: وجدت القمر (${t.name})!`,'tag-day');if(t.foundPartner){addLog('system','الشمس والقمر اكتشفا بعضهما — يفوزان فوراً!','tag-system');showResult('☀️🌙','فاز الشمس والقمر!','اكتشف الاثنان بعضهما وفازا معاً!','#f59e42');}else{showToast('الشمس وجدت القمر! ينتظر القمر أن يجدها ليلاً','success');}}else{addLog('day',`الشمس: حاولت التعرف على ${t.name} — ليس القمر`,'tag-day');showToast(`${t.name} ليس القمر`,'warn');}}
+function sunDayAction(){const sun=state.players.find(p=>p.alive&&p.roleId==='sun');if(!sun){showToast('لا يوجد لاعب الشمس حي','warn');return;}const al=state.players.filter(p=>p.alive&&p.id!==sun.id);const tid=prompt(`الشمس تبحث عن القمر (لا تستطيع اختيار نفسها):\n${al.map(p=>`${p.id}. ${p.name}`).join('\n')}\n\nأدخل رقم اللاعب:`);if(!tid)return;const t=state.players.find(p=>p.id==parseInt(tid));if(!t){showToast('لاعب غير صالح','error');return;}if(t.id===sun.id){showToast('الشمس لا تستطيع اختيار نفسها','error');return;}if(t.roleId==='moon'){sun.foundPartner=true;addLog('day',`الشمس: وجدت القمر (${t.name})!`,'tag-day');if(t.foundPartner){addLog('system','الشمس والقمر اكتشفا بعضهما — يفوزان فوراً!','tag-system');showResult('☀️🌙','فاز الشمس والقمر!','اكتشف الاثنان بعضهما وفازا معاً!','#f59e42');}else{showToast('الشمس وجدت القمر! ينتظر القمر أن يجدها ليلاً','success');}}else{addLog('day',`الشمس: حاولت التعرف على ${t.name} — ليس القمر`,'tag-day');showToast(`${t.name} ليس القمر`,'warn');}}
+function revealMayorPublic(){const mayor=state.players.find(p=>p.alive&&p.roleId==='mayor'&&!p.mayorRevealed);if(!mayor){showToast('لا يوجد عمدة مخفي','warn');return;}mayor.mayorRevealed=true;addLog('day',`العمدة ${mayor.name} كشف عن نفسه — صوته يساوي الآن 3 أصوات في التصويت. الدكتور لا يستطيع حمايته بعد الآن.`,'tag-day');showToast(`🏛️ ${mayor.name} كشف عن نفسه — صوته ×3`,'success');renderDayPanel([]);renderNightPanel();}
 function goToNight(){state.phase='night';renderNightPanel();switchTab('night');setMobileNav('night');addLog('night',`بدأت الليلة ${state.night}`,'tag-night');}
 function killPlayer(){const al=state.players.filter(p=>p.alive);const n=prompt(`اختر لاعباً للقتل:\n${al.map(p=>`${p.id}. ${p.name}`).join('\n')}\n\nأدخل الرقم:`);if(!n)return;const p=state.players.find(x=>x.id==parseInt(n));if(!p||!p.alive){showToast('لاعب غير صالح','error');return;}p.alive=false;addLog('death',`${p.name} (${p.role}) — أُعلن وفاته يدوياً من المشرف`,'tag-death');renderSidebar();updateHeader();checkWinConditions();}
 function revivePlayer(){const dead=state.players.filter(p=>!p.alive);if(!dead.length){showToast('لا يوجد موتى','warn');return;}const n=prompt(`اختر لاعباً للإحياء:\n${dead.map(p=>`${p.id}. ${p.name}`).join('\n')}\n\nأدخل الرقم:`);if(!n)return;const p=state.players.find(x=>x.id==parseInt(n));if(!p||p.alive){showToast('لاعب غير صالح','error');return;}p.alive=true;addLog('save',`المشرف أحيا ${p.name} (${p.role}) — عاد إلى اللعبة`,'tag-save');renderSidebar();updateHeader();}
