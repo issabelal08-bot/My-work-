@@ -415,73 +415,96 @@ function renderNightPanel(){
   const nmOpts=nonMafia.map(p=>`<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');
   const none='<option value="">— لا أحد —</option>';
   const grid=document.getElementById('night-actions-grid');grid.innerHTML='';
+
+  // Check which mafia roles are alive
+  const mafiaAlive=alive.some(p=>p.faction==='mafia');
+  const gangsterAlive=alive.some(p=>p.roleId==='gangster');
+
+  // MAFIA ATTACK CARD — shown if any mafia member alive (godfather/mafia/gangster/bomber)
+  if(mafiaAlive&&!grid.querySelector('[data-mafia]')){
+    grid.insertAdjacentHTML('beforeend',`<div class="night-action-card" data-mafia="1">
+      <div class="night-action-title"><div class="action-icon icon-red">🔴</div>المافيا — الاغتيال</div>
+      <div class="night-action-subtitle">أي عضو مافيا حي يستطيع الاغتيال — أعضاء المافيا مستبعدون</div>
+      <div class="form-group"><label class="form-label">🗡️ الضحية</label><select class="form-input" id="action-mafia">${none}${nmOpts}</select></div>
+    </div>`);
+  }
+
+  // GANGSTER THREAT CARD — منفصل تماماً، يستطيع تهديد أي لاعب حي حتى نفسه
+  if(gangsterAlive&&!grid.querySelector('[data-gangster]')){
+    grid.insertAdjacentHTML('beforeend',`<div class="night-action-card" data-gangster="1">
+      <div class="night-action-title"><div class="action-icon icon-red">🗡️</div>رجل العصابة — التهديد</div>
+      <div class="night-action-subtitle">يهدد لاعباً واحداً — لن يستطيع التصويت في الجولة القادمة</div>
+      <div class="form-group"><label class="form-label">الهدف المهدَّد (يشمل نفسه)</label><select class="form-input" id="action-gangster">${none}${aOpts}</select></div>
+    </div>`);
+  }
+
   sorted.forEach(r=>{
     const pwr=state.players.filter(p=>p.alive&&p.roleId===r.id);if(!pwr.length)return;
+    // Skip mafia roles — already handled above
+    if(['mafia','godfather','gangster','bomber'].includes(r.id))return;
     let h='';
-    // MAFIA GROUP: godfather + mafia + gangster + bomber all share one attack card
-    if(r.id==='mafia'||r.id==='godfather'||r.id==='gangster'||r.id==='bomber'){
-      if(grid.querySelector('[data-mafia]'))return;
-      // gangster threat options (exclude self = gangster player)
-      const gangPlayer=state.players.find(p=>p.alive&&p.roleId==='gangster');
-      const gangOpts=nonMafia.filter(p=>p.id!==(gangPlayer?.id)).map(p=>`<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');
-      const hasGangster=state.players.some(p=>p.alive&&p.roleId==='gangster');
-      h=`<div class="night-action-card" data-mafia="1">
-        <div class="night-action-title"><div class="action-icon icon-red">🔴</div>المافيا — إجراءات الليل</div>
-        <div class="night-action-subtitle">أعضاء المافيا مستبعدون من قائمة الأهداف</div>
-        <div class="form-group"><label class="form-label">🗡️ الاغتيال (العراب + المافيا)</label><select class="form-input" id="action-mafia">${none}${nmOpts}</select></div>
-        ${hasGangster?`<div class="form-group" style="margin-top:0.7rem"><label class="form-label">🗡️ تهديد رجل العصابة</label><select class="form-input" id="action-gangster">${none}${gangOpts}</select></div>`:''}
-      </div>`;
-    }
-    else if(r.id==='doctor'){
-      // Exclude mayor if revealed
+    if(r.id==='doctor'){
       const mayorRevealed=state.players.some(p=>p.alive&&p.roleId==='mayor'&&p.mayorRevealed);
       const docOpts=alive.filter(p=>!(mayorRevealed&&p.roleId==='mayor')).map(p=>`<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');
       h=`<div class="night-action-card"><div class="night-action-title"><div class="action-icon icon-green">💊</div>الدكتور</div>
-        <div class="night-action-subtitle">اختر من تحمي هذه الليلة${mayorRevealed?' — العمدة المكشوف لا يمكن حمايته':''}</div>
+        <div class="night-action-subtitle">اختر من تحمي${mayorRevealed?' — العمدة المكشوف مستبعد':''}</div>
         <div class="form-group"><label class="form-label">الهدف المحمي</label><select class="form-input" id="action-doctor">${none}${docOpts}</select></div></div>`;}
     else if(r.id==='guard'){
-      // Guard cannot protect self
-      const guardPlayer=pwr[0];
-      const guardOpts=alive.filter(p=>p.id!==guardPlayer?.id).map(p=>`<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');
+      const gP=pwr[0];
+      const gOpts=alive.filter(p=>p.id!==gP?.id).map(p=>`<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');
       h=`<div class="night-action-card"><div class="night-action-title"><div class="action-icon icon-blue">🛡️</div>حارس الأمن</div>
-        <div class="night-action-subtitle">يحمي هدفاً ويموت عنه إن هُوجم — لا يستطيع حماية نفسه</div>
-        <div class="form-group"><label class="form-label">الهدف المحمي</label><select class="form-input" id="action-guard">${none}${guardOpts}</select></div></div>`;}
+        <div class="night-action-subtitle">يحمي هدفاً ويموت عنه — لا يحمي نفسه</div>
+        <div class="form-group"><label class="form-label">الهدف المحمي</label><select class="form-input" id="action-guard">${none}${gOpts}</select></div></div>`;}
     else if(r.id==='detective'){
-      // Detective cannot investigate self
-      const detPlayer=pwr[0];
-      const detOpts=alive.filter(p=>p.id!==detPlayer?.id).map(p=>`<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');
+      const dP=pwr[0];
+      const dOpts=alive.filter(p=>p.id!==dP?.id).map(p=>`<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');
       h=`<div class="night-action-card"><div class="night-action-title"><div class="action-icon icon-purple">🔍</div>المحقق</div>
-        <div class="night-action-subtitle">يحقق في لاعب ويعرف هويته — لا يستطيع التحقيق في نفسه</div>
-        <div class="form-group"><label class="form-label">الهدف</label><select class="form-input" id="action-detective">${none}${detOpts}</select></div>
+        <div class="night-action-subtitle">يحقق في لاعب — لا يحقق في نفسه</div>
+        <div class="form-group"><label class="form-label">الهدف</label><select class="form-input" id="action-detective">${none}${dOpts}</select></div>
         <div id="detective-result" style="margin-top:0.8rem;font-size:0.8rem;min-height:20px"></div>
         <button class="btn btn-ghost" style="margin-top:0.5rem" onclick="revealDetective()">🔍 كشف النتيجة (للمشرف)</button></div>`;}
-    else if(r.id==='witch'){const hu=state.usedAbilities.includes('witch-heal');const ku=state.usedAbilities.includes('witch-kill');const dOpts=state.players.filter(p=>!p.alive).map(p=>`<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');h=`<div class="night-action-card"><div class="night-action-title"><div class="action-icon icon-purple">🧪</div>الساحر</div><div class="night-action-subtitle">إحياء: ${hu?'✗ مستخدمة':'✓ متاحة'} | قتل: ${ku?'✗ مستخدمة':'✓ متاحة'}</div>${!hu?`<div class="form-group" style="margin-bottom:0.7rem"><label class="form-label">🩺 إحياء لاعب</label><select class="form-input" id="action-witch-heal">${none}${dOpts}</select></div>`:''}${!ku?`<div class="form-group"><label class="form-label">☠️ قتل لاعب</label><select class="form-input" id="action-witch-kill">${none}${aOpts}</select></div>`:''}</div>`;}
+    else if(r.id==='witch'){
+      // Witch: ONE ability per night — either heal OR kill, not both
+      const hu=state.usedAbilities.includes('witch-heal');
+      const ku=state.usedAbilities.includes('witch-kill');
+      const bothUsed=hu&&ku;
+      const dOpts=state.players.filter(p=>!p.alive).map(p=>`<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');
+      h=`<div class="night-action-card"><div class="night-action-title"><div class="action-icon icon-purple">🧪</div>الساحر</div>
+        <div class="night-action-subtitle">جرعة واحدة فقط لكل ليلة — إحياء: ${hu?'✗ مستهلكة':'✓'} | قتل: ${ku?'✗ مستهلكة':'✓'}</div>
+        ${bothUsed?'<p style="color:var(--text3);font-size:0.8rem">نفدت جميع الجرعات</p>':''}
+        ${!hu&&!bothUsed?`<div class="form-group" style="margin-bottom:0.7rem"><label class="form-label">🩺 إحياء (يلغي الكتل إذا اخترت قتلاً)</label><select class="form-input" id="action-witch-heal" onchange="witchLock('heal')">${none}${dOpts}</select></div>`:''}
+        ${!ku&&!bothUsed?`<div class="form-group"><label class="form-label">☠️ قتل (يلغي الإحياء إذا اخترت)</label><select class="form-input" id="action-witch-kill" onchange="witchLock('kill')">${none}${aOpts}</select></div>`:''}</div>`;}
     else if(r.id==='sniper'){
-      // Sniper cannot target self
       const sp=pwr[0];if(sp&&sp.sniperBullets===undefined)sp.sniperBullets=state.players.length>10?2:1;
       const rem=sp?.sniperBullets??0;
-      const sniperOpts=alive.filter(p=>p.id!==sp?.id).map(p=>`<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');
+      const sOpts=alive.filter(p=>p.id!==sp?.id).map(p=>`<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');
       h=`<div class="night-action-card"><div class="night-action-title"><div class="action-icon icon-blue">🎯</div>القناص</div>
-        <div class="night-action-subtitle">رصاصات متبقية: <strong style="color:var(--gold)">${rem}</strong> — إن أصاب بريئاً مات معه — لا يستطيع إطلاق النار على نفسه</div>
-        <div class="form-group"><label class="form-label">الهدف</label><select class="form-input" id="action-sniper">${rem>0?none+sniperOpts:'<option value="">— نفدت الرصاصات —</option>'}</select></div></div>`;}
+        <div class="night-action-subtitle">رصاصات متبقية: <strong style="color:var(--gold)">${rem}</strong> — لا يستطيع إطلاق النار على نفسه</div>
+        <div class="form-group"><label class="form-label">الهدف</label><select class="form-input" id="action-sniper">${rem>0?none+sOpts:'<option value="">— نفدت الرصاصات —</option>'}</select></div></div>`;}
     else if(r.id==='moon'){
-      // Moon cannot target self
-      const moonP=pwr[0];
-      const moonOpts=alive.filter(p=>p.id!==moonP?.id).map(p=>`<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');
+      const mP=pwr[0];
+      const mOpts=alive.filter(p=>p.id!==mP?.id).map(p=>`<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');
       h=`<div class="night-action-card"><div class="night-action-title"><div class="action-icon icon-purple">🌙</div>القمر</div>
-        <div class="night-action-subtitle">يحاول التعرف على لاعب — هل هو الشمس؟ لا يستطيع اختيار نفسه</div>
-        <div class="form-group"><label class="form-label">اللاعب المستهدف</label><select class="form-input" id="action-moon">${none}${moonOpts}</select></div>
+        <div class="night-action-subtitle">يبحث عن الشمس — لا يختار نفسه</div>
+        <div class="form-group"><label class="form-label">اللاعب المستهدف</label><select class="form-input" id="action-moon">${none}${mOpts}</select></div>
         <div id="moon-result" style="margin-top:0.8rem;font-size:0.8rem;min-height:20px"></div>
         <button class="btn btn-ghost" style="margin-top:0.5rem" onclick="revealMoon()">🌙 كشف النتيجة (للمشرف)</button></div>`;}
     else{h=`<div class="night-action-card"><div class="night-action-title"><div class="action-icon icon-gold">${r.icon||'❓'}</div>${r.name}</div><div class="night-action-subtitle">${r.desc}</div><div class="form-group"><label class="form-label">الهدف</label><select class="form-input" id="action-custom-${r.id}">${none}${aOpts}</select></div></div>`;}
     if(h)grid.insertAdjacentHTML('beforeend',h);
   });
-  // Night special actions: bomber button if alive bomber exists
+
+  // Night special: bomber button only if alive & unused
   const nsa=document.getElementById('night-special-actions');
   if(nsa){
-    const bomberAlive=state.players.find(p=>p.alive&&p.roleId==='bomber'&&!p.bomberUsed);
-    nsa.innerHTML=bomberAlive?`<div class="divider"></div><div class="section-title" style="margin-bottom:0.8rem">إجراءات خاصة بالليل</div><div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1rem"><button class="btn btn-ghost" style="border-color:var(--red-border);color:var(--red)" onclick="activateBomberSacrifice()">💣 المتفجر يفجّر نفسه</button></div>`:'';
+    const bA=state.players.find(p=>p.alive&&p.roleId==='bomber'&&!p.bomberUsed);
+    nsa.innerHTML=bA?`<div class="divider"></div><div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1rem"><button class="btn btn-ghost" style="border-color:var(--red-border);color:var(--red)" onclick="activateBomberSacrifice()">💣 المتفجر يفجّر نفسه (الليل)</button></div>`:'';
   }
+}
+
+// Witch: selecting one clears the other
+function witchLock(which){
+  if(which==='heal'){const k=document.getElementById('action-witch-kill');if(k)k.value='';}
+  else{const h=document.getElementById('action-witch-heal');if(h)h.value='';}
 }
 function revealDetective(){const s=document.getElementById('action-detective');if(!s||!s.value)return;const t=state.players.find(p=>p.id==s.value);if(!t)return;const gi=state.usedAbilities.filter(a=>a==='detect-godfather').length;let res,logR;if(t.roleId==='godfather'&&gi===0){res='✅ بريء (العراب يظهر بريئاً في أول تحقيق)';logR='النتيجة: بريء — هو في الحقيقة العراب لكن يظهر بريئاً في التحقيق الأول';state.usedAbilities.push('detect-godfather');}else if(t.faction==='mafia'){res=`🔴 مافيا! — دوره: ${t.role}`;logR=`النتيجة: مافيا — دوره الحقيقي: ${t.role}`;}else{res=`✅ بريء — دوره: ${t.role}`;logR=`النتيجة: بريء — دوره: ${t.role}`;}addLog('night',`تحقيق المحقق: استهدف ${t.name} — ${logR}`,'tag-night');document.getElementById('detective-result').innerHTML=`<div style="padding:0.5rem;border-radius:6px;background:var(--bg3);border:1px solid var(--border2)"><strong>${t.name}:</strong> ${res}</div>`;}
 function revealMoon(){const s=document.getElementById('action-moon');if(!s||!s.value)return;const t=state.players.find(p=>p.id==s.value);if(!t)return;document.getElementById('moon-result').innerHTML=`<div style="padding:0.5rem;border-radius:6px;background:var(--bg3);border:1px solid var(--border2)"><strong>${t.name}:</strong> ${t.roleId==='sun'?'☀️ هذا هو الشمس!':` ❌ ليس الشمس — دوره: ${t.role}`}</div>`;}
