@@ -218,7 +218,7 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
           <th>&#x627;&#x644;&#x627;&#x633;&#x645; &#x627;&#x644;&#x645;&#x633;&#x62A;&#x639;&#x627;&#x631;</th>
           <th>&#x627;&#x644;&#x62F;&#x648;&#x631; <span style="color:var(--text3);font-weight:400;font-size:0.6rem">(&#x645;&#x62E;&#x641;&#x64A;)</span></th>
           <th class="col-faction">&#x627;&#x644;&#x641;&#x635;&#x64A;&#x644;</th>
-          <th style="width:60px">&#x643;&#x634;&#x641;</th>
+          <th style="width:80px">إجراء</th>
         </tr></thead>
         <tbody id="players-tbody"></tbody>
       </table>
@@ -411,12 +411,25 @@ function renderPlayerTable(){
   if(!state.revealedPlayers) state.revealedPlayers={};
   document.getElementById('players-tbody').innerHTML=state.players.map(p=>{
     const shown=!!state.revealedPlayers[p.id];
-    const roleCell=shown&&p.role
-      ?`<span class="role-badge badge-${p.faction==='mafia'?'mafia':p.faction==='neutral'?'neutral':'city'}">${p.role}</span>`
-      :(p.role?'<span style="color:var(--text3);font-size:0.8rem;letter-spacing:2px">● ● ●</span>':'<span style="color:var(--text3);font-size:0.75rem">—</span>');
-    const factionCell=shown&&p.faction
-      ?`<span style="color:var(--${p.faction==='mafia'?'red':p.faction==='neutral'?'orange':'blue'})">${fn(p.faction)}</span>`
-      :(p.faction?'<span style="color:var(--text3);font-size:0.8rem;letter-spacing:2px">● ●</span>':'—');
+    // الخلية الأصلية: نقاط مخفية + النقر يفتح modal
+    const roleCell=p.role
+      ?`<span style="color:var(--text3);font-size:0.8rem;letter-spacing:2px;cursor:pointer" onclick="openPlayerModal(${p.id})" title="اضغط للكشف">● ● ●</span>`
+      :'<span style="color:var(--text3);font-size:0.75rem">—</span>';
+    const factionCell=p.faction
+      ?'<span style="color:var(--text3);font-size:0.8rem;letter-spacing:2px">● ●</span>'
+      :'—';
+    // صف الإظهار الإضافي تحت الاسم (يظهر فقط عند الضغط على الزر)
+    const revealRow=shown&&p.role?`
+      <tr id="reveal-row-${p.id}" style="background:var(--bg3)">
+        <td></td>
+        <td colspan="3" style="padding:0.3rem 0.8rem;font-size:0.78rem">
+          <span style="color:var(--text2);margin-left:0.5rem">الدور:</span>
+          <span class="role-badge badge-${p.faction==='mafia'?'mafia':p.faction==='neutral'?'neutral':'city'}" style="margin-left:0.4rem">${p.role}</span>
+          <span style="color:var(--text2);margin-right:0.8rem;margin-left:0.5rem">الفصيل:</span>
+          <span style="color:var(--${p.faction==='mafia'?'red':p.faction==='neutral'?'orange':'blue'});font-weight:700">${fn(p.faction)}</span>
+        </td>
+        <td></td>
+      </tr>`:'';
     return `<tr>
       <td style="color:var(--text3);font-weight:700">${p.id}</td>
       <td><input type="text" value="${p.name.replace(/"/g,'&quot;')}"
@@ -424,9 +437,12 @@ function renderPlayerTable(){
         style="${p.alive?'':'opacity:0.45;text-decoration:line-through'}"></td>
       <td>${roleCell}</td>
       <td class="col-faction">${factionCell}</td>
-      <td><button class="btn btn-ghost" style="padding:0.2rem 0.5rem;font-size:0.65rem;white-space:nowrap"
-        onclick="togglePlayerReveal(${p.id})">${shown?'🙈 إخفاء':'👁 إظهار'}</button></td>
-    </tr>`;
+      <td style="display:flex;gap:0.3rem;align-items:center">
+        <button class="btn btn-ghost" style="padding:0.2rem 0.5rem;font-size:0.7rem" onclick="openPlayerModal(${p.id})" title="معلومات اللاعب">👁</button>
+        <button class="btn btn-ghost" style="padding:0.2rem 0.4rem;font-size:0.6rem;white-space:nowrap;border-color:${shown?'var(--gold-border)':'var(--border2)'};color:${shown?'var(--gold)':'var(--text2)'}"
+          onclick="togglePlayerReveal(${p.id})">${shown?'إخفاء':'عرض'}</button>
+      </td>
+    </tr>${revealRow}`;
   }).join('');
 }
 function togglePlayerReveal(id){
