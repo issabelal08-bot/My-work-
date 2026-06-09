@@ -215,9 +215,9 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
       <table class="players-table">
         <thead><tr>
           <th style="width:40px">#</th>
-          <th>&#x627;&#x644;&#x627;&#x633;&#x645; &#x627;&#x644;&#x645;&#x633;&#x62A;&#x639;&#x627;&#x631;</th>
-          <th>&#x627;&#x644;&#x62F;&#x648;&#x631; <span style="color:var(--text3);font-weight:400;font-size:0.6rem">(&#x645;&#x62E;&#x641;&#x64A;)</span></th>
-          <th class="col-faction">&#x627;&#x644;&#x641;&#x635;&#x64A;&#x644;</th>
+          <th>أسماء اللاعبين</th>
+          <th>الدور</th>
+          <th class="col-faction">الفصيل</th>
           <th style="width:80px">إجراء</th>
         </tr></thead>
         <tbody id="players-tbody"></tbody>
@@ -438,9 +438,9 @@ function renderPlayerTable(){
       <td>${roleCell}</td>
       <td class="col-faction">${factionCell}</td>
       <td style="display:flex;gap:0.3rem;align-items:center">
-        <button class="btn btn-ghost" style="padding:0.2rem 0.5rem;font-size:0.7rem" onclick="openPlayerModal(${p.id})" title="معلومات اللاعب">👁</button>
         <button class="btn btn-ghost" style="padding:0.2rem 0.4rem;font-size:0.6rem;white-space:nowrap;border-color:${shown?'var(--gold-border)':'var(--border2)'};color:${shown?'var(--gold)':'var(--text2)'}"
           onclick="togglePlayerReveal(${p.id})">${shown?'إخفاء':'عرض'}</button>
+        <button class="btn btn-ghost" style="padding:0.2rem 0.5rem;font-size:0.7rem" onclick="openPlayerModal(${p.id})" title="معلومات اللاعب">👁</button>
       </td>
     </tr>${revealRow}`;
   }).join('');
@@ -590,56 +590,64 @@ function resolveNight(){
   const mnT=document.getElementById('action-moon')?.value;
   const btT=document.getElementById('action-bettor')?.value;
 
-  if(mT){const mt=state.players.find(p=>p.id==mT);if(mt&&mt.faction==='mafia'){showToast('خطأ: لا يمكن للمافيا استهداف أحد أفرادها!','error');return;}if(mt&&!mt.alive){showToast('خطأ: الهدف ميت!','error');return;}}
-  let dead=[],saved=[],events=[];
+  if(mT){const mt=state.players.find(p=>p.id==mT);
+    if(mt&&mt.faction==='mafia'){showToast('خطأ: لا يمكن للمافيا استهداف أحد أفرادها!','error');return;}
+    if(mt&&!mt.alive){showToast('خطأ: الهدف ميت!','error');return;}}
 
-  // Guard vs mafia
-  if(gT&&mT&&gT==mT){const g=state.players.find(p=>p.alive&&p.roleId==='guard');if(g){g.alive=false;dead.push(g);const wn=state.players.find(p=>p.id==gT)?.name||'';events.push(`المافيا حاولت اغتيال ${wn} — حارس الأمن (${g.name}) تصدّى للهجوم ومات بدلاً منه`);addLog('death',`حارس الأمن: ${g.name} — مات دفاعاً عن ${wn}`,'tag-death');}}
+  // نظام الأولويات: ساحر(1) ← قناص(2) ← مافيا(3) | حارس(1) ← دكتور(2)
+  // pendingDeadIds: dedup — كل لاعب يُسجَّل مرة واحدة فقط
+  const pendingDeadIds=new Set();
+  const saved=[];
+  const events=[];
 
-  // ===== WITCH KILL: تتجاوز الدكتور دائماً — لا يمكن للدكتور إلغاؤها =====
-  if(wK){const wt=state.players.find(p=>p.id==wK);if(wt&&wt.alive){wt.alive=false;dead.push(wt);events.push(`الساحر استخدم جرعة القتل على ${wt.name} — مات فوراً (جرعة القتل لا يمكن إيقافها)`);addLog('death',`وفاة: ${wt.name} (${wt.role}) — قتله الساحر بجرعة القتل. جرعة القتل تتجاوز حماية الدكتور`,'tag-death');state.usedAbilities.push('witch-kill');if(dT==wK){events.push(`ملاحظة: الدكتور حاول حماية ${wt.name} لكن جرعة الساحر لا يمكن إيقافها`);addLog('night',`الدكتور حاول حماية ${wt.name} لكن جرعة قتل الساحر تتجاوز الحماية`,'tag-night');}}}
+  const markDead=(p,reason)=>{
+    if(!p||pendingDeadIds.has(p.id))return false;
+    pendingDeadIds.add(p.id);
+    if(reason){events.push(reason);addLog('death',reason,'tag-death');}
+    return true;
+  };
 
-  // Witch heal
+  // 1. جرعة قتل الساحر — أعلى أولوية، تتجاوز الدكتور دائماً
+  if(wK){const wt=state.players.find(p=>p.id==wK);if(wt&&wt.alive){markDead(wt,`وفاة: ${wt.name} (${wt.role}) — قتله الساحر. جرعة القتل لا يمكن إيقافها بأي حماية`);state.usedAbilities.push('witch-kill');if(dT==wK)events.push(`ملاحظة: الدكتور حاول حماية ${wt.name} لكن جرعة الساحر تتجاوز الحماية تماماً`);}}
+
+  // 2. إحياء الساحر
   if(wH){const wr=state.players.find(p=>p.id==wH&&!p.alive);if(wr){wr.alive=true;events.push(`الساحر استخدم جرعة الإحياء على ${wr.name} — عاد إلى الحياة`);addLog('save',`إحياء: ${wr.name} (${wr.role}) — الساحر أعاده للحياة`,'tag-save');state.usedAbilities.push('witch-heal');}}
 
-  // Mafia attack — doctor saves only from mafia (NOT from witch kill)
-  if(mT){const t=state.players.find(p=>p.id==mT);if(t&&t.alive){const gP=gT==mT;const dP=dT==mT;if(!gP){if(dP){saved.push(t);events.push(`المافيا حاولت اغتيال ${t.name} — الدكتور كان يحميه فنجا`);addLog('save',`إنقاذ: ${t.name} (${t.role}) — المافيا استهدفته لكن الدكتور كان يحميه`,'tag-save');}else{t.alive=false;dead.push(t);events.push(`المافيا اغتالت ${t.name}`);addLog('death',`وفاة: ${t.name} (${t.role}) — اغتالته المافيا`,'tag-death');}}}}
+  // 3. القناص — ينفذ طلقته حتى لو مات لاحقاً في نفس الليلة
+  if(snT){const sn=state.players.find(p=>p.roleId==='sniper');const st=state.players.find(p=>p.id==snT);if(sn&&sn.alive&&!pendingDeadIds.has(sn.id)&&st&&st.alive&&!pendingDeadIds.has(st.id)&&(sn.sniperBullets??0)>0){sn.sniperBullets--;if(st.faction==='mafia'){markDead(st,`وفاة: ${st.name} (${st.role}) — أصابه القناص ${sn.name}. رصاصات: ${sn.sniperBullets}`);}else{markDead(st,`وفاة: ${st.name} (${st.role}) — أصابه القناص وكان بريئاً`);markDead(sn,`وفاة: القناص ${sn.name} — مات لأنه أصاب بريئاً`);events.push(`القناص أطلق النار على ${st.name} لكنه بريء — ماتا معاً`);}}}
 
+  // 4. هجوم المافيا — حارس أولاً ثم دكتور (لا يحميان من الساحر)
+  if(mT){const t=state.players.find(p=>p.id==mT);if(t&&t.alive&&!pendingDeadIds.has(t.id)){if(gT==mT){const guard=state.players.find(p=>p.alive&&p.roleId==='guard'&&!pendingDeadIds.has(p.id));if(guard){markDead(guard,`حارس الأمن: ${guard.name} — مات دفاعاً عن ${t.name} بعد تصدّيه لهجوم المافيا`);events.push(`المافيا حاولت اغتيال ${t.name} — الحارس تصدّى ومات بدلاً منه`);addLog('save',`إنقاذ: ${t.name} — الحارس ضحى بنفسه`,'tag-save');}}else if(dT==mT){saved.push(t);events.push(`المافيا حاولت اغتيال ${t.name} — الدكتور كان يحميه فنجا`);addLog('save',`إنقاذ: ${t.name} (${t.role}) — المافيا استهدفته لكن الدكتور كان يحميه`,'tag-save');}else{markDead(t,`وفاة: ${t.name} (${t.role}) — اغتالته المافيا، لم يكن أحد يحميه`);events.push(`المافيا اغتالت ${t.name}`);}}}
+
+  // 5. المحقق (سري)
   if(det){const dt=state.players.find(p=>p.id==det);addLog('night',`المحقق: حقّق في ${dt?.name||'؟'} — النتيجة ظهرت للمشرف فقط`,'tag-night');}
 
-  // Gangster: reset ONE block only
+  // 6. تهديد رجل العصابة — واحد فقط لكل جولة
   state.players.forEach(p=>{p.votingBlocked=false;});
   if(gsT){const gt=state.players.find(p=>p.id==gsT);if(gt&&gt.alive){gt.votingBlocked=true;events.push(`تم تهديد ${gt.name} — لن يستطيع التصويت في النهار القادم`);addLog('night',`رجل العصابة: هدَّد ${gt.name} — محظور من التصويت غداً`,'tag-night');}}
 
-  if(snT){const sn=state.players.find(p=>p.alive&&p.roleId==='sniper');const st=state.players.find(p=>p.id==snT);if(sn&&st&&st.alive&&(sn.sniperBullets??0)>0){sn.sniperBullets--;if(st.faction==='mafia'){st.alive=false;dead.push(st);events.push(`القناص أطلق النار على ${st.name} — كان من المافيا ومات`);addLog('death',`وفاة: ${st.name} (${st.role}) — أصابه القناص. رصاصات متبقية: ${sn.sniperBullets}`,'tag-death');}else{st.alive=false;sn.alive=false;dead.push(st);dead.push(sn);events.push(`القناص أطلق النار على ${st.name} لكنه كان بريئاً — ماتا معاً`);addLog('death',`وفاة مزدوجة: القناص ${sn.name} أصاب البريء ${st.name} (${st.role})`,'tag-death');}}}
+  // 7. القمر
+  if(mnT){const mt=state.players.find(p=>p.id==mnT);const moon=state.players.find(p=>p.alive&&p.roleId==='moon');if(mt&&moon){if(mt.roleId==='sun'){moon.foundPartner=true;addLog('night',`القمر: وجد الشمس (${mt.name})!`,'tag-night');if(mt.foundPartner)addLog('night',`الشمس أيضاً وجدت القمر — شرط الفوز سيُفحص بعد انتهاء الليلة`,'tag-night');}else addLog('night',`القمر: حاول التعرف على ${mt.name} — ليس الشمس`,'tag-night');}}
 
-  if(mnT){const mt=state.players.find(p=>p.id==mnT);const moon=state.players.find(p=>p.alive&&p.roleId==='moon');if(mt&&moon){if(mt.roleId==='sun'){moon.foundPartner=true;addLog('night',`القمر: وجد الشمس (${mt.name})!`,'tag-night');if(mt.foundPartner){addLog('system','الشمس والقمر اكتشفا بعضهما — يفوزان!','tag-system');showResult('☀️🌙','فاز الشمس والقمر!','اكتشف الاثنان بعضهما وفازا معاً!','#f59e42');}}else{addLog('night',`القمر: حاول التعرف على ${mt.name} — ليس الشمس`,'tag-night');}}}
+  // 8. رهان المراهن (ليلة 1 فقط)
+  if(btT&&state.night===1){const bP=state.players.find(p=>p.alive&&p.roleId==='bettor');const bTarget=state.players.find(p=>p.id==btT);if(bP&&bTarget&&!bP.bettorTarget){bP.bettorTarget=parseInt(btT);addLog('night',`المراهن: راهن على طرد ${bTarget.name} — سيتحقق الفوز إذا طُرد بالتصويت`,'tag-night');}}
 
-  // Bettor: lock bet on night 1
-  if(btT&&state.night===1){
-    const bP=state.players.find(p=>p.alive&&p.roleId==='bettor');
-    const bTarget=state.players.find(p=>p.id==btT);
-    if(bP&&bTarget&&!bP.bettorTarget){bP.bettorTarget=parseInt(btT);addLog('night',`المراهن: راهن على طرد ${bTarget.name} — سيتحقق الفوز إذا طُرد بالتصويت`,'tag-night');}
-  }
+  // تطبيق الوفيات — مرة واحدة لكل لاعب (dedup مضمون بـ Set)
+  const dead=[];
+  pendingDeadIds.forEach(id=>{const p=state.players.find(x=>x.id===id);if(p&&p.alive){p.alive=false;dead.push(p);}});
 
   state.nightResults={dead,saved};state.night++;
   addLog('night',`انتهت الليلة ${state.night-1} — وفيات: ${dead.length} | إنقاذات: ${saved.length}`,'tag-night');
   renderSidebar();updateHeader();
 
-  // ===== DEATH CHAIN: Bomber + Hunter تعملان معاً بدون تعارض =====
-  // كلاهما يؤدي قدرته حتى لو مات الآخر بسببه
+  // سلسلة الموت: المتفجر ثم الصياد — كلاهما يؤديان قدرتهما كاملاً حتى لو مات أحدهما بسبب الآخر
   const bomberDead=dead.find(p=>p.roleId==='bomber'&&!p.bomberUsed);
   const hunterDead=dead.find(p=>p.roleId==='hunter');
-  const doDay=()=>{renderDayPanel(events);checkWinConditions();switchTab('day');setMobileNav('day');};
+  const doDay=()=>{renderDayPanel(events);checkWinConditionsFull();switchTab('day');setMobileNav('day');};
 
   if(bomberDead&&hunterDead){
-    // كلاهما مات — المتفجر يؤدي قدرته أولاً ثم الصياد
-    // لكن يجب التحقق: إذا مات الصياد بسبب المتفجر، تُفعَّل قدرة الصياد أيضاً
     bomberDead.bomberUsed=true;
-    showBomberModal(()=>{
-      // بعد المتفجر يختار — يأتي دور الصياد (حتى لو مات بسبب المتفجر)
-      showHunterModal(doDay);
-    },'المتفجر اغتيل ليلاً — اختر لاعباً يأخذه معه');
+    showBomberModal(()=>showHunterModal(doDay),'المتفجر اغتيل ليلاً — اختر لاعباً يأخذه معه');
   } else if(bomberDead){
     bomberDead.bomberUsed=true;
     showBomberModal(doDay,'المتفجر اغتيل ليلاً — اختر لاعباً يأخذه معه');
@@ -647,6 +655,23 @@ function resolveNight(){
     showHunterModal(doDay);
   } else{doDay();}
 }
+
+function checkWinConditionsFull(){
+  // الشمس والقمر — يفوزان فقط إذا كلاهما حي وكلاهما وجد الآخر
+  const sunP=state.players.find(p=>p.roleId==='sun');
+  const moonP=state.players.find(p=>p.roleId==='moon');
+  if(sunP&&moonP&&sunP.alive&&moonP.alive&&sunP.foundPartner&&moonP.foundPartner){
+    showResult('☀️🌙','فاز الشمس والقمر!','اكتشف الاثنان بعضهما وكلاهما حي!','#f59e42');
+    addLog('system','فوز الشمس والقمر!','tag-system');return true;
+  }
+  const alive=state.players.filter(p=>p.alive);
+  const am=alive.filter(p=>p.faction==='mafia');
+  const ao=alive.filter(p=>p.faction!=='mafia');
+  if(am.length>=ao.length&&am.length>0){showResult('🔴','فازت المافيا!',`المافيا (${am.length}) تساوت مع باقي اللاعبين (${ao.length})`,'#e24b4a');addLog('system','فوز المافيا','tag-system');return true;}
+  if(am.length===0&&alive.length>0){showResult('🏙️','فازت المدينة!','تم القضاء على جميع أفراد المافيا!','#4a8fe2');addLog('system','فوز المدينة','tag-system');return true;}
+  return false;
+}
+
 function skipNight(){state.nightResults={dead:[],saved:[]};state.night++;renderDayPanel(['لم تحدث أي أحداث هذه الليلة']);switchTab('day');setMobileNav('day');}
 function renderDayPanel(events){
   document.getElementById('day-num').textContent=state.day;
