@@ -182,10 +182,11 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 <header class="header">
   <div class="logo">&#x1F3AD; <span>&#x645;&#x627;&#x641;&#x64A;&#x627;</span> GM</div>
   <div class="header-stats">
-    <div class="stat-pill"><div class="dot dot-green"></div><span id="hdr-alive">0</span> &#x62D;&#x64A;</div>
-    <div class="stat-pill"><div class="dot dot-red"></div><span id="hdr-dead">0</span> &#x645;&#x64A;&#x62A;</div>
-    <div class="stat-pill"><div class="dot dot-blue"></div>&#x627;&#x644;&#x645;&#x62F;&#x64A;&#x646;&#x629;: <span id="hdr-city">0</span></div>
-    <div class="stat-pill"><div class="dot dot-red"></div>&#x627;&#x644;&#x645;&#x627;&#x641;&#x64A;&#x627;: <span id="hdr-mafia">0</span></div>
+    <div class="stat-pill"><div class="dot dot-green"></div><span id="hdr-alive">0</span> حي</div>
+    <div class="stat-pill"><div class="dot dot-red"></div><span id="hdr-dead">0</span> ميت</div>
+    <div class="stat-pill"><div class="dot dot-blue"></div>المدينة: <span id="hdr-city">0</span></div>
+    <div class="stat-pill"><div class="dot dot-red"></div>المافيا: <span id="hdr-mafia">0</span></div>
+    <div class="stat-pill"><div class="dot" style="background:var(--orange);box-shadow:0 0 6px var(--orange)"></div>المستقلون: <span id="hdr-neutral">0</span></div>
   </div>
   <div class="phase-badge" id="phase-badge">&#x625;&#x639;&#x62F;&#x627;&#x62F; &#x627;&#x644;&#x644;&#x639;&#x628;&#x629;</div>
 </header>
@@ -206,7 +207,10 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
         <input type="number" class="form-input" id="player-count" value="10" min="4" max="30" onchange="generatePlayerSlots();validateRoleCounts()">
       </div>
     </div>
-    <div class="section-title" style="margin-bottom:1rem">&#x623;&#x633;&#x645;&#x627;&#x621; &#x627;&#x644;&#x644;&#x627;&#x639;&#x628;&#x64A;&#x646;</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.8rem">
+      <div class="section-title" style="margin-bottom:0;border:none">أسماء اللاعبين</div>
+      <button class="btn btn-ghost" style="font-size:0.72rem;padding:0.25rem 0.7rem" onclick="toggleAllRoles()">👁 إظهار/إخفاء الكل</button>
+    </div>
     <div style="overflow-x:auto;margin-bottom:1.5rem">
       <table class="players-table">
         <thead><tr>
@@ -403,7 +407,39 @@ function chRC(id,d){const r=state.roles.find(x=>x.id===id);if(!r)return;r.count=
 function validateRoleCounts(){const t=state.roles.reduce((s,r)=>s+r.count,0);const pc=parseInt(document.getElementById('player-count').value)||0;document.getElementById('roles-total-count').textContent=t;document.getElementById('roles-player-count').textContent=pc;const i=document.getElementById('roles-match-indicator');if(t===pc&&t>0){i.textContent='✓ مطابق';i.style.color='var(--green)';}else if(t>pc){i.textContent=`زيادة ${t-pc}`;i.style.color='var(--red)';}else{i.textContent=t===0?'':`ناقص ${pc-t}`;i.style.color='var(--gold)';}}
 function resetRoleCounts(){state.roles.forEach(r=>{r.count=0;});renderRolesGrid();renderNightOrder();validateRoleCounts();showToast('تم تصفير جميع الأدوار','success');}
 function generatePlayerSlots(){const n=parseInt(document.getElementById('player-count').value)||10;const ex=state.players;state.players=[];for(let i=1;i<=n;i++){const o=ex.find(p=>p.id===i);state.players.push({id:i,name:o?o.name:`لاعب ${i}`,role:o?o.role:null,faction:o?o.faction:null,roleId:o?o.roleId:null,alive:true,protected:false,votingBlocked:false,mayorRevealed:false,sniperBullets:undefined,bomberUsed:false,foundPartner:false,bettorTarget:null});}renderPlayerTable();}
-function renderPlayerTable(){document.getElementById('players-tbody').innerHTML=state.players.map(p=>`<tr><td style="color:var(--text3);font-weight:700">${p.id}</td><td><input type="text" value="${p.name.replace(/"/g,'&quot;')}" onchange="(function(v){var pl=state.players.find(function(x){return x.id===${p.id};});if(pl){pl.name=v;renderSidebar();}})(this.value)" style="${p.alive?'':'opacity:0.45;text-decoration:line-through'}"></td><td>${p.role?`<span style="color:var(--text3);font-size:0.8rem;letter-spacing:2px;cursor:pointer" onclick="openPlayerModal(${p.id})" title="اضغط للكشف">● ● ●</span>`:'<span style="color:var(--text3);font-size:0.75rem">—</span>'}</td><td class="col-faction">${p.faction?'<span style="color:var(--text3);font-size:0.8rem;letter-spacing:2px">● ●</span>':'—'}</td><td><button class="btn btn-ghost" style="padding:0.2rem 0.5rem;font-size:0.7rem" onclick="openPlayerModal(${p.id})">👁</button></td></tr>`).join('');}
+function renderPlayerTable(){
+  if(!state.revealedPlayers) state.revealedPlayers={};
+  document.getElementById('players-tbody').innerHTML=state.players.map(p=>{
+    const shown=!!state.revealedPlayers[p.id];
+    const roleCell=shown&&p.role
+      ?`<span class="role-badge badge-${p.faction==='mafia'?'mafia':p.faction==='neutral'?'neutral':'city'}">${p.role}</span>`
+      :(p.role?'<span style="color:var(--text3);font-size:0.8rem;letter-spacing:2px">● ● ●</span>':'<span style="color:var(--text3);font-size:0.75rem">—</span>');
+    const factionCell=shown&&p.faction
+      ?`<span style="color:var(--${p.faction==='mafia'?'red':p.faction==='neutral'?'orange':'blue'})">${fn(p.faction)}</span>`
+      :(p.faction?'<span style="color:var(--text3);font-size:0.8rem;letter-spacing:2px">● ●</span>':'—');
+    return `<tr>
+      <td style="color:var(--text3);font-weight:700">${p.id}</td>
+      <td><input type="text" value="${p.name.replace(/"/g,'&quot;')}"
+        onchange="(function(v){var pl=state.players.find(function(x){return x.id===${p.id};});if(pl){pl.name=v;renderSidebar();}})(this.value)"
+        style="${p.alive?'':'opacity:0.45;text-decoration:line-through'}"></td>
+      <td>${roleCell}</td>
+      <td class="col-faction">${factionCell}</td>
+      <td><button class="btn btn-ghost" style="padding:0.2rem 0.5rem;font-size:0.65rem;white-space:nowrap"
+        onclick="togglePlayerReveal(${p.id})">${shown?'🙈 إخفاء':'👁 إظهار'}</button></td>
+    </tr>`;
+  }).join('');
+}
+function togglePlayerReveal(id){
+  if(!state.revealedPlayers) state.revealedPlayers={};
+  state.revealedPlayers[id]=!state.revealedPlayers[id];
+  renderPlayerTable();
+}
+function toggleAllRoles(){
+  if(!state.revealedPlayers) state.revealedPlayers={};
+  const anyShown=state.players.some(p=>state.revealedPlayers[p.id]);
+  state.players.forEach(p=>{state.revealedPlayers[p.id]=!anyShown;});
+  renderPlayerTable();
+}
 function renderNightOrder(){const s=[...state.roles].filter(r=>r.hasNight&&r.count>0).sort((a,b)=>a.nightOrder-b.nightOrder);const e=document.getElementById('night-order-display');if(!e)return;e.innerHTML=s.map((r,i)=>`<li class="night-order-item"><div class="order-num">${i+1}</div><div class="action-icon icon-${r.faction==='mafia'?'red':r.faction==='neutral'?'orange':'blue'}">${r.icon||'❓'}</div><span style="font-size:0.85rem;font-weight:600">${r.name}</span></li>`).join('');}
 function randomAssign(){const n=state.players.length;const t=state.roles.reduce((s,r)=>s+r.count,0);if(t!==n){showToast(`مجموع الأدوار (${t}) لا يساوي عدد اللاعبين (${n})`,'error');return;}let pool=[];state.roles.forEach(r=>{for(let i=0;i<r.count;i++)pool.push({role:r.name,faction:r.faction,roleId:r.id});});for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}state.players.forEach((p,i)=>{p.role=pool[i].role;p.faction=pool[i].faction;p.roleId=pool[i].roleId;p.alive=true;p.votingBlocked=false;p.mayorRevealed=false;p.foundPartner=false;p.bomberUsed=false;if(pool[i].roleId==='sniper')p.sniperBullets=state.players.length>10?2:1;});renderPlayerTable();renderSidebar();showToast('تم التوزيع العشوائي للأدوار! ✓','success');}
 function startGame(){if(state.players.filter(p=>!p.role).length>0){showToast('بعض اللاعبين لا يملكون أدواراً','warn');return;}state.started=true;state.night=1;state.day=1;state.phase='night';addLog('system',`بدأت اللعبة بـ ${state.players.length} لاعب`,'tag-system');renderSidebar();renderNightPanel();renderRolesReference();renderFactionStatus();updateHeader();switchTab('night');setMobileNav('night');showToast('بدأت اللعبة! الليلة الأولى...','success');}
@@ -541,20 +577,29 @@ function resolveNight(){
   if(mT){const mt=state.players.find(p=>p.id==mT);if(mt&&mt.faction==='mafia'){showToast('خطأ: لا يمكن للمافيا استهداف أحد أفرادها!','error');return;}if(mt&&!mt.alive){showToast('خطأ: الهدف ميت!','error');return;}}
   let dead=[],saved=[],events=[];
 
+  // Guard vs mafia
   if(gT&&mT&&gT==mT){const g=state.players.find(p=>p.alive&&p.roleId==='guard');if(g){g.alive=false;dead.push(g);const wn=state.players.find(p=>p.id==gT)?.name||'';events.push(`المافيا حاولت اغتيال ${wn} — حارس الأمن (${g.name}) تصدّى للهجوم ومات بدلاً منه`);addLog('death',`حارس الأمن: ${g.name} — مات دفاعاً عن ${wn}`,'tag-death');}}
-  if(wK){const wt=state.players.find(p=>p.id==wK);if(wt&&wt.alive){if(dT==wK){saved.push(wt);events.push(`الساحر حاول قتل ${wt.name} — الدكتور كان يحميه فنجا`);addLog('save',`إنقاذ: ${wt.name} — الساحر حاول قتله لكن الدكتور كان يحميه`,'tag-save');}else{wt.alive=false;dead.push(wt);events.push(`الساحر استخدم جرعة القتل على ${wt.name} — مات فوراً`);addLog('death',`وفاة: ${wt.name} (${wt.role}) — قتله الساحر`,'tag-death');state.usedAbilities.push('witch-kill');}}}
+
+  // ===== WITCH KILL: تتجاوز الدكتور دائماً — لا يمكن للدكتور إلغاؤها =====
+  if(wK){const wt=state.players.find(p=>p.id==wK);if(wt&&wt.alive){wt.alive=false;dead.push(wt);events.push(`الساحر استخدم جرعة القتل على ${wt.name} — مات فوراً (جرعة القتل لا يمكن إيقافها)`);addLog('death',`وفاة: ${wt.name} (${wt.role}) — قتله الساحر بجرعة القتل. جرعة القتل تتجاوز حماية الدكتور`,'tag-death');state.usedAbilities.push('witch-kill');if(dT==wK){events.push(`ملاحظة: الدكتور حاول حماية ${wt.name} لكن جرعة الساحر لا يمكن إيقافها`);addLog('night',`الدكتور حاول حماية ${wt.name} لكن جرعة قتل الساحر تتجاوز الحماية`,'tag-night');}}}
+
+  // Witch heal
   if(wH){const wr=state.players.find(p=>p.id==wH&&!p.alive);if(wr){wr.alive=true;events.push(`الساحر استخدم جرعة الإحياء على ${wr.name} — عاد إلى الحياة`);addLog('save',`إحياء: ${wr.name} (${wr.role}) — الساحر أعاده للحياة`,'tag-save');state.usedAbilities.push('witch-heal');}}
+
+  // Mafia attack — doctor saves only from mafia (NOT from witch kill)
   if(mT){const t=state.players.find(p=>p.id==mT);if(t&&t.alive){const gP=gT==mT;const dP=dT==mT;if(!gP){if(dP){saved.push(t);events.push(`المافيا حاولت اغتيال ${t.name} — الدكتور كان يحميه فنجا`);addLog('save',`إنقاذ: ${t.name} (${t.role}) — المافيا استهدفته لكن الدكتور كان يحميه`,'tag-save');}else{t.alive=false;dead.push(t);events.push(`المافيا اغتالت ${t.name}`);addLog('death',`وفاة: ${t.name} (${t.role}) — اغتالته المافيا`,'tag-death');}}}}
+
   if(det){const dt=state.players.find(p=>p.id==det);addLog('night',`المحقق: حقّق في ${dt?.name||'؟'} — النتيجة ظهرت للمشرف فقط`,'tag-night');}
 
-  // Gangster: reset all previous blocks, set exactly ONE new block
+  // Gangster: reset ONE block only
   state.players.forEach(p=>{p.votingBlocked=false;});
   if(gsT){const gt=state.players.find(p=>p.id==gsT);if(gt&&gt.alive){gt.votingBlocked=true;events.push(`تم تهديد ${gt.name} — لن يستطيع التصويت في النهار القادم`);addLog('night',`رجل العصابة: هدَّد ${gt.name} — محظور من التصويت غداً`,'tag-night');}}
 
   if(snT){const sn=state.players.find(p=>p.alive&&p.roleId==='sniper');const st=state.players.find(p=>p.id==snT);if(sn&&st&&st.alive&&(sn.sniperBullets??0)>0){sn.sniperBullets--;if(st.faction==='mafia'){st.alive=false;dead.push(st);events.push(`القناص أطلق النار على ${st.name} — كان من المافيا ومات`);addLog('death',`وفاة: ${st.name} (${st.role}) — أصابه القناص. رصاصات متبقية: ${sn.sniperBullets}`,'tag-death');}else{st.alive=false;sn.alive=false;dead.push(st);dead.push(sn);events.push(`القناص أطلق النار على ${st.name} لكنه كان بريئاً — ماتا معاً`);addLog('death',`وفاة مزدوجة: القناص ${sn.name} أصاب البريء ${st.name} (${st.role})`,'tag-death');}}}
+
   if(mnT){const mt=state.players.find(p=>p.id==mnT);const moon=state.players.find(p=>p.alive&&p.roleId==='moon');if(mt&&moon){if(mt.roleId==='sun'){moon.foundPartner=true;addLog('night',`القمر: وجد الشمس (${mt.name})!`,'tag-night');if(mt.foundPartner){addLog('system','الشمس والقمر اكتشفا بعضهما — يفوزان!','tag-system');showResult('☀️🌙','فاز الشمس والقمر!','اكتشف الاثنان بعضهما وفازا معاً!','#f59e42');}}else{addLog('night',`القمر: حاول التعرف على ${mt.name} — ليس الشمس`,'tag-night');}}}
 
-  // Bettor: lock bet on night 1 (must choose real player, not none)
+  // Bettor: lock bet on night 1
   if(btT&&state.night===1){
     const bP=state.players.find(p=>p.alive&&p.roleId==='bettor');
     const bTarget=state.players.find(p=>p.id==btT);
@@ -565,20 +610,26 @@ function resolveNight(){
   addLog('night',`انتهت الليلة ${state.night-1} — وفيات: ${dead.length} | إنقاذات: ${saved.length}`,'tag-night');
   renderSidebar();updateHeader();
 
-  // Handle death chain: bomber → hunter (not chained to each other's ability)
-  // If both bomber and hunter died, show bomber modal first, then hunter modal
+  // ===== DEATH CHAIN: Bomber + Hunter تعملان معاً بدون تعارض =====
+  // كلاهما يؤدي قدرته حتى لو مات الآخر بسببه
   const bomberDead=dead.find(p=>p.roleId==='bomber'&&!p.bomberUsed);
   const hunterDead=dead.find(p=>p.roleId==='hunter');
   const doDay=()=>{renderDayPanel(events);checkWinConditions();switchTab('day');setMobileNav('day');};
 
-  if(bomberDead){
+  if(bomberDead&&hunterDead){
+    // كلاهما مات — المتفجر يؤدي قدرته أولاً ثم الصياد
+    // لكن يجب التحقق: إذا مات الصياد بسبب المتفجر، تُفعَّل قدرة الصياد أيضاً
     bomberDead.bomberUsed=true;
-    // Hunter died too? Show hunter AFTER bomber, but only if hunter is NOT the bomber's target
     showBomberModal(()=>{
-      if(hunterDead){showHunterModal(doDay);}else{doDay();}
+      // بعد المتفجر يختار — يأتي دور الصياد (حتى لو مات بسبب المتفجر)
+      showHunterModal(doDay);
     },'المتفجر اغتيل ليلاً — اختر لاعباً يأخذه معه');
-  } else if(hunterDead){showHunterModal(doDay);}
-  else{doDay();}
+  } else if(bomberDead){
+    bomberDead.bomberUsed=true;
+    showBomberModal(doDay,'المتفجر اغتيل ليلاً — اختر لاعباً يأخذه معه');
+  } else if(hunterDead){
+    showHunterModal(doDay);
+  } else{doDay();}
 }
 function skipNight(){state.nightResults={dead:[],saved:[]};state.night++;renderDayPanel(['لم تحدث أي أحداث هذه الليلة']);switchTab('day');setMobileNav('day');}
 function renderDayPanel(events){
@@ -624,10 +675,22 @@ function declareResult(){
   const tgt=top.p;tgt.alive=false;
   addLog('vote',`إعدام: ${tgt.name} (${tgt.role}) — حصل على ${top.count} صوت من أصل ${alive.length} لاعب`,'tag-vote');
   showToast(`⚖️ تم إعدام ${tgt.name} — ${tgt.role}`,'warn');
-  if(tgt.roleId==='jester'){showResult('🤡','فاز المهرج!',`${tgt.name} أُعدم بالتصويت — المهرج يفوز!`,'#f59e42');addLog('system',`فاز المهرج — ${tgt.name}`,'tag-system');renderSidebar();updateHeader();return;}
-  // Bettor win — only if executed player (not 'no one') matches the bet
-  const bettor=state.players.find(p=>p.alive&&p.roleId==='bettor'&&p.bettorTarget);
-  if(bettor&&bettor.bettorTarget===tgt.id){showResult('🎰','فاز المراهن!',`راهن على طرد ${tgt.name} — وتحقق الرهان! المراهن يفوز!`,'#f59e42');addLog('system',`فاز المراهن — راهن على طرد ${tgt.name} وتحقق`,'tag-system');renderSidebar();updateHeader();return;}
+  if(tgt.roleId==='jester'){
+    // Check if bettor bet on this jester
+    const bettor=state.players.find(p=>p.alive&&p.roleId==='bettor'&&p.bettorTarget===tgt.id);
+    if(bettor){
+      // DUAL WIN: both jester and bettor win together
+      showResult('🤡🎰','فاز المهرج والمراهن معاً!',`${tgt.name} (المهرج) أُعدم بالتصويت — والمراهن كان قد راهن عليه! فوز مزدوج!`,'#f59e42');
+      addLog('system',`فوز مزدوج: المهرج ${tgt.name} + المراهن ${bettor.name}`,'tag-system');
+    } else {
+      showResult('🤡','فاز المهرج!',`${tgt.name} أُعدم بالتصويت — المهرج يفوز!`,'#f59e42');
+      addLog('system',`فاز المهرج — ${tgt.name}`,'tag-system');
+    }
+    renderSidebar();updateHeader();return;
+  }
+  // Bettor win — only on real player execution
+  const bettor=state.players.find(p=>p.alive&&p.roleId==='bettor'&&p.bettorTarget===tgt.id);
+  if(bettor){showResult('🎰','فاز المراهن!',`راهن على طرد ${tgt.name} — وتحقق الرهان! المراهن يفوز!`,'#f59e42');addLog('system',`فاز المراهن — راهن على طرد ${tgt.name} وتحقق`,'tag-system');renderSidebar();updateHeader();return;}
   renderSidebar();updateHeader();renderFactionStatus();
   if(tgt.roleId==='bomber'){showBomberModal(()=>{state.day++;checkWinConditions();},'المتفجر أُعدم — اختر لاعباً يأخذه معه');return;}
   if(tgt.roleId==='hunter'){showHunterModal(()=>{state.day++;checkWinConditions();});return;}
@@ -664,8 +727,17 @@ function clearLog(){state.log=[];document.getElementById('game-log').innerHTML='
 function exportLog(){const t=state.log.map(e=>`[${e.time}][${e.phase}][${e.type.toUpperCase()}] ${e.text.replace(/<[^>]+>/g,'')}`).join('\n');const b=new Blob([t],{type:'text/plain'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`mafia-log-day${state.day}.txt`;a.click();}
 function renderRolesReference(){const ig=state.roles.filter(r=>r.count>0);document.getElementById('roles-reference').innerHTML=ig.map(r=>`<div class="log-entry" style="margin-bottom:0.5rem"><div style="font-size:1.2rem;flex-shrink:0">${r.icon||'❓'}</div><div class="log-content"><div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.3rem"><span style="font-weight:700;font-size:0.9rem">${r.name}</span><span class="role-badge badge-${r.faction}">${fn(r.faction)}</span><span style="color:var(--text3);font-size:0.75rem">× ${r.count}</span></div><div style="font-size:0.8rem;color:var(--text2);line-height:1.5">${r.desc}</div><div style="font-size:0.75rem;color:var(--gold);margin-top:0.3rem">🏆 ${r.win}</div></div></div>`).join('');const facs=[...new Set(ig.map(r=>r.faction))];document.getElementById('win-conditions').innerHTML=facs.map(f=>{const fr=ig.filter(r=>r.faction===f);return`<div style="display:flex;gap:0.8rem;align-items:center;padding:0.6rem 0;border-bottom:1px solid var(--border);font-size:0.85rem"><span class="role-badge badge-${f}">${fn(f)}</span><span style="color:var(--text2);font-size:0.82rem">${fr[0]?.win||'—'}</span></div>`;}).join('');}
 function renderFactionStatus(){const bl=(lbl,players,col)=>`<div style="margin-bottom:0.8rem"><div style="font-size:0.7rem;color:var(--text3);font-weight:700;margin-bottom:0.3rem">${lbl}</div>${players.map(p=>`<div style="display:flex;align-items:center;gap:0.4rem;padding:0.2rem 0;font-size:0.78rem"><div style="width:6px;height:6px;border-radius:50%;background:${p.alive?col:'var(--text3)'}"></div><span style="${p.alive?'':'text-decoration:line-through;opacity:0.4'}">${p.name}</span></div>`).join('')}</div>`;document.getElementById('faction-status').innerHTML=bl('🔴 المافيا',state.players.filter(p=>p.faction==='mafia'),'var(--red)')+bl('🏙️ المدينة',state.players.filter(p=>p.faction==='city'),'var(--green)')+(state.players.filter(p=>p.faction==='neutral').length?bl('⚪ مستقل',state.players.filter(p=>p.faction==='neutral'),'var(--orange)'):'');}
-function updateHeader(){const alive=state.players.filter(p=>p.alive);document.getElementById('hdr-alive').textContent=alive.length;document.getElementById('hdr-dead').textContent=state.players.filter(p=>!p.alive).length;document.getElementById('hdr-city').textContent=alive.filter(p=>p.faction!=='mafia'&&p.faction!=='neutral').length;document.getElementById('hdr-mafia').textContent=alive.filter(p=>p.faction==='mafia').length;document.getElementById('phase-badge').textContent=state.phase==='night'?`🌙 الليلة ${state.night}`:`☀️ النهار ${state.day}`;}
-function resetGame(){if(!confirm('هل تريد إعادة تعيين اللعبة بالكامل؟'))return;state={started:false,day:0,night:0,phase:'setup',players:[],roles:[],log:[],votes:{},nightResults:{dead:[],saved:[]},usedAbilities:[],modalTarget:null,_hunterCb:null,_bomberCb:null};document.getElementById('game-log').innerHTML='';document.getElementById('quick-log').innerHTML='';document.getElementById('log-empty').style.display='block';document.getElementById('players-sidebar').innerHTML='';document.getElementById('hdr-alive').textContent='0';document.getElementById('hdr-dead').textContent='0';document.getElementById('phase-badge').textContent='إعداد اللعبة';init();switchTab('setup');setMobileNav('setup');showToast('تم إعادة تعيين اللعبة','success');}
+function updateHeader(){
+  const alive=state.players.filter(p=>p.alive);
+  document.getElementById('hdr-alive').textContent=alive.length;
+  document.getElementById('hdr-dead').textContent=state.players.filter(p=>!p.alive).length;
+  document.getElementById('hdr-city').textContent=alive.filter(p=>p.faction==='city').length;
+  document.getElementById('hdr-mafia').textContent=alive.filter(p=>p.faction==='mafia').length;
+  const neutralEl=document.getElementById('hdr-neutral');
+  if(neutralEl) neutralEl.textContent=alive.filter(p=>p.faction==='neutral').length;
+  document.getElementById('phase-badge').textContent=state.phase==='night'?`🌙 الليلة ${state.night}`:`☀️ النهار ${state.day}`;
+}
+function resetGame(){if(!confirm('هل تريد إعادة تعيين اللعبة بالكامل؟'))return;state={started:false,day:0,night:0,phase:'setup',players:[],roles:[],log:[],votes:{},nightResults:{dead:[],saved:[]},usedAbilities:[],modalTarget:null,_hunterCb:null,_bomberCb:null,revealedPlayers:{}};document.getElementById('game-log').innerHTML='';document.getElementById('quick-log').innerHTML='';document.getElementById('log-empty').style.display='block';document.getElementById('players-sidebar').innerHTML='';document.getElementById('hdr-alive').textContent='0';document.getElementById('hdr-dead').textContent='0';document.getElementById('phase-badge').textContent='إعداد اللعبة';init();switchTab('setup');setMobileNav('setup');showToast('تم إعادة تعيين اللعبة','success');}
 function switchTab(tab){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('panel-'+tab).classList.add('active');document.querySelectorAll('.tab').forEach(t=>{if(t.getAttribute('onclick')?.includes(`'${tab}'`))t.classList.add('active');});}
 function setMobileNav(tab){document.querySelectorAll('.mobile-nav-btn').forEach(b=>b.classList.remove('active'));const b=document.getElementById('mnav-'+tab);if(b)b.classList.add('active');}
 function showToast(msg,type='success'){const t=document.getElementById('toast');t.textContent=msg;t.className=`toast ${type} show`;clearTimeout(t._timer);t._timer=setTimeout(()=>t.classList.remove('show'),3000);}
