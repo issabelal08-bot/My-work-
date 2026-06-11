@@ -665,8 +665,8 @@ function gatherWinners(executedPlayer){
   // المراهن راهن على هذا اللاعع؟
   const bettor=state.players.find(p=>p.alive&&p.roleId==='bettor'&&p.bettorTarget===executedPlayer.id);
 
-  if(isJester) wins.push({emoji:'🤡',name:'المهرج',detail:`${executedPlayer.name} أُعدم بالتصويت`});
-  if(bettor) wins.push({emoji:'🎰',name:`المراهن (${bettor.name})`,detail:`راهن على طرد ${executedPlayer.name} وتحقق`});
+  if(isJester) wins.push({emoji:'🤡',name:'المهرج',detail:'أُعدم بالتصويت وحقق هدفه'});
+  if(bettor) wins.push({emoji:'🎰',name:`المراهن (${bettor.name})`,detail:`راهن على طرد الهدف وتحقق`});
 
   // المافيا: هل تساوت بعد الإعدام؟
   if(am.length>=ao.length&&am.length>0) wins.push({emoji:'🔴',name:'المافيا',detail:`المافيا (${am.length}) تساوت مع الآخرين (${ao.length})`});
@@ -685,9 +685,24 @@ function announceWinners(wins){
   wins.forEach(w=>addLog('system',`فوز: ${w.name} — ${w.detail}`,'tag-system'));
 }
 
-function showHunterModal(cb){const al=state.players.filter(p=>p.alive&&p.roleId!=='hunter');if(!al.length){if(cb)cb();return;}document.getElementById('hunter-target-select').innerHTML=al.map(p=>`<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');document.getElementById('hunter-modal').classList.add('show');state._hunterCb=cb;}
+function showHunterModal(cb){
+  // الصياد قد يكون alive=false بالفعل (محكوم بالموت) — نسمح له بالقدرة
+  const al=state.players.filter(p=>p.alive&&p.roleId!=='hunter');
+  if(!al.length){if(cb)cb();return;}
+  document.getElementById('hunter-target-select').innerHTML=al.map(p=>`<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');
+  document.getElementById('hunter-modal').classList.add('show');
+  state._hunterCb=cb;
+}
 function confirmHunterKill(){const s=document.getElementById('hunter-target-select');if(!s.value){showToast('اختر لاعباً','warn');return;}const t=state.players.find(p=>p.id==s.value);if(!t||!t.alive){showToast('لاعب غير صالح','error');return;}t.alive=false;addLog('death',`قدرة الصياد: ${t.name} (${t.role}) — الصياد اختاره ليموت معه`,'tag-death');showToast(`🏹 ${t.name} مات بقدرة الصياد`,'warn');document.getElementById('hunter-modal').classList.remove('show');renderSidebar();updateHeader();renderFactionStatus();checkWinConditionsFull();if(state._hunterCb){state._hunterCb();state._hunterCb=null;}}
-function showBomberModal(cb,desc){const al=state.players.filter(p=>p.alive&&p.roleId!=='bomber');if(!al.length){if(cb)cb();return;}document.getElementById('bomber-modal-desc').textContent=desc||'اختر لاعباً يأخذه معه — القدرة إجبارية';document.getElementById('bomber-target-select').innerHTML=al.map(p=>`<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');document.getElementById('bomber-modal').classList.add('show');state._bomberCb=cb;}
+function showBomberModal(cb,desc){
+  // المتفجر قد يكون alive=false بالفعل (محكوم بالموت) — نسمح له بالقدرة
+  const al=state.players.filter(p=>p.alive&&p.roleId!=='bomber');
+  if(!al.length){if(cb)cb();return;}
+  document.getElementById('bomber-modal-desc').textContent=desc||'اختر لاعباً يأخذه معه — القدرة إجبارية';
+  document.getElementById('bomber-target-select').innerHTML=al.map(p=>`<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');
+  document.getElementById('bomber-modal').classList.add('show');
+  state._bomberCb=cb;
+}
 function confirmBomberKill(){const s=document.getElementById('bomber-target-select');if(!s.value){showToast('اختر لاعباً','warn');return;}const t=state.players.find(p=>p.id==s.value);if(!t||!t.alive){showToast('لاعب غير صالح','error');return;}t.alive=false;addLog('death',`قدرة المتفجر: ${t.name} (${t.role}) — اختاره المتفجر ليموت معه`,'tag-death');showToast(`💣 ${t.name} مات بقدرة المتفجر`,'warn');document.getElementById('bomber-modal').classList.remove('show');renderSidebar();updateHeader();renderFactionStatus();checkWinConditionsFull();if(state._bomberCb){state._bomberCb();state._bomberCb=null;}}
 function activateBomberSacrifice(){const b=state.players.find(p=>p.alive&&p.roleId==='bomber');if(!b){showToast('لا يوجد متفجر حي','warn');return;}if(b.bomberUsed){showToast('المتفجر استخدم قدرته بالفعل','warn');return;}b.alive=false;b.bomberUsed=true;addLog('death',`المتفجر ${b.name} فجّر نفسه — ينتهي النهار فوراً`,'tag-death');renderSidebar();updateHeader();showBomberModal(()=>{showToast('انتهى النهار — ابدأ الليل التالي','warn');checkWinConditionsFull();},'المتفجر فجّر نفسه — اختر لاعباً يأخذه معه');}
 function sunDayAction(){const sun=state.players.find(p=>p.alive&&p.roleId==='sun');if(!sun){showToast('لا يوجد لاعب الشمس حي','warn');return;}const al=state.players.filter(p=>p.alive&&p.id!==sun.id);const tid=prompt(`الشمس تبحث عن القمر (لا تستطيع اختيار نفسها):\n${al.map(p=>`${p.id}. ${p.name}`).join('\n')}\n\nأدخل رقم اللاعب:`);if(!tid)return;const t=state.players.find(p=>p.id==parseInt(tid));if(!t){showToast('لاعب غير صالح','error');return;}if(t.id===sun.id){showToast('الشمس لا تستطيع اختيار نفسها','error');return;}if(t.roleId==='moon'){sun.foundPartner=true;addLog('day',`الشمس: وجدت القمر (${t.name})!`,'tag-day');if(t.foundPartner){addLog('system','الشمس والقمر اكتشفا بعضهما — يفوزان فوراً!','tag-system');showResult('☀️🌙','فاز الشمس والقمر!','اكتشف الاثنان بعضهما وفازا معاً!','#f59e42');}else{showToast('الشمس وجدت القمر! ينتظر القمر أن يجدها ليلاً','success');}}else{addLog('day',`الشمس: حاولت التعرف على ${t.name} — ليس القمر`,'tag-day');showToast(`${t.name} ليس القمر`,'warn');}}
