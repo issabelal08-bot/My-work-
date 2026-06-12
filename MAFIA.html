@@ -634,7 +634,13 @@ function declareResult(){
   tgt.alive=false;
   addLog('vote',`إعدام: ${tgt.name} (${tgt.role}) — أُعدم بالتصويت النهاري بـ${top.count} صوت`,'tag-vote');
   showToast(`⚖️ تم إعدام ${tgt.name} — ${tgt.role}`,'warn');
-  renderSidebar();updateHeader();renderFactionStatus();
+
+  // ── تحديث فوري للواجهة بعد الإقصاء مباشرة ──
+  renderSidebar();
+  updateHeader();
+  renderFactionStatus();
+  renderVoteList();         // إزالة اللاعع من قائمة التصويت فوراً
+  renderPlayerTable();      // تحديث جدول اللاعبين فوراً
 
   // ── حساب جميع الفائزين في آن واحد ──
   const winners=gatherWinners(tgt);
@@ -646,13 +652,33 @@ function declareResult(){
 
   // ── Hunter: يجب تأجيل فحص الفوز حتى ينتهي الصياد من قدرته ──
   if(tgt.roleId==='hunter'){
-    showHunterModal(()=>{state.day++;renderSidebar();updateHeader();checkWinConditionsFull();});
+    showHunterModal(()=>{state.day++;renderSidebar();updateHeader();renderVoteList();checkWinConditionsFull();});
     return;
   }
   // ── Bomber executed ──
-  executePendingDeathTriggers([tgt], ()=>{
-    state.day++;renderSidebar();updateHeader();checkWinConditionsFull();
-  });
+  if(tgt.roleId==='bomber'){
+    const b=tgt;b.bomberUsed=true;
+    showBomberModal(()=>{state.day++;renderSidebar();updateHeader();renderVoteList();checkWinConditionsFull();},`المتفجر (${b.name}) أُعدم — اختر لاعباً يأخذه معه`);
+    return;
+  }
+  state.day++;renderSidebar();updateHeader();renderVoteList();checkWinConditionsFull();
+}
+
+// ── تنفيذ قدرات الموت: المتفجر → الصياد — كلاهما "محكوم بالموت" ──
+function executePendingDeathTriggers(dead, callback){
+  const bD=dead.find(p=>p.roleId==='bomber'&&!p.bomberUsed);
+  const hD=dead.find(p=>p.roleId==='hunter');
+  if(bD&&hD){
+    bD.bomberUsed=true;
+    showBomberModal(()=>showHunterModal(callback),`المتفجر (${bD.name}) اغتيل — اختر لاعباً يأخذه معه`);
+  } else if(bD){
+    bD.bomberUsed=true;
+    showBomberModal(callback,`المتفجر (${bD.name}) اغتيل — اختر لاعباً يأخذه معه`);
+  } else if(hD){
+    showHunterModal(callback);
+  } else{
+    callback();
+  }
 }
 
 // جمع كل الفائزين في لحظة الإعدام
