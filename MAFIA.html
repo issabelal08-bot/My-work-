@@ -413,7 +413,16 @@ function renderRolesGrid(){
   });
   grid.innerHTML=h;
 }
-function chRC(id,d){const r=state.roles.find(x=>x.id===id);if(!r)return;r.count=Math.max(0,r.count+d);const e=document.getElementById('count-'+id);if(e)e.textContent=r.count;const c=document.getElementById('rolecard-'+id);if(c)c.classList.toggle('selected',r.count>0);validateRoleCounts();renderNightOrder();}
+function chRC(id,d){
+  const r=state.roles.find(x=>x.id===id);if(!r)return;
+  // ادوار بدون حد أقصى: مافيا ومواطنون فقط
+  const unlimited=['mafia','citizen'];
+  const maxCount=unlimited.includes(id)?99:1;
+  r.count=Math.max(0,Math.min(maxCount,r.count+d));
+  const e=document.getElementById('count-'+id);if(e)e.textContent=r.count;
+  const c=document.getElementById('rolecard-'+id);if(c)c.classList.toggle('selected',r.count>0);
+  validateRoleCounts();renderNightOrder();
+}
 function validateRoleCounts(){const t=state.roles.reduce((s,r)=>s+r.count,0);const pc=parseInt(document.getElementById('player-count').value)||0;document.getElementById('roles-total-count').textContent=t;document.getElementById('roles-player-count').textContent=pc;const i=document.getElementById('roles-match-indicator');if(t===pc&&t>0){i.textContent='✓ مطابق';i.style.color='var(--green)';}else if(t>pc){i.textContent=`زيادة ${t-pc}`;i.style.color='var(--red)';}else{i.textContent=t===0?'':`ناقص ${pc-t}`;i.style.color='var(--gold)';}}
 function resetRoleCounts(){state.roles.forEach(r=>{r.count=0;});renderRolesGrid();renderNightOrder();validateRoleCounts();showToast('تم تصفير جميع الأدوار','success');}
 function generatePlayerSlots(){const n=parseInt(document.getElementById('player-count').value)||10;const ex=state.players;state.players=[];for(let i=1;i<=n;i++){const o=ex.find(p=>p.id===i);state.players.push({id:i,name:o?o.name:`لاعب ${i}`,role:o?o.role:null,faction:o?o.faction:null,roleId:o?o.roleId:null,alive:true,protected:false,votingBlocked:false,mayorRevealed:false,sniperBullets:undefined,bomberUsed:false,foundPartner:false,bettorTarget:null});}renderPlayerTable();}
@@ -929,12 +938,8 @@ function sunDayAction(){
 function showSunCard(){
   const found=state._sunResult;
   if(found===undefined)return;
-  const bg=found?'var(--gold-bg)':'var(--bg3)';
-  const border=found?'2px solid var(--gold)':'2px solid var(--border2)';
-  const color=found?'var(--gold)':'var(--text2)';
-  const label=found?'وجدت القمر':'ليس القمر';
-  const icon=found?'🌙':'❌';
-  showToast(`${icon} ${label}`,'success');
+  if(found) showResultCard('🌙','وجدت القمر','نتيجة قدرة الشمس','gold');
+  else showResultCard('❌','ليس القمر','نتيجة قدرة الشمس','text3');
 }
 function revealMayorPublic(){const mayor=state.players.find(p=>p.alive&&p.roleId==='mayor'&&!p.mayorRevealed);if(!mayor){showToast('لا يوجد عمدة مخفي','warn');return;}mayor.mayorRevealed=true;addLog('day',`العمدة ${mayor.name} كشف عن نفسه — صوته يساوي الآن 3 أصوات في التصويت. الدكتور لا يستطيع حمايته بعد الآن.`,'tag-day');showToast(`🏛️ ${mayor.name} كشف عن نفسه — صوته ×3`,'success');renderDayPanel([]);renderNightPanel();}
 function goToNight(){state.phase='night';renderNightPanel();switchTab('night');setMobileNav('night');addLog('night',`بدأت الليلة ${state.night}`,'tag-night');}
@@ -1028,8 +1033,8 @@ function openPlayerModal(id){
   const hasPrev=state.players.some(x=>x.id<p.id);
   const hasNext=state.players.some(x=>x.id>p.id);
   acts.innerHTML+=`<div style="display:flex;gap:0.4rem;margin-bottom:0.4rem;width:100%">
-    <button class="btn btn-ghost" style="flex:1;${hasPrev?'':'opacity:0.3;pointer-events:none'}" onclick="navPlayerModal(-1)">← السابق</button>
     <button class="btn btn-ghost" style="flex:1;${hasNext?'':'opacity:0.3;pointer-events:none'}" onclick="navPlayerModal(1)">التالي →</button>
+    <button class="btn btn-ghost" style="flex:1;${hasPrev?'':'opacity:0.3;pointer-events:none'}" onclick="navPlayerModal(-1)">← السابق</button>
   </div>`;
   // Row 2: actions
   if(p.alive){
@@ -1051,6 +1056,23 @@ function navPlayerModal(dir){
 }
 
 function closeModal(){document.getElementById('player-modal').classList.remove('show');}
+
+// بطاقة نتيجة موحدة — نفس تصميم بطاقة اللاعع
+function showResultCard(icon, title, desc, colorVar){
+  const color='var(--'+colorVar+')';
+  const bgMap={red:'var(--red-bg)',green:'var(--green-bg)',gold:'var(--gold-bg)',orange:'var(--orange-bg)',blue:'var(--blue-bg)',text3:'var(--bg3)'};
+  const bg=bgMap[colorVar]||'var(--bg3)';
+  const border='var(--'+colorVar+'-border)'||'var(--border2)';
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-content').innerHTML=`
+    <div style="background:${bg};border:1px solid ${border};border-radius:var(--radius);padding:1.5rem;text-align:center;margin-bottom:1rem">
+      <div style="font-size:3rem;margin-bottom:0.5rem">${icon}</div>
+      <div style="font-size:1.6rem;font-weight:900;color:${color};margin-bottom:0.4rem">${title}</div>
+      <div style="font-size:0.85rem;color:var(--text2)">${desc}</div>
+    </div>`;
+  document.getElementById('modal-actions').innerHTML=`<button class="btn btn-ghost" onclick="closeModal()">إغلاق</button>`;
+  document.getElementById('player-modal').classList.add('show');
+}
 function modalKill(){const p=state.players.find(x=>x.id===state.modalTarget);if(!p||!p.alive)return;p.alive=false;addLog('death',`${p.name} (${p.role}) — أُعلن وفاته يدوياً من المشرف`,'tag-death');renderSidebar();updateHeader();closeModal();checkWinConditionsFull();}
 function modalRevive(){const p=state.players.find(x=>x.id===state.modalTarget);if(!p||p.alive)return;p.alive=true;addLog('save',`المشرف أحيا اللاعب ${p.name} (${p.role}) — عاد إلى اللعبة`,'tag-save');showToast(`💚 ${p.name} عاد إلى الحياة`,'success');renderSidebar();updateHeader();closeModal();checkWinConditionsFull();}
 function modalRevealMayor(){const p=state.players.find(x=>x.id===state.modalTarget);if(!p||!p.alive||p.roleId!=='mayor')return;p.mayorRevealed=true;addLog('day',`العمدة ${p.name} كشف عن نفسه — صوته يساوي الآن 3 أصوات`,'tag-day');showToast(`🏛️ ${p.name} كشف عن نفسه — صوته ×3`,'success');closeModal();}
@@ -1186,11 +1208,10 @@ function buildNightSteps(){
           <div class="form-group"><label class="form-label">الهدف</label>
           <select class="form-input" id="ns-detective">${none}${dOpts}</select></div>
           <div id="ns-detective-result" style="margin-top:0.8rem;font-size:0.8rem;min-height:20px"></div>
-          <div style="display:flex;gap:0.5rem;margin-top:0.5rem;flex-wrap:wrap">
-            <button class="btn btn-ghost" onclick="revealDetectiveNS()">🔍 كشف النتيجة (للمشرف)</button>
-            <button class="btn btn-ghost" id="ns-detect-eye-btn" style="display:none" onclick="showDetectiveCard()">👁 عرض البطاقة</button>
-          </div>
-          <div id="ns-detective-card" style="display:none;margin-top:0.5rem"></div></div>`;
+          <div style="display:flex;gap:0.5rem;margin-top:0.5rem;flex-wrap:wrap;align-items:center">
+            <button class="btn btn-ghost" onclick="revealDetectiveNS()">🔍 كشف النتيجة</button>
+            <button class="btn btn-ghost" id="ns-detect-eye-btn" style="display:none;padding:0.4rem 0.6rem" onclick="showDetectiveCard()" title="عرض البطاقة">👁</button>
+          </div></div>`;
       },'ns-detective',()=>!isAlive('detective'));
   }
 
@@ -1243,11 +1264,10 @@ function buildNightSteps(){
           <div class="form-group"><label class="form-label">اللاعب</label>
           <select class="form-input" id="ns-moon">${none}${mOpts}</select></div>
           <div id="ns-moon-result" style="margin-top:0.8rem;font-size:0.8rem;min-height:20px"></div>
-          <div style="display:flex;gap:0.5rem;margin-top:0.5rem;flex-wrap:wrap">
+          <div style="display:flex;gap:0.5rem;margin-top:0.5rem;flex-wrap:wrap;align-items:center">
             <button class="btn btn-ghost" onclick="revealMoonNS()">🌙 كشف النتيجة</button>
-            <button class="btn btn-ghost" id="ns-moon-eye-btn" style="display:none" onclick="showMoonCard()">👁 عرض البطاقة</button>
-          </div>
-          <div id="ns-moon-card" style="display:none;margin-top:0.5rem"></div></div>`;
+            <button class="btn btn-ghost" id="ns-moon-eye-btn" style="display:none;padding:0.4rem 0.6rem" onclick="showMoonCard()" title="عرض البطاقة">👁</button>
+          </div></div>`;
       },'ns-moon',()=>!isAlive('moon'));
   }
 
@@ -1389,21 +1409,9 @@ function revealDetectiveNS(){
 }
 function showDetectiveCard(){
   const isMafia=state._detectiveResult;
-  const bg=isMafia?'var(--red-bg)':'var(--green-bg)';
-  const border=isMafia?'2px solid var(--red)':'2px solid var(--green)';
-  const color=isMafia?'var(--red)':'var(--green)';
-  const label=isMafia?'مافيا':'بريء';
-  const icon=isMafia?'🔴':'✅';
-  const card=document.getElementById('ns-detective-card');
-  if(!card)return;
-  const showing=card.style.display==='block';
-  card.style.display=showing?'none':'block';
-  if(!showing) card.innerHTML=`
-    <div style="display:flex;align-items:center;justify-content:center;gap:1rem;padding:1.2rem;
-      border-radius:var(--radius-sm);background:${bg};border:${border};text-align:center;margin-top:0.3rem">
-      <div style="font-size:2.5rem">${icon}</div>
-      <div style="font-size:2rem;font-weight:900;color:${color}">${label}</div>
-    </div>`;
+  if(isMafia===undefined){showToast('اكشف النتيجة أولاً','warn');return;}
+  if(isMafia) showResultCard('🔴','مافيا','نتيجة تحقيق المحقق','red');
+  else showResultCard('✅','بريء','نتيجة تحقيق المحقق','green');
 }
 
 function revealMoonNS(){
@@ -1425,4 +1433,4 @@ init();renderSidebar();
 
 </script>
 </body>
-</html>
+  </html>
