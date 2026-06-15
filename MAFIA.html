@@ -645,7 +645,7 @@ function getNightInput(key){
       'mafia':'mafia','doctor':'doctor','guard':'guard',
       'witch-heal':'witch-heal','witch-kill':'witch-kill',
       'detective':'detective','gangster':'gangster','sniper':'sniper',
-      'moon':'moon','sun':'sun','bettor':'bettor'
+      'moon':'moon','bettor':'bettor'
     };
     return state._nightInputs[map[key]]||'';
   }
@@ -739,22 +739,6 @@ function resolveNight(){
     gt.votingBlocked=true;
     addLog('night',`رجل العصابة: هدَّد ${gt.name} — محظور من التصويت غداً`,'tag-night');
   }}
-
-  // 7a. الشمس (نفس المنطق في الليل)
-  const sunT=getNightInput('sun');
-  if(sunT){
-    const sunP2=state.players.find(p=>p.alive&&p.roleId==='sun');
-    const sunTarget=state.players.find(p=>p.id==sunT);
-    if(sunP2&&sunTarget&&!sunP2.foundPartner){
-      if(sunTarget.roleId==='moon'){
-        sunP2.foundPartner=true;
-        addLog('night',`الشمس: وجدت القمر (${sunTarget.name})!`,'tag-night');
-        if(sunTarget.foundPartner) addLog('night','الشمس والقمر اكتشفا بعضهما — شرط الفوز سيُفحص','tag-night');
-      }else{
-        addLog('night',`الشمس: حاولت التعرف على ${sunTarget.name} — ليس القمر`,'tag-night');
-      }
-    }
-  }
 
   // 7. القمر
   if(mnT){const mt=state.players.find(p=>p.id==mnT);const moon=state.players.find(p=>p.alive&&p.roleId==='moon');
@@ -886,7 +870,7 @@ function gatherWinners(executedPlayer){
   // المهرج يفوز بأُعدم
   if(isJester) wins.push({emoji:'🤡',name:'المهرج',detail:'أُعدم بالتصويت وحقق هدفه'});
   // المراهن يفوز إذا أُعدم الهدف الذي راهن عليه
-  if(bettor) wins.push({emoji:'🎰',name:`المراهن (${bettor.name})`,detail:'راهن على طرد هذا اللاعع وتحقق'});
+  if(bettor) wins.push({emoji:'🎰',name:'المراهن',detail:`${bettor.name} راهن على طرد هذا اللاعع وتحقق الرهان`});
 
   // المافيا: تساوت مع المدينة فقط (ليس المستقلين)
   if(am.length>0&&am.length>=city.length)
@@ -1051,12 +1035,14 @@ function openPlayerModal(id){
   const hasNext=state.players.some(x=>x.id>p.id);
   // Two-click navigation system
   state._navPending=state._navPending||null;
-  acts.innerHTML+=`<div style="display:flex;flex-direction:column;gap:0.3rem;margin-bottom:0.5rem;width:100%">
+  // Nav buttons (next↑, prev↓)
+  acts.innerHTML+=`<div style="display:flex;flex-direction:column;gap:0.3rem;width:100%">
     <button class="btn btn-ghost" id="nav-next-btn" style="${hasNext?'':'opacity:0.3;pointer-events:none'}" onclick="navClickTwo(1)">التالي ←</button>
     <button class="btn btn-ghost" id="nav-prev-btn" style="${hasPrev?'':'opacity:0.3;pointer-events:none'}" onclick="navClickTwo(-1)">→ السابق</button>
-  </div>
-  <div id="nav-pending-hint" style="font-size:0.72rem;color:var(--gold);text-align:center;min-height:18px;margin-bottom:0.3rem"></div>`;
-  // Row 2: actions
+    <div id="nav-pending-hint" style="font-size:0.72rem;color:var(--gold);text-align:center;min-height:16px;margin-top:0.2rem"></div>
+  </div>`;
+  // Divider then action buttons
+  acts.innerHTML+=`<div style="height:1px;background:var(--border);margin:0.5rem 0"></div>`;
   if(p.alive){
     acts.innerHTML+=`<button class="btn btn-danger" onclick="modalKill()">💀 إعلان وفاة</button>`;
     if(p.roleId==='mayor'&&!p.mayorRevealed)
@@ -1285,27 +1271,6 @@ function buildNightSteps(){
       },'ns-sniper',()=>!isAlive('sniper'));
   }
 
-  // 7b. الشمس (ليلة 1 فقط — تبحث عن القمر مثل القمر تماماً)
-  if(roleInGame('sun')){
-    addStep('sun','الشمس','☀️',
-      ()=>{
-        const sP=getPlayer('sun');
-        if(!isAlive('sun')) return deadCard('☀️','الشمس',deathReason(sP));
-        if(sP.foundPartner) return deadCard('☀️','الشمس','الشمس وجدت القمر بالفعل');
-        const sOpts=state.players.filter(p=>p.alive&&p.id!==sP.id).map(p=>`<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');
-        return `<div class="night-action-card" style="max-width:400px">
-          <div class="night-action-title"><div class="action-icon icon-gold">☀️</div>الشمس</div>
-          <div class="night-action-subtitle">تبحث عن القمر — لا تختار نفسها</div>
-          <div class="form-group"><label class="form-label">اللاعع</label>
-          <select class="form-input" id="ns-sun">${'<option value="">— لا أحد —</option>'}${sOpts}</select></div>
-          <div id="ns-sun-result" style="margin-top:0.8rem;font-size:0.8rem;min-height:20px"></div>
-          <div style="display:flex;gap:0.5rem;margin-top:0.5rem;flex-wrap:wrap;align-items:center">
-            <button class="btn btn-ghost" onclick="revealSunNS()">☀️ كشف النتيجة</button>
-            <button class="btn btn-ghost" id="ns-sun-eye-btn" style="display:none;padding:0.4rem 0.6rem" onclick="showSunCard()" title="عرض البطاقة">👁</button>
-          </div></div>`;
-      },'ns-sun',()=>!isAlive('sun'));
-  }
-
   // 8. القمر
   if(roleInGame('moon')){
     addStep('moon','القمر','🌙',
@@ -1417,7 +1382,6 @@ function saveCurrentStep(){
   const wh=document.getElementById('ns-witch-heal');const wk=document.getElementById('ns-witch-kill');
   if(wh) nightInputs['witch-heal']=wh.value;
   if(wk) nightInputs['witch-kill']=wk.value;
-  const sunSel=document.getElementById('ns-sun');if(sunSel) nightInputs['sun']=sunSel.value;
 }
 
 function nightStepNext(){
@@ -1439,24 +1403,26 @@ function revealDetectiveNS(){
   const sel=document.getElementById('ns-detective');if(!sel||!sel.value)return;
   const t=state.players.find(p=>p.id==sel.value);if(!t)return;
   const gi=state.usedAbilities.filter(a=>a==='detect-godfather').length;
-  let isMafia=false;let logText='';
+  let isMafia=false;let roleDisplay='';let logText='';
   if(t.roleId==='godfather'&&gi===0){
-    isMafia=false;
+    isMafia=false; roleDisplay='العراب (أول تحقيق)';
     logText=`المحقق: حقّق في ${t.name} — بريء (أول تحقيق على العراب)`;
     state.usedAbilities.push('detect-godfather');
   }else if(t.faction==='mafia'){
-    isMafia=true;
-    logText=`المحقق: حقّق في ${t.name} — مافيا`;
+    isMafia=true; roleDisplay=t.role;
+    logText=`المحقق: حقّق في ${t.name} — مافيا (${t.role})`;
   }else{
-    isMafia=false;
-    logText=`المحقق: حقّق في ${t.name} — بريء`;
+    isMafia=false; roleDisplay=t.role;
+    logText=`المحقق: حقّق في ${t.name} — بريء (${t.role})`;
   }
-  // Store result for eye button
   state._detectiveResult=isMafia;
-  // Show existing text result
+  // Show inline result: verdict + role
+  const verdict=isMafia?'🔴 مافيا':'✅ بريء';
+  const vColor=isMafia?'var(--red)':'var(--green)';
   const el=document.getElementById('ns-detective-result');
-  if(el) el.innerHTML=`<div style="padding:0.5rem;border-radius:6px;background:var(--bg3);border:1px solid var(--border2);font-size:0.85rem">
-    <strong>${t.name}:</strong> ${isMafia?'🔴 مافيا':'✅ بريء'}
+  if(el) el.innerHTML=`<div style="display:flex;align-items:center;gap:0.6rem;padding:0.6rem 0.8rem;border-radius:var(--radius-sm);background:var(--bg3);border:1px solid var(--border2);margin-top:0.3rem">
+    <span style="font-weight:900;color:${vColor};font-size:1rem">${verdict}</span>
+    <span style="color:var(--text2);font-size:0.78rem">— ${t.name} — ${roleDisplay}</span>
   </div>`;
   // Show eye button
   const eyeBtn=document.getElementById('ns-detect-eye-btn');
@@ -1470,27 +1436,7 @@ function showDetectiveCard(){
   else showResultCard('✅','بريء','نتيجة تحقيق المحقق','green');
 }
 
-function revealSunNS(){
-  const sel=document.getElementById('ns-sun');if(!sel||!sel.value)return;
-  const t=state.players.find(p=>p.id==sel.value);if(!t)return;
-  const found=t.roleId==='moon';
-  state._sunResult=found;
-  const el=document.getElementById('ns-sun-result');
-  if(el) el.innerHTML=`<div style="padding:0.5rem;border-radius:6px;background:var(--bg3);border:1px solid var(--border2);font-size:0.85rem">
-    <strong>${t.name}:</strong> ${found?'🌙 هذا هو القمر!':'❌ ليس القمر'}
-  </div>`;
-  const eyeBtn=document.getElementById('ns-sun-eye-btn');
-  if(eyeBtn) eyeBtn.style.display='inline-flex';
-  const sunP=state.players.find(p=>p.alive&&p.roleId==='sun');
-  if(found&&sunP){
-    sunP.foundPartner=true;
-    addLog('night',`الشمس: وجدت القمر (${t.name})!`,'tag-night');
-    const moonP=state.players.find(p=>p.roleId==='moon');
-    if(moonP?.foundPartner) addLog('system','الشمس والقمر اكتشفا بعضهما — يفوزان!','tag-system');
-  }else{
-    addLog('night',`الشمس: حاولت التعرف على ${t.name} — ليس القمر`,'tag-night');
-  }
-}
+
 function revealMoonNS(){
   const sel=document.getElementById('ns-moon');if(!sel||!sel.value)return;
   const t=state.players.find(p=>p.id==sel.value);if(!t)return;
@@ -1510,4 +1456,4 @@ init();renderSidebar();
 
 </script>
 </body>
-</html>
+  </html>
