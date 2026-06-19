@@ -269,8 +269,8 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
   <div id="night-special-actions"></div>
   <div class="divider"></div>
   <div class="actions-row">
-   <button class="btn btn-primary" id="night-next-btn" onclick="nightStepNext()">التالي →</button>
-   <button class="btn btn-ghost" id="night-prev-btn" onclick="nightStepPrev()" style="display:none">← السابق</button>
+   <button class="btn btn-primary" id="night-next-btn" onclick="nightStepNext()">التالي ←</button>
+   <button class="btn btn-ghost" id="night-prev-btn" onclick="nightStepPrev()" style="display:none">→ السابق</button>
    <button class="btn btn-ghost" onclick="skipNight()">⏭️ تخطي الليل</button>
   </div>
  </div>
@@ -300,10 +300,10 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
      <label class="form-label">&#x627;&#x62E;&#x62A;&#x631; &#x644;&#x627;&#x639;&#x628;&#x64B;&#x627;</label>
      <select class="form-input" id="sun-day-select"></select>
     </div>
-    <div style="margin-top:0.7rem">
+    <div id="sun-day-result" style="margin-top:0.5rem;min-height:24px"></div>
+    <div style="margin-top:0.5rem">
      <button class="btn btn-ghost" onclick="executeSunDay()">&#x2600;&#xFE0F; &#x62A;&#x646;&#x641;&#x64A;&#x630; &#x627;&#x644;&#x628;&#x62D;&#x62B;</button>
     </div>
-    <div id="sun-day-result" style="margin-top:0.5rem;min-height:24px"></div>
    </div>
   </div>
   <div class="divider"></div>
@@ -1054,8 +1054,8 @@ function openPlayerModal(id){
  state._navPending=state._navPending||null;
  // Nav buttons (next↑, prev↓)
  acts.innerHTML+=`<div style="display:flex;flex-direction:column;gap:0.3rem;width:100%">
-  <button class="btn btn-ghost" id="nav-next-btn" style="${hasNext?'':'opacity:0.3;pointer-events:none'}" onclick="navClickTwo(1)">التالي →</button>
-  <button class="btn btn-ghost" id="nav-prev-btn" style="${hasPrev?'':'opacity:0.3;pointer-events:none'}" onclick="navClickTwo(-1)">← السابق</button>
+  <button class="btn btn-ghost" id="nav-next-btn" style="${hasNext?'':'opacity:0.3;pointer-events:none'}" onclick="navClickTwo(1)">التالي ←</button>
+  <button class="btn btn-ghost" id="nav-prev-btn" style="${hasPrev?'':'opacity:0.3;pointer-events:none'}" onclick="navClickTwo(-1)">→ السابق</button>
   <div id="nav-pending-hint" style="font-size:0.72rem;color:var(--gold);text-align:center;min-height:16px;margin-top:0.2rem"></div>
  </div>`;
  // Divider then action buttons
@@ -1375,7 +1375,7 @@ function renderNightStepUI(){
   nextBtn.onclick=()=>{saveCurrentStep();resolveNightFromInputs();};
  } else {
   // If dead step: show "تخطي" instead of "التالي"
-  nextBtn.textContent=isDead?'تخطي →':'التالي →';
+  nextBtn.textContent=isDead?'تخطي ←':'التالي ←';
   nextBtn.onclick=()=>nightStepNext();
  }
 
@@ -1434,11 +1434,11 @@ function revealDetectiveNS(){
  const verdict=isMafia?'🔴 مافيا':'✅ بريء';
  const vColor=isMafia?'var(--red)':'var(--green)';
  const el=document.getElementById('ns-detective-result');
- if(el) el.innerHTML=`<div style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.4rem 0.7rem;border-radius:var(--radius-sm);background:var(--bg3);border:1px solid var(--border2)">
-  <span style="font-weight:900;color:${vColor}">${verdict}</span>
-  <span style="color:var(--text2);font-size:0.75rem">— ${t.name} — ${roleDisplay}</span>
-  <button class="btn btn-ghost" style="padding:0.1rem 0.35rem;font-size:0.7rem;margin-right:0.2rem" onclick="showDetectiveCard()">👁</button>
- </div>`;
+ if(el) el.innerHTML=`<div style="display:flex;align-items:center;gap:0.6rem;padding:0.6rem 0.8rem;border-radius:var(--radius-sm);background:var(--bg3);border:1px solid var(--border2);width:100%;box-sizing:border-box">
+  <span style="font-weight:900;color:${vColor};font-size:1rem">${verdict}</span>
+  <span style="color:var(--text2);font-size:0.78rem;flex:1">— ${t.name} — ${roleDisplay}</span>
+  <button class="btn btn-ghost" style="padding:0.15rem 0.4rem;font-size:0.8rem;margin-left:auto" onclick="showDetectiveCard()" title="عرض البطاقة">👁</button>
+</div>`
  addLog('night',logText,'tag-night');
 }
 function showDetectiveCard(){
@@ -1460,7 +1460,7 @@ function revealMoonNS(){
  if(el) el.innerHTML=`<div style="display:flex;align-items:center;gap:0.6rem;padding:0.5rem 0.8rem;border-radius:var(--radius-sm);background:var(--bg3);border:1px solid var(--border2);flex-wrap:wrap">
   <span style="font-weight:700;color:${color}">${label}</span>
   <span style="color:var(--text3);font-size:0.75rem">— ${t.name}</span>
-  <button class="btn btn-ghost" style="padding:0.15rem 0.4rem;font-size:0.72rem;margin-right:auto" onclick="showMoonCard()">👁</button>
+  <button class="btn btn-ghost" style="padding:0.15rem 0.4rem;font-size:0.8rem;margin-right:0;margin-left:auto" onclick="showMoonCard()" title="عرض البطاقة">👁</button>
  </div>`;
  addLog('night',found?`القمر: وجد الشمس (${t.name})!`:`القمر: حاول التعرف على ${t.name} — ليست الشمس`,'tag-night');
  if(found){
@@ -1531,7 +1531,7 @@ function executeSunDay(){
   if(res) res.innerHTML=`<div style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.8rem;border-radius:var(--radius-sm);background:var(--bg3);border:1px solid var(--border2)">
    <span style="font-weight:700;color:var(--gold);font-size:0.95rem">🌙 وجدت القمر</span>
    <span style="color:var(--text3);font-size:0.75rem">— ${t.name}</span>
-   <button class="btn btn-ghost" style="padding:0.15rem 0.4rem;font-size:0.72rem" onclick="showSunCard()">👁 بطاقة</button>
+   <button class="btn btn-ghost" style="padding:0.15rem 0.4rem;font-size:0.72rem" onclick="showSunCard()">👁</button>
   </div>`;
   addLog('day',`الشمس: وجدت القمر (${t.name})!`,'tag-day');
   const moonP=state.players.find(p=>p.roleId==='moon');
@@ -1541,14 +1541,13 @@ function executeSunDay(){
   if(res) res.innerHTML=`<div style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.8rem;border-radius:var(--radius-sm);background:var(--bg3);border:1px solid var(--border2)">
    <span style="font-weight:700;color:var(--text2);font-size:0.95rem">❌ ليس القمر</span>
    <span style="color:var(--text3);font-size:0.75rem">— ${t.name}</span>
-   <button class="btn btn-ghost" style="padding:0.15rem 0.4rem;font-size:0.72rem" onclick="showSunCard()">👁 بطاقة</button>
+   <button class="btn btn-ghost" style="padding:0.15rem 0.4rem;font-size:0.72rem" onclick="showSunCard()">👁</button>
   </div>`;
   addLog('day',`الشمس: حاولت التعرف على ${t.name} — ليس القمر`,'tag-day');
  }
 
 }
 init();renderSidebar();
-
 </script>
 </body>
 </html>
