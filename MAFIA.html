@@ -156,8 +156,7 @@ body.hide-colors .player-num.neutral {
 body.hide-colors .vote-bar{background:var(--text3)!important}
 body.hide-colors .player-status{background:var(--text3)!important;box-shadow:none!important}
 body.hide-colors .role-badge{background:var(--bg3)!important;color:var(--text2)!important;border-color:var(--border)!important}
-body.hide-colors .dot{background:var(--text3)!important;box-shadow:none!important}
-body.hide-colors .stat-pill .dot{background:var(--text3)!important;box-shadow:none!important}
+/* العدادات العلوية في الهيدر تبقى ملونة دائماً — لا تتأثر بإخفاء الألوان */
 body.hide-colors .fc-num{color:var(--text)!important}
 
 @media(max-width:1100px){.app{grid-template-columns:220px 1fr}.sidebar-right{display:none}}
@@ -223,7 +222,7 @@ body.hide-colors .fc-num{color:var(--text)!important}
   </div>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.8rem">
    <div class="section-title" style="margin-bottom:0;border:none">أسماء اللاعبين</div>
-   <button class="btn btn-ghost" style="font-size:0.72rem;padding:0.25rem 0.7rem" onclick="toggleAllRoles()">👁 إظهار/إخفاء الكل</button>
+   <button id="toggle-all-roles-btn" class="btn btn-ghost" style="font-size:0.72rem;padding:0.25rem 0.7rem" onclick="toggleAllRoles()">إظهار الكل 👁️</button>
   </div>
   <div style="overflow-x:auto;margin-bottom:1.5rem">
    <table class="players-table">
@@ -284,7 +283,7 @@ body.hide-colors .fc-num{color:var(--text)!important}
   <div class="actions-row">
    <button class="btn btn-primary" id="night-next-btn" onclick="nightStepNext()">التالي ←</button>
    <button class="btn btn-ghost" id="night-prev-btn" onclick="nightStepPrev()" style="display:none">→ السابق</button>
-   <button class="btn btn-ghost" onclick="skipNight()">⏭️ تخطي الليل</button>
+   <button class="btn btn-ghost" onclick="skipNight()">تخطي الليل ⏮️</button>
   </div>
  </div>
  <div class="panel" id="panel-day">
@@ -500,6 +499,8 @@ function toggleAllRoles(){
  const anyShown=state.players.some(p=>state.revealedPlayers[p.id]);
  state.players.forEach(p=>{state.revealedPlayers[p.id]=!anyShown;});
  renderPlayerTable();
+ const btn=document.getElementById('toggle-all-roles-btn');
+ if(btn) btn.textContent=anyShown?'إظهار الكل 👁️':'إخفاء الكل 👁️';
 }
 function renderNightOrder(){const s=[...state.roles].filter(r=>r.hasNight&&r.count>0).sort((a,b)=>a.nightOrder-b.nightOrder);const e=document.getElementById('night-order-display');if(!e)return;e.innerHTML=s.map((r,i)=>`<li class="night-order-item"><div class="order-num">${i+1}</div><div class="action-icon icon-${r.faction==='mafia'?'red':r.faction==='neutral'?'orange':'blue'}">${r.icon||'❓'}</div><span style="font-size:0.85rem;font-weight:600">${r.name}</span></li>`).join('');}
 function randomAssign(){const n=state.players.length;const t=state.roles.reduce((s,r)=>s+r.count,0);if(t!==n){showToast(`مجموع الأدوار (${t}) لا يساوي عدد اللاعبين (${n})`,'error');return;}let pool=[];state.roles.forEach(r=>{for(let i=0;i<r.count;i++)pool.push({role:r.name,faction:r.faction,roleId:r.id});});for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}state.players.forEach((p,i)=>{p.role=pool[i].role;p.faction=pool[i].faction;p.roleId=pool[i].roleId;p.alive=true;p.votingBlocked=false;p.mayorRevealed=false;p.foundPartner=false;p.bomberUsed=false;if(pool[i].roleId==='sniper')p.sniperBullets=state.players.length>10?2:1;});renderPlayerTable();renderSidebar();showToast('تم التوزيع العشوائي للأدوار! ✓','success');}
