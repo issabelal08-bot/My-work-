@@ -255,8 +255,6 @@ body.hide-colors .fc-num{color:var(--text)!important}
     <thead><tr>
      <th style="width:40px">#</th>
      <th>أسماء اللاعبين</th>
-     <th>الدور</th>
-     <th class="col-faction">الفصيل</th>
      <th style="width:80px">إجراء</th>
     </tr></thead>
     <tbody id="players-tbody"></tbody>
@@ -520,8 +518,6 @@ function renderPlayerTable(){
    <td><input type="text" value="${p.name.replace(/"/g,'&quot;')}"
     onchange="(function(v){var pl=state.players.find(function(x){return x.id===${p.id};});if(pl){pl.name=v;renderSidebar();}})(this.value)"
     style="${p.alive?'':'opacity:0.45;text-decoration:line-through'}"></td>
-   <td>${roleCell}</td>
-   <td class="col-faction">${factionCell}</td>
    <td style="display:flex;gap:0.3rem;align-items:center">
     <button class="btn btn-ghost" style="padding:0.2rem 0.4rem;font-size:0.6rem;white-space:nowrap;border-color:${shown?'var(--gold-border)':'var(--border2)'};color:${shown?'var(--gold)':'var(--text2)'}"
      onclick="togglePlayerReveal(${p.id})">${shown?'إخفاء':'عرض'}</button>
