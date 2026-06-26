@@ -1062,7 +1062,7 @@ function openPlayerModal(id){
  acts.innerHTML+=`<div style="height:1px;background:var(--border);margin:0.5rem 0"></div>`;
  if(p.alive){
   acts.innerHTML+=`<button class="btn btn-danger" onclick="modalKill()">💀 إعلان وفاة</button>`;
-  if(p.roleId==='mayor'&&!p.mayorRevealed) acts.innerHTML+=`<button class="btn btn-ghost" style="border-color:var(--gold-border);color:var(--gold)" onclick="modalRevealMayor()">🏛️ كشف العمدة</button>`;
+  if(p.roleId==='mayor'&&!p.mayorRevealed&&state.started) acts.innerHTML+=`<button class="btn btn-ghost" style="border-color:var(--gold-border);color:var(--gold)" onclick="modalRevealMayor()">🏛️ كشف العمدة</button>`;
  }else{
   acts.innerHTML+=`<button class="btn btn-success" onclick="modalRevive()">💚 إحياء اللاعب</button>`;
  }
