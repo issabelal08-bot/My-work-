@@ -153,7 +153,6 @@ body.hide-colors .player-num.city,
 body.hide-colors .player-num.neutral {
   background:var(--bg4)!important;border-color:var(--border2)!important;color:var(--text2)!important;
 }
-body.hide-colors .vote-bar{background:var(--text3)!important}
 body.hide-colors .player-status{background:var(--text3)!important;box-shadow:none!important}
 body.hide-colors .role-badge{background:var(--bg3)!important;color:var(--text2)!important;border-color:var(--border)!important}
 /* العدادات العلوية في الهيدر تبقى ملونة دائماً — لا تتأثر بإخفاء الألوان */
@@ -505,13 +504,12 @@ function renderPlayerTable(){
   const revealRow=shown&&p.role?`
    <tr id="reveal-row-${p.id}" style="background:var(--bg3)">
     <td></td>
-    <td colspan="3" style="padding:0.3rem 0.8rem;font-size:0.78rem">
+    <td colspan="2" style="padding:0.3rem 0.8rem;font-size:0.78rem">
      <span style="color:var(--text2);margin-left:0.5rem">الفصيل:</span>
-     <span style="color:var(--${p.faction==='mafia'?'red':p.faction==='neutral'?'orange':'blue'});font-weight:700;margin-left:0.4rem">${fn(p.faction)}</span>
+     <span style="color:${p.faction==='mafia'?'#e24b4a':p.faction==='neutral'?'#f59e42':'#4a8fe2'};font-weight:700;margin-left:0.4rem">${fn(p.faction)}</span>
      <span style="color:var(--text2);margin-right:0.8rem;margin-left:0.5rem">الدور:</span>
-     <span class="role-badge badge-${p.faction==='mafia'?'mafia':p.faction==='neutral'?'neutral':'city'}">${p.role}</span>
+     <span style="display:inline-block;padding:0.15rem 0.6rem;border-radius:10px;font-size:0.7rem;font-weight:700;background:${p.faction==='mafia'?'#1a0a0a':p.faction==='neutral'?'#180f00':'#0a1020'};color:${p.faction==='mafia'?'#e24b4a':p.faction==='neutral'?'#f59e42':'#4a8fe2'};border:1px solid ${p.faction==='mafia'?'rgba(226,75,74,0.3)':p.faction==='neutral'?'rgba(245,158,66,0.3)':'rgba(74,143,226,0.3)'}">${p.role}</span>
     </td>
-    <td></td>
    </tr>`:'';
   return `<tr>
    <td style="color:var(--text3);font-weight:700">${p.id}</td>
