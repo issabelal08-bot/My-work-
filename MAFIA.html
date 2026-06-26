@@ -475,7 +475,12 @@ function renderRolesGrid(){
   const rs=state.roles.filter(r=>r.faction===g.key);
   if(!rs.length)return;
   h+=`<div style="grid-column:1/-1;padding:0.4rem 0.8rem;background:var(--bg3);border:1px solid ${g.bdr};border-radius:var(--radius-sm);margin-top:0.4rem"><span style="font-size:0.72rem;font-weight:900;color:${g.col};text-transform:uppercase;letter-spacing:1px">${g.label}</span></div>`;
-  rs.forEach(r=>{h+=`<div class="role-card ${r.count>0?'selected':''}" id="rolecard-${r.id}"><div class="role-card-faction faction-${r.faction}">${fn(r.faction)}</div><div style="font-size:1.3rem;margin-bottom:0.3rem">${r.icon||'❓'}</div><div class="role-card-name">${r.name}</div><div class="role-card-desc">${r.desc}</div><div class="role-count-control"><button class="count-btn" onclick="chRC('${r.id}',-1)">−</button><span class="count-num" id="count-${r.id}">${r.count}</span><button class="count-btn" onclick="chRC('${r.id}',1)">+</button></div></div>`;});
+  rs.forEach(r=>{
+   const unlimited=['mafia','citizen'];
+   const minusDisabled=r.count===0?'opacity:0.3;cursor:not-allowed;pointer-events:none':'';
+   const plusDisabled=(!unlimited.includes(r.id)&&r.count>=1)?'opacity:0.3;cursor:not-allowed;pointer-events:none':'';
+   h+=`<div class="role-card ${r.count>0?'selected':''}" id="rolecard-${r.id}"><div class="role-card-faction faction-${r.faction}">${fn(r.faction)}</div><div style="font-size:1.3rem;margin-bottom:0.3rem">${r.icon||'❓'}</div><div class="role-card-name">${r.name}</div><div class="role-card-desc">${r.desc}</div><div class="role-count-control"><button class="count-btn" id="btn-minus-${r.id}" style="${minusDisabled}" onclick="chRC('${r.id}',-1)">−</button><span class="count-num" id="count-${r.id}">${r.count}</span><button class="count-btn" id="btn-plus-${r.id}" style="${plusDisabled}" onclick="chRC('${r.id}',1)">+</button></div></div>`;
+  });
  });
  grid.innerHTML=h;
 }
@@ -486,6 +491,11 @@ function chRC(id,d){
  r.count=Math.max(0,Math.min(maxCount,r.count+d));
  const e=document.getElementById('count-'+id);if(e)e.textContent=r.count;
  const c=document.getElementById('rolecard-'+id);if(c)c.classList.toggle('selected',r.count>0);
+ // تحديث حالة أزرار +/-
+ const bm=document.getElementById('btn-minus-'+id);
+ const bp=document.getElementById('btn-plus-'+id);
+ if(bm){const dis=r.count===0;bm.style.opacity=dis?'0.3':'';bm.style.cursor=dis?'not-allowed':'';bm.style.pointerEvents=dis?'none':'';}
+ if(bp){const dis=!unlimited.includes(id)&&r.count>=1;bp.style.opacity=dis?'0.3':'';bp.style.cursor=dis?'not-allowed':'';bp.style.pointerEvents=dis?'none':'';}
  validateRoleCounts();renderNightOrder();
 }
 function validateRoleCounts(){const t=state.roles.reduce((s,r)=>s+r.count,0);const pc=parseInt(document.getElementById('player-count').value)||0;document.getElementById('roles-total-count').textContent=t;document.getElementById('roles-player-count').textContent=pc;const i=document.getElementById('roles-match-indicator');if(t===pc&&t>0){i.textContent='✓ مطابق';i.style.color='var(--green)';}else if(t>pc){i.textContent=`زيادة ${t-pc}`;i.style.color='var(--red)';}else{i.textContent=t===0?'':`ناقص ${pc-t}`;i.style.color='var(--gold)';}}
@@ -501,14 +511,20 @@ function renderPlayerTable(){
   const factionCell=p.faction
    ?'<span style="color:var(--text3);font-size:0.8rem;letter-spacing:2px">● ●</span>'
    :'—';
+  const rc=p.faction==='mafia'?{c:'#e24b4a',bg:'#1a0a0a',bd:'rgba(226,75,74,0.3)'}:p.faction==='neutral'?{c:'#f59e42',bg:'#180f00',bd:'rgba(245,158,66,0.3)'}:{c:'#4a8fe2',bg:'#0a1020',bd:'rgba(74,143,226,0.3)'};
+  const badge=(txt)=>`<span style="display:inline-block;padding:0.15rem 0.55rem;border-radius:10px;font-size:0.7rem;font-weight:700;background:${rc.bg};color:${rc.c};border:1px solid ${rc.bd}">${txt}</span>`;
   const revealRow=shown&&p.role?`
    <tr id="reveal-row-${p.id}" style="background:var(--bg3)">
     <td></td>
-    <td colspan="2" style="padding:0.3rem 0.8rem;font-size:0.78rem">
-     <span style="color:var(--text2);margin-left:0.5rem">الفصيل:</span>
-     <span style="color:${p.faction==='mafia'?'#e24b4a':p.faction==='neutral'?'#f59e42':'#4a8fe2'};font-weight:700;margin-left:0.4rem">${fn(p.faction)}</span>
-     <span style="color:var(--text2);margin-right:0.8rem;margin-left:0.5rem">الدور:</span>
-     <span style="display:inline-block;padding:0.15rem 0.6rem;border-radius:10px;font-size:0.7rem;font-weight:700;background:${p.faction==='mafia'?'#1a0a0a':p.faction==='neutral'?'#180f00':'#0a1020'};color:${p.faction==='mafia'?'#e24b4a':p.faction==='neutral'?'#f59e42':'#4a8fe2'};border:1px solid ${p.faction==='mafia'?'rgba(226,75,74,0.3)':p.faction==='neutral'?'rgba(245,158,66,0.3)':'rgba(74,143,226,0.3)'}">${p.role}</span>
+    <td colspan="2" style="padding:0.4rem 0.8rem">
+     <div style="display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap">
+      ${badge(p.role)}
+      ${badge(fn(p.faction))}
+      <span style="margin-right:auto;display:flex;gap:0.3rem;align-items:center">
+       <span style="font-size:0.72rem;padding:0.12rem 0.5rem;border-radius:10px;font-weight:700;${p.alive?'background:#0a1a10;color:#4ac78a;border:1px solid rgba(74,199,138,0.35)':'background:#0d0d0d;color:#5a5a72;border:1px solid rgba(90,90,114,0.3)'}">🟢 حي</span>
+       <span style="font-size:0.72rem;padding:0.12rem 0.5rem;border-radius:10px;font-weight:700;${!p.alive?'background:#1a0a0a;color:#e24b4a;border:1px solid rgba(226,75,74,0.35)':'background:#0d0d0d;color:#5a5a72;border:1px solid rgba(90,90,114,0.3)'}">🔴 ميت</span>
+      </span>
+     </div>
     </td>
    </tr>`:'';
   return `<tr>
@@ -605,12 +621,13 @@ function showHunterModalFor(hunter, cb) {
  document.getElementById('hunter-modal').classList.add('show');
  state._hunterCb = () => {
   const sel = document.getElementById('hunter-target-select');
-  if (!sel.value) { showToast('اختر لاعباً', 'warn'); return; }
+  if (!sel.value) { showToast('اختر لاعباً.', 'warn'); return; }
   const t = state.players.find(p => p.id == sel.value);
   if (!t) { cb(); return; }
-  addToPendingDeath(t, `قدرة الصياد: ${t.name} (${t.role}) — اختاره الصياد ليموت معه`, `قدرة الصياد ${hunter.name}: اختار ${t.name} (${t.role}) ليموت معه`);
+  const msg = `الصياد ${hunter.name} مات واستخدم قدرته — اختار ${t.name} (${t.role}) ليموت معه.`;
+  addToPendingDeath(t, msg, msg);
   document.getElementById('hunter-modal').classList.remove('show');
-  showToast(`🏹 ${t.name} سيموت بقدرة الصياد`, 'warn');
+  showToast(`🏹 ${t.name} سيموت بقدرة الصياد.`, 'warn');
   resolvePendingDeaths(cb);
  };
 }
@@ -622,12 +639,13 @@ function showBomberModalFor(bomber, cb) {
  document.getElementById('bomber-modal').classList.add('show');
  state._bomberCb = () => {
   const sel = document.getElementById('bomber-target-select');
-  if (!sel.value) { showToast('اختر لاعباً', 'warn'); return; }
+  if (!sel.value) { showToast('اختر لاعباً.', 'warn'); return; }
   const t = state.players.find(p => p.id == sel.value);
   if (!t) { cb(); return; }
-  addToPendingDeath(t, `قدرة المتفجر: ${t.name} (${t.role}) — اختاره المتفجر ليموت معه`, `قدرة المتفجر ${bomber.name}: اختار ${t.name} (${t.role}) ليموت معه`);
+  const msg = `المتفجر ${bomber.name} مات واستخدم قدرته — اختار ${t.name} (${t.role}) ليموت معه.`;
+  addToPendingDeath(t, msg, msg);
   document.getElementById('bomber-modal').classList.remove('show');
-  showToast(`💣 ${t.name} سيموت بقدرة المتفجر`, 'warn');
+  showToast(`💣 ${t.name} سيموت بقدرة المتفجر.`, 'warn');
   resolvePendingDeaths(cb);
  };
 }
@@ -656,41 +674,72 @@ function resolveNight(){
   return true;
  };
  if(wK){const wt=state.players.find(p=>p.id==wK);if(wt&&wt.alive){
-  markDead(wt,`الساحر قتل اللاعب ${wt.name}`,`وفاة: ${wt.name} (${wt.role}) — قتله الساحر بجرعة القتل`);
+  const docTried=dT==wK;
+  const msg=docTried
+   ?`الساحر استخدم جرعة القتل على ${wt.name} (${wt.role}) — حاول الدكتور حمايته لكن جرعة الساحر لا يمكن إيقافها، مات ${wt.name}.`
+   :`الساحر استخدم جرعة القتل على ${wt.name} (${wt.role})، مات ${wt.name}.`;
+  markDead(wt,`الساحر قتل ${wt.name}`,msg);
   state.usedAbilities.push('witch-kill');
-  if(dT==wK) addLog('night',`الدكتور حاول حماية ${wt.name} لكن جرعة الساحر لا يمكن إيقافها`,'tag-night');
  }}
  if(wH){const wr=state.players.find(p=>p.id==wH&&!p.alive);if(wr){
-  wr.alive=true;events.push(`الساحر أحيا ${wr.name} من الأموات`);
-  addLog('save',`إحياء: ${wr.name} (${wr.role}) — الساحر أعاده للحياة`,'tag-save');
+  wr.alive=true;
+  events.push(`الساحر استخدم جرعة الإحياء على ${wr.name} (${wr.role})، عاد للحياة.`);
+  addLog('save',`الساحر أحيا ${wr.name} (${wr.role}) — عاد إلى اللعبة.`,'tag-save');
   state.usedAbilities.push('witch-heal');
  }}
  if(snT){
   const sn=state.players.find(p=>p.roleId==='sniper');const st=state.players.find(p=>p.id==snT);
   if(sn&&sn.alive&&!deadSet.has(sn.id)&&st&&st.alive&&!deadSet.has(st.id)&&(sn.sniperBullets??0)>0){
    sn.sniperBullets--;
-   if(st.faction==='mafia'){markDead(st,`القناص أطلق النار على ${st.name}`,`وفاة: ${st.name} (${st.role}) — أصابه القناص`);}
-   else{markDead(st,`القناص أطلق النار على ${st.name} (بريء) — ماتا معاً`,`وفاة: ${st.name} (${st.role}) — أصابه القناص وكان بريئاً`);markDead(sn,`القناص ${sn.name} مات لأنه أصاب بريئاً`,`وفاة: القناص ${sn.name} — مات لأنه أصاب بريئاً`);}
+   if(st.faction==='mafia'){
+    markDead(st,`القناص ${sn.name} أطلق النار على ${st.name} وأصاب — مات ${st.name}.`,`القناص ${sn.name} أطلق النار على ${st.name} (${st.role}) وكان مافيا، مات ${st.name}.`);
+   }else{
+    // رسالة واحدة مدمجة للقناص والهدف البريء
+    const combined=`القناص ${sn.name} أطلق النار على ${st.name} (${st.role})، لكن الهدف كان بريئاً — مات ${st.name} ومات القناص ${sn.name} معه.`;
+    recordDeath(st,'القناص أصاب بريئاً');recordDeath(sn,'مات لإصابة بريء');
+    deadSet.add(st.id);deadSet.add(sn.id);
+    events.push(combined);
+    addLog('death',combined,'tag-death');
+   }
   }
  }
  if(mT){const t=state.players.find(p=>p.id==mT);if(t&&t.alive&&!deadSet.has(t.id)){
   if(gT==mT){
    const guard=state.players.find(p=>p.alive&&p.roleId==='guard'&&!deadSet.has(p.id));
-   if(guard){markDead(guard,`حارس الأمن ${guard.name} مات دفاعاً عن ${t.name}`,`حارس الأمن: ${guard.name} — مات دفاعاً عن ${t.name}`);addLog('save',`إنقاذ: ${t.name} (${t.role}) — الحارس ضحى بنفسه`,'tag-save');}
-  }else if(dT==mT){saved.push(t);events.push(`المافيا حاولت اغتيال ${t.name} — الدكتور أنقذه`);addLog('save',`إنقاذ: ${t.name} (${t.role}) — المافيا استهدفته لكن الدكتور كان يحميه`,'tag-save');}
-  else{markDead(t,`المافيا اغتالت ${t.name} الليلة`,`وفاة: ${t.name} (${t.role}) — اغتالته المافيا`);}
+   if(guard){
+    const msg=`المافيا استهدفت ${t.name}، لكن حارس الأمن ${guard.name} تصدى للهجوم ومات عوضاً عنه — نجا ${t.name}.`;
+    markDead(guard,`حارس الأمن ${guard.name} مات دفاعاً عن ${t.name}`,msg);
+    events.push(msg);
+   }
+  }else if(dT==mT){
+   const msg=`المافيا استهدفت ${t.name}، لكن الدكتور كان يحميه — نجا ${t.name}.`;
+   saved.push(t);events.push(msg);addLog('save',msg,'tag-save');
+  }else{
+   markDead(t,`المافيا اغتالت ${t.name} الليلة`,`المافيا اغتالت ${t.name} (${t.role}) هذه الليلة.`);
+  }
  }}
- if(det){const dt=state.players.find(p=>p.id==det);addLog('night',`المحقق: حقّق في ${dt?.name||'؟'} — النتيجة ظهرت للمشرف فقط`,'tag-night');}
+ if(det){const dt=state.players.find(p=>p.id==det);addLog('night',`المحقق حقّق في ${dt?.name||'؟'} — النتيجة سُجّلت للمشرف فقط.`,'tag-night');}
  state.players.forEach(p=>{p.votingBlocked=false;});
- if(gsT){const gt=state.players.find(p=>p.id==gsT);if(gt&&gt.alive){gt.votingBlocked=true;addLog('night',`رجل العصابة: هدَّد ${gt.name} — محظور من التصويت غداً`,'tag-night');}}
+ if(gsT){const gt=state.players.find(p=>p.id==gsT);if(gt&&gt.alive){gt.votingBlocked=true;addLog('night',`رجل العصابة هدَّد ${gt.name} — محظور من التصويت في النهار القادم.`,'tag-night');}}
  if(mnT){const mt=state.players.find(p=>p.id==mnT);const moon=state.players.find(p=>p.alive&&p.roleId==='moon');
-  if(mt&&moon){if(mt.roleId==='sun'){moon.foundPartner=true;addLog('night',`القمر: وجد الشمس (${mt.name})!`,'tag-night');if(mt.foundPartner)addLog('night','الشمس أيضاً وجدت القمر — شرط الفوز سيُفحص','tag-night');}else addLog('night',`القمر: حاول التعرف على ${mt.name} — ليست الشمس`,'tag-night');}}
+  if(mt&&moon){
+   if(mt.roleId==='sun'){
+    moon.foundPartner=true;
+    const msg=mt.foundPartner
+     ?`القمر بحث عن الشمس واختار ${mt.name} — وجدها! وكانت الشمس قد وجدت القمر سابقاً — شرط الفوز اكتمل.`
+     :`القمر بحث عن الشمس واختار ${mt.name} — وجدها! ينتظر الآن أن تجده الشمس من جهتها.`;
+    addLog('night',msg,'tag-night');
+   }else{
+    addLog('night',`القمر بحث عن الشمس واختار ${mt.name} — لم تكن الشمس.`,'tag-night');
+   }
+  }
+ }
  if(btT&&state.night===1){const bP=state.players.find(p=>p.alive&&p.roleId==='bettor');const bTarget=state.players.find(p=>p.id==btT);
-  if(bP&&bTarget&&!bP.bettorTarget){bP.bettorTarget=parseInt(btT);addLog('night',`المراهن: راهن على طرد ${bTarget.name}`,'tag-night');}}
+  if(bP&&bTarget&&!bP.bettorTarget){bP.bettorTarget=parseInt(btT);addLog('night',`المراهن راهن على أن ${bTarget.name} سيُقصى بالتصويت.`,'tag-night');}}
  const dead=[];
  deadSet.forEach(id=>{const p=state.players.find(x=>x.id===id);if(p&&p.alive){p.alive=false;dead.push(p);}});
  state.nightResults={dead,saved};state.night++;
- addLog('night',`انتهت الليلة ${state.night-1} — وفيات: ${dead.length} | إنقاذات: ${saved.length}`,'tag-night');
+ addLog('night',`انتهت الليلة ${state.night-1}${dead.length?` — ماتَ: ${dead.map(p=>p.name).join('، ')}`:''}${saved.length?` — نجا: ${saved.map(p=>p.name).join('، ')}`:''}.`,'tag-night');
  renderSidebar();updateHeader();
  const bomberDead=dead.find(p=>p.roleId==='bomber'&&!p.bomberUsed);
  const hunterDead=dead.find(p=>p.roleId==='hunter');
@@ -748,7 +797,7 @@ function declareResult(){
  const tgt=top.p;
  recordDeath(tgt,`إقصاء بالتصويت — نهار ${state.day}`);
  tgt.alive=false;
- addLog('vote',`إقصاء: ${tgt.name} (${tgt.role}) — أُقصي بالتصويت النهاري بـ${top.count} صوت.`,'tag-vote');
+ addLog('vote',`أُقصي ${tgt.name} (${tgt.role}) بالتصويت النهاري بـ${top.count} صوت.`,'tag-vote');
  showToast(`⚖️ تم إقصاء ${tgt.name} — ${tgt.role}.`,'warn');
  renderSidebar();updateHeader();renderFactionStatus();renderVoteList();renderPlayerTable();
  const winners=gatherWinners(tgt);
