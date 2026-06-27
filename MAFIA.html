@@ -48,13 +48,13 @@ body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;min
 .form-input::placeholder{color:var(--text3)}
 select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239090a8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:left 10px center;padding-left:30px}
 .roles-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:0.8rem;margin-bottom:1rem}
-.role-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;cursor:pointer;transition:all 0.2s}
+.role-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;cursor:pointer;transition:all 0.2s;display:flex;flex-direction:column}
 .role-card:hover{transform:translateY(-2px);border-color:var(--border2)}
 .role-card.selected{border-color:var(--gold-border);background:var(--gold-bg)}
 .role-card-faction{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.4rem}
 .faction-mafia{color:var(--red)}.faction-city{color:var(--blue)}.faction-neutral{color:var(--orange)}
 .role-card-name{font-size:0.95rem;font-weight:700;margin-bottom:0.3rem}
-.role-card-desc{font-size:0.72rem;color:var(--text2);line-height:1.5}
+.role-card-desc{font-size:0.72rem;color:var(--text2);line-height:1.5;flex:1}
 .role-count-control{display:flex;align-items:center;gap:0.5rem;margin-top:0.7rem}
 .count-btn{width:26px;height:26px;border-radius:50%;background:var(--bg4);border:1px solid var(--border2);color:var(--text);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-family:'Tajawal',sans-serif}
 .count-btn:hover{background:var(--bg3);border-color:var(--gold-border);color:var(--gold)}
@@ -1198,7 +1198,7 @@ function updateHeader(){
  document.getElementById('phase-badge').textContent=state.phase==='night'?`🌙 الليلة ${state.night}`:`☀️ النهار ${state.day}`;}
 function resetGame(){if(!confirm('هل تريد إعادة تعيين اللعبة بالكامل؟'))return;state={started:false,day:0,night:0,phase:'setup',players:[],roles:[],log:[],votes:{},nightResults:{dead:[],saved:[]},usedAbilities:[],modalTarget:null,_hunterCb:null,_bomberCb:null,_confirmCb:null,revealedPlayers:{},_lastWinners:null,_excludedIds:new Set()};document.getElementById('result-overlay').classList.remove('show');document.getElementById('summary-overlay').classList.remove('show');document.getElementById('game-log').innerHTML='';document.getElementById('quick-log').innerHTML='';document.getElementById('log-empty').style.display='block';document.getElementById('players-sidebar').innerHTML='';document.getElementById('hdr-alive').textContent='0';document.getElementById('hdr-dead').textContent='0';document.getElementById('phase-badge').textContent='إعداد اللعبة';// إعادة تفعيل إخفاء الألوان
 document.body.classList.add('hide-colors');const vcb=document.getElementById('vote-color-btn');if(vcb)vcb.textContent='🎨 إظهار الألوان';init();switchTab('setup');setMobileNav('setup');showToast('تم إعادة تعيين اللعبة.','success');}
-function switchTab(tab){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('panel-'+tab).classList.add('active');document.querySelectorAll('.tab').forEach(t=>{if(t.getAttribute('onclick')?.includes(`'${tab}'`))t.classList.add('active');});}
+function switchTab(tab){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('panel-'+tab).classList.add('active');document.querySelectorAll('.tab').forEach(t=>{if(t.getAttribute('onclick')?.includes(`'${tab}'`))t.classList.add('active');});document.querySelector('.main').scrollTop=0;window.scrollTo(0,0);}
 function setMobileNav(tab){document.querySelectorAll('.mobile-nav-btn').forEach(b=>b.classList.remove('active'));const b=document.getElementById('mnav-'+tab);if(b)b.classList.add('active');}
 function showToast(msg,type='success'){const t=document.getElementById('toast');t.textContent=msg;t.className=`toast ${type} show`;clearTimeout(t._timer);t._timer=setTimeout(()=>t.classList.remove('show'),3000);}
 
