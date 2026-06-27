@@ -515,8 +515,7 @@ function renderPlayerTable(){
   const badge=(txt)=>`<span style="display:inline-block;padding:0.15rem 0.55rem;border-radius:10px;font-size:0.7rem;font-weight:700;background:${rc.bg};color:${rc.c};border:1px solid ${rc.bd}">${txt}</span>`;
   const revealRow=shown&&p.role?`
    <tr id="reveal-row-${p.id}" style="background:var(--bg3)">
-    <td></td>
-    <td colspan="2" style="padding:0.4rem 0.8rem">
+    <td colspan="3" style="padding:0.4rem 0.8rem">
      <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
       <span style="display:flex;gap:0.3rem;align-items:center">
        ${badge(p.role)}
