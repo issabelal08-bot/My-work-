@@ -577,10 +577,10 @@ function revealDetective(){const s=document.getElementById('action-detective');i
 function revealMoon(){const s=document.getElementById('action-moon');if(!s||!s.value)return;const t=state.players.find(p=>p.id==s.value);if(!t)return;document.getElementById('moon-result').innerHTML=`<div style="padding:0.5rem;border-radius:6px;background:var(--bg3);border:1px solid var(--border2)"><strong>${t.name}:</strong> ${t.roleId==='sun'?'☀️ هذا هو الشمس!':` ❌ ليست الشمس — دوره: ${t.role}`}</div>`;}
 
 // تسجيل توقيت الموت
-function recordDeath(player, cause){
- if(!player||player.deathRound) return; // لا تسجّل مرتين
- player.deathRound = state.phase==='night' ? state.night : state.day;
- player.deathPhase = state.phase==='night' ? 'night' : 'day';
+function recordDeath(player, cause, phaseOverride, roundOverride){
+ if(!player||player.deathRound) return;
+ player.deathRound = roundOverride !== undefined ? roundOverride : (state.phase==='night' ? state.night : state.day);
+ player.deathPhase = phaseOverride || (state.phase==='night' ? 'night' : 'day');
  player.deathCause = cause||'—';
 }
 
@@ -797,9 +797,8 @@ function declareResult(){
  alive.forEach(p=>{p.votingBlocked=false;});
  if(top.isNone){addLog('vote','التصويت: قرر أهل المدينة عدم إقصاء أحد هذا اليوم.','tag-vote');showToast('لم يتم إقصاء أحد.','success');state.day++;renderVoteList();return;}
  const tgt=top.p;
- recordDeath(tgt,`إقصاء بالتصويت — نهار ${state.day}`);
+ recordDeath(tgt, `إقصاء بالتصويت — نهار ${state.day}`, 'day', state.day);
  tgt.alive=false;
- addLog('vote',`أُقصي ${tgt.name} (${tgt.role}) بالتصويت النهاري بـ${top.count} صوت.`,'tag-vote');
  showToast(`⚖️ تم إقصاء ${tgt.name} — ${tgt.role}.`,'warn');
  renderSidebar();updateHeader();renderFactionStatus();renderVoteList();renderPlayerTable();
  const winners=gatherWinners(tgt);
@@ -883,23 +882,30 @@ function showGameSummary(){
   else if(w.name==='المراهن') state.players.filter(p=>p.roleId==='bettor').forEach(p=>winnerIds.add(p.id));
  });
 
- // ترتيب: أحياء أولاً، ثم أموات بترتيب وقت الوفاة
+ // ترتيب اللاعبين: فائز حي → فائز ميت → خاسر حي → خاسر ميت
+ // داخل كل مجموعة: حسب وقت الخروج تصاعدياً (الأقدم خروجاً أولاً)
  const sorted=[...state.players].sort((a,b)=>{
-  if(a.alive&&!b.alive) return -1;
-  if(!a.alive&&b.alive) return 1;
+  const aW=winnerIds.has(a.id);const bW=winnerIds.has(b.id);
+  // تحديد المجموعة: 0=فائز حي, 1=فائز ميت, 2=خاسر حي, 3=خاسر ميت
+  const grp=p=>(winnerIds.has(p.id)?0:2)+(p.alive?0:1);
+  if(grp(a)!==grp(b)) return grp(a)-grp(b);
+  // داخل المجموعة: حسب وقت الخروج تصاعدياً (من مات أول أولاً)
   if(!a.alive&&!b.alive){
-   const ar=a.deathRound||99,br=b.deathRound||99;
-   if(ar!==br) return br-ar; // الأخير في الموت أولاً
+   const ar=a.deathRound??99,br=b.deathRound??99;
+   return ar-br;
   }
   return a.id-b.id;
  });
 
- const roleData=p=>state.roles.find(r=>r.id===p.roleId)||{};
  const deathLabel=p=>{
   if(!p.deathRound) return '';
-  const phaseAr=p.deathPhase==='night'?`ليلة ${p.deathRound}`:`نهار ${p.deathRound}`;
-  return phaseAr;
+  const isVote=p.deathCause&&(p.deathCause.includes('إقصاء')||p.deathCause.includes('تصويت'));
+  const type=isVote?'إقصاء':'قتل';
+  const phase=p.deathPhase==='night'?`ليلة ${p.deathRound}`:`نهار ${p.deathRound}`;
+  return `${type} — ${phase}`;
  };
+
+ const roleData=p=>state.roles.find(r=>r.id===p.roleId)||{};
 
  document.getElementById('summary-players-list').innerHTML=sorted.map(p=>{
   const rd=roleData(p);
@@ -910,10 +916,10 @@ function showGameSummary(){
    ?`<span style="color:var(--green);font-weight:700">✅ حي</span>`
    :`<span style="color:var(--red);font-weight:700">💀 ميت</span>`;
   const timeHtml=!p.alive&&p.deathRound
-   ?`<div class="sp-time">خرج في: ${deathLabel(p)}</div>`:'';
+   ?`<div class="sp-time">${deathLabel(p)}</div>`:'';
   return `<div class="summary-player-row ${isWinner?'winner-row':''} ${!p.alive?'dead-row':''}">
    <div class="sp-num" style="${isWinner?`background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold)`:''}">
-    ${p.id}${isWinner?' 🏆':''}
+    ${isWinner?'🏆':'🎖️'}
    </div>
    <div class="sp-icon">${rd.icon||'❓'}</div>
    <div class="sp-info">
@@ -1151,8 +1157,8 @@ function showResultCard(icon, title, desc, colorVar){
  document.getElementById('modal-actions').innerHTML=`<button class="btn btn-ghost" onclick="closeModal()">إغلاق</button>`;
  document.getElementById('player-modal').classList.add('show');
 }
-function modalKill(){const p=state.players.find(x=>x.id===state.modalTarget);if(!p||!p.alive)return;recordDeath(p,'إعلان وفاة يدوي');p.alive=false;addLog('death',`${p.name} (${p.role}) — أُعلن وفاته يدوياً من المشرف`,'tag-death');renderSidebar();updateHeader();closeModal();checkWinConditionsFull();}
-function modalRevive(){const p=state.players.find(x=>x.id===state.modalTarget);if(!p||p.alive)return;p.alive=true;addLog('save',`المشرف أحيا اللاعب ${p.name} (${p.role}) — عاد إلى اللعبة.`,'tag-save');showToast(`💚 ${p.name} عاد إلى الحياة.`,'success');renderSidebar();updateHeader();closeModal();checkWinConditionsFull();}
+function modalKill(){const p=state.players.find(x=>x.id===state.modalTarget);if(!p||!p.alive)return;recordDeath(p,'إعلان وفاة يدوي');p.alive=false;addLog('death',`${p.name} (${p.role}) — أُعلن وفاته يدوياً من المشرف`,'tag-death');renderSidebar();updateHeader();renderPlayerTable();closeModal();checkWinConditionsFull();}
+function modalRevive(){const p=state.players.find(x=>x.id===state.modalTarget);if(!p||p.alive)return;p.alive=true;addLog('save',`المشرف أحيا اللاعب ${p.name} (${p.role}) — عاد إلى اللعبة.`,'tag-save');showToast(`💚 ${p.name} عاد إلى الحياة.`,'success');renderSidebar();updateHeader();renderPlayerTable();closeModal();checkWinConditionsFull();}
 function addLog(type,text,tagClass){const now=new Date();const time=`${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;const phase=state.phase==='night'?`ليلة ${state.night}`:`نهار ${state.day}`;state.log.unshift({type,text,tagClass,time,phase});const lm={'tag-death':'وفاة','tag-save':'إنقاذ','tag-vote':'تصويت','tag-night':'ليل','tag-day':'نهار','tag-system':'نظام'};const label=lm[tagClass]||type;const h=`<div class="log-entry"><div class="log-time"><div>${time}</div><div style="font-size:0.6rem;color:var(--text3);margin-top:2px">${phase}</div></div><div class="log-content"><div><span class="log-tag ${tagClass}">${label}</span></div><div class="log-text">${text}</div></div></div>`;document.getElementById('game-log').insertAdjacentHTML('afterbegin',h);document.getElementById('log-empty').style.display='none';const ql=document.getElementById('quick-log');ql.insertAdjacentHTML('afterbegin',h);while(ql.children.length>5)ql.removeChild(ql.lastChild);}
 function clearLog(){state.log=[];document.getElementById('game-log').innerHTML='';document.getElementById('quick-log').innerHTML='';document.getElementById('log-empty').style.display='block';}
 function exportLog(){const t=state.log.map(e=>`[${e.time}][${e.phase}][${e.type.toUpperCase()}] ${e.text.replace(/<[^>]+>/g,'')}`).join('\n');const b=new Blob([t],{type:'text/plain'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`mafia-log-day${state.day}.txt`;a.click();}
