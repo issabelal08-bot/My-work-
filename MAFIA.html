@@ -556,7 +556,7 @@ function toggleAllRoles(){
 }
 function renderNightOrder(){const s=[...state.roles].filter(r=>r.hasNight&&r.count>0).sort((a,b)=>a.nightOrder-b.nightOrder);const e=document.getElementById('night-order-display');if(!e)return;e.innerHTML=s.map((r,i)=>`<li class="night-order-item"><div class="order-num">${i+1}</div><div class="action-icon icon-${r.faction==='mafia'?'red':r.faction==='neutral'?'orange':'blue'}">${r.icon||'❓'}</div><span style="font-size:0.85rem;font-weight:600">${r.name}</span></li>`).join('');}
 function randomAssign(){const n=state.players.length;const t=state.roles.reduce((s,r)=>s+r.count,0);if(t!==n){showToast(`مجموع الأدوار (${t}) لا يساوي عدد اللاعبين (${n}).`,'error');return;}let pool=[];state.roles.forEach(r=>{for(let i=0;i<r.count;i++)pool.push({role:r.name,faction:r.faction,roleId:r.id});});for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}state.players.forEach((p,i)=>{p.role=pool[i].role;p.faction=pool[i].faction;p.roleId=pool[i].roleId;p.alive=true;p.votingBlocked=false;p.mayorRevealed=false;p.foundPartner=false;p.bomberUsed=false;if(pool[i].roleId==='sniper')p.sniperBullets=state.players.length>10?2:1;});renderPlayerTable();renderSidebar();showToast('تم التوزيع العشوائي للأدوار.','success');}
-function startGame(){if(state.players.filter(p=>!p.role).length>0){showToast('بعض اللاعبين لا يملكون أدواراً.','warn');return;}state.started=true;state.night=1;state.day=1;state.phase='night';addLog('system',`بدأت اللعبة بـ ${state.players.length} لاعب.`,'tag-system');renderSidebar();renderNightPanel();renderRolesReference();renderFactionStatus();updateHeader();switchTab('night');setMobileNav('night');showToast('بدأت اللعبة. الليلة الأولى...','success');}
+function startGame(){if(state.players.filter(p=>!p.role).length>0){showToast('بعض اللاعبين لا يملكون أدواراً.','warn');return;}state.started=true;state.night=1;state.day=0;state.phase='night';addLog('system',`بدأت اللعبة بـ ${state.players.length} لاعب.`,'tag-system');renderSidebar();renderNightPanel();renderRolesReference();renderFactionStatus();updateHeader();switchTab('night');setMobileNav('night');showToast('بدأت اللعبة. الليلة الأولى...','success');}
 function resetRoleCounts(){state.roles.forEach(r=>{r.count=0;});renderRolesGrid();renderNightOrder();validateRoleCounts();showToast('تم تصفير جميع الأدوار.','success');}
 function renderNightPanel(){
  const el_city=document.getElementById('night-city-count');
@@ -745,7 +745,7 @@ function resolveNight(){
  const bomberDead=dead.find(p=>p.roleId==='bomber'&&!p.bomberUsed);
  const hunterDead=dead.find(p=>p.roleId==='hunter');
  // فحص الفوز يأتي فقط بعد انتهاء جميع قدرات الموت
- const doDay=()=>{renderSidebar();updateHeader();renderFactionStatus();renderDayPanel(events);checkWinConditionsFull();switchTab('day');setMobileNav('day');};
+ const doDay=()=>{state.phase='day';state.day++;renderSidebar();updateHeader();renderFactionStatus();renderDayPanel(events);checkWinConditionsFull();switchTab('day');setMobileNav('day');};
  if(bomberDead&&hunterDead){
   bomberDead.bomberUsed=true;
   // المتفجر أولاً (إجباري — بدون تأكيد) ثم الصياد ثم فحص الفوز
@@ -759,7 +759,7 @@ function resolveNight(){
   showHunterModal(doDay);
  }else{doDay();}
 }
-function skipNight(){state.nightResults={dead:[],saved:[]};state.night++;renderDayPanel(['لم تحدث أي أحداث هذه الليلة.']);switchTab('day');setMobileNav('day');}
+function skipNight(){state.nightResults={dead:[],saved:[]};state.night++;state.phase='day';state.day++;renderDayPanel(['لم تحدث أي أحداث هذه الليلة.']);updateHeader();switchTab('day');setMobileNav('day');}
 function renderDayPanel(events){
  document.getElementById('day-num').textContent=state.day;
  document.getElementById('day-total').textContent=state.players.filter(p=>p.alive).length;
@@ -1058,6 +1058,7 @@ function showPublicAnnouncementCard(emoji, line1, line2, color, bg, border, note
 }
 function goToNight(){
  state.phase='night';
+ updateHeader();
  // إعادة تفعيل زر الإقصاء للنهار القادم
  const db=document.getElementById('declare-result-btn');
  if(db){db.disabled=false;db.style.opacity='';db.style.cursor='';}
@@ -1193,8 +1194,7 @@ function updateHeader(){
  document.getElementById('hdr-mafia').textContent=alive.filter(p=>p.faction==='mafia').length;
  const neutralEl=document.getElementById('hdr-neutral');
  if(neutralEl) neutralEl.textContent=alive.filter(p=>p.faction==='neutral').length;
- document.getElementById('phase-badge').textContent=state.phase==='night'?`🌙 الليلة ${state.night}`:`☀️ النهار ${state.day}`;
-}
+ document.getElementById('phase-badge').textContent=state.phase==='night'?`🌙 الليلة ${state.night}`:`☀️ النهار ${state.day}`;}
 function resetGame(){if(!confirm('هل تريد إعادة تعيين اللعبة بالكامل؟'))return;state={started:false,day:0,night:0,phase:'setup',players:[],roles:[],log:[],votes:{},nightResults:{dead:[],saved:[]},usedAbilities:[],modalTarget:null,_hunterCb:null,_bomberCb:null,_confirmCb:null,revealedPlayers:{},_lastWinners:null,_excludedIds:new Set()};document.getElementById('result-overlay').classList.remove('show');document.getElementById('summary-overlay').classList.remove('show');document.getElementById('game-log').innerHTML='';document.getElementById('quick-log').innerHTML='';document.getElementById('log-empty').style.display='block';document.getElementById('players-sidebar').innerHTML='';document.getElementById('hdr-alive').textContent='0';document.getElementById('hdr-dead').textContent='0';document.getElementById('phase-badge').textContent='إعداد اللعبة';// إعادة تفعيل إخفاء الألوان
 document.body.classList.add('hide-colors');const vcb=document.getElementById('vote-color-btn');if(vcb)vcb.textContent='🎨 إظهار الألوان';init();switchTab('setup');setMobileNav('setup');showToast('تم إعادة تعيين اللعبة.','success');}
 function switchTab(tab){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('panel-'+tab).classList.add('active');document.querySelectorAll('.tab').forEach(t=>{if(t.getAttribute('onclick')?.includes(`'${tab}'`))t.classList.add('active');});}
