@@ -618,27 +618,43 @@ function addToPendingDeath(player, publicMsg, logMsg) {
  pendingDeaths.push({ player, publicMsg, logMsg });
 }
 function clearPendingDeaths() { pendingDeaths.length = 0; }
-function resolvePendingDeaths(callback) {
- const triggerable = pendingDeaths.filter(d => hasDeathTrigger(d.player) && !d.player.triggerUsed);
- const nonTriggerable = pendingDeaths.filter(d => !hasDeathTrigger(d.player) || d.player.triggerUsed);
- nonTriggerable.forEach(d => { d.player.alive = false; });
- if (triggerable.length === 0) { callback(); return; }
- executeTriggersSequentially(triggerable, 0, callback);
-}
 function hasDeathTrigger(player) { return player.roleId === 'hunter' || player.roleId === 'bomber'; }
-function executeTriggersSequentially(list, index, callback) {
- if (index >= list.length) {
+function resolvePendingDeaths(callback) {
+ // أزل من ليس لديهم triggers أو استخدموها
+ pendingDeaths
+  .filter(d => !hasDeathTrigger(d.player) || d.player.triggerUsed)
+  .forEach(d => { d.player.alive = false; });
+
+ // ابحث عن أول trigger لم يُنفَّذ بعد (قد أُضيف حديثاً من trigger سابق)
+ const next = pendingDeaths.find(d => hasDeathTrigger(d.player) && !d.player.triggerUsed);
+
+ if (!next) {
+  // انتهت جميع الـ triggers — أزل الجميع نهائياً
   pendingDeaths.forEach(d => { d.player.alive = false; });
   renderSidebar(); updateHeader(); renderFactionStatus();
-  callback(); return;
+  callback();
+  return;
  }
- const { player } = list[index];
- if (player.triggerUsed) { executeTriggersSequentially(list, index + 1, callback); return; }
- player.triggerUsed = true;
- const next = () => executeTriggersSequentially(list, index + 1, callback);
- if (player.roleId === 'hunter') showHunterModalFor(player, next);
- else if (player.roleId === 'bomber') { if (!player.bomberUsed) { player.bomberUsed = true; showBomberModalFor(player, next); } else next(); }
- else next();
+
+ next.player.triggerUsed = true;
+ next.player.alive = false;
+
+ // بعد انتهاء هذا الـ trigger: أعد استدعاء resolvePendingDeaths
+ // لالتقاط أي لاعبين جدد أُضيفوا للقائمة (مثل: الصياد يقتل المتفجر)
+ const afterTrigger = () => resolvePendingDeaths(callback);
+
+ if (next.player.roleId === 'hunter') {
+  showHunterModalFor(next.player, afterTrigger);
+ } else if (next.player.roleId === 'bomber') {
+  if (!next.player.bomberUsed) {
+   next.player.bomberUsed = true;
+   showBomberModalFor(next.player, afterTrigger);
+  } else {
+   afterTrigger();
+  }
+ } else {
+  afterTrigger();
+ }
 }
 function showHunterModalFor(hunter, cb) {
  const al = state.players.filter(p => p.alive && p.id !== hunter.id);
@@ -985,7 +1001,52 @@ function showHunterModal(cb){
  document.getElementById('hunter-modal').classList.add('show');
  state._hunterCb=cb;
 }
-function confirmHunterKill(){const s=document.getElementById('hunter-target-select');if(!s.value){showToast('اختر لاعباً.','warn');return;}const t=state.players.find(p=>p.id==s.value);if(!t||!t.alive){showToast('لاعب غير صالح.','error');return;}recordDeath(t,'قدرة الصياد');t.alive=false;addLog('death',`قدرة الصياد: ${t.name} (${t.role}) — اختاره الصياد ليموت معه.`,'tag-death');showToast(`🏹 ${t.name} مات بقدرة الصياد.`,'warn');document.getElementById('hunter-modal').classList.remove('show');renderSidebar();updateHeader();renderFactionStatus();checkWinConditionsFull();if(state._hunterCb){state._hunterCb();state._hunterCb=null;}}
+function confirmHunterKill(){
+ const s=document.getElementById('hunter-target-select');
+ if(!s.value){showToast('اختر لاعباً.','warn');return;}
+ const t=state.players.find(p=>p.id==s.value);
+ if(!t||!t.alive){showToast('لاعب غير صالح.','error');return;}
+ document.getElementById('hunter-modal').classList.remove('show');
+ if(state._hunterCb){
+  // showHunterModalFor path — _hunterCb handles addToPendingDeath + resolvePendingDeaths
+  state._hunterCb();
+  state._hunterCb=null;
+ } else {
+  // showHunterModal (old) path — add victim to pending then resolve
+  recordDeath(t,'قدرة الصياد');
+  addLog('death',`قدرة الصياد: ${t.name} (${t.role}) — اختاره الصياد ليموت معه.`,'tag-death');
+  showToast(`🏹 ${t.name} مات بقدرة الصياد.`,'warn');
+  if(!pendingDeaths.some(d=>d.player.id===t.id)){
+   pendingDeaths.push({player:t,publicMsg:'',logMsg:''});
+  }
+  resolvePendingDeaths(()=>{
+   renderSidebar();updateHeader();renderFactionStatus();checkWinConditionsFull();
+  });
+ }
+}
+function confirmBomberKill(){
+ const s=document.getElementById('bomber-target-select');
+ if(!s.value){showToast('اختر لاعباً.','warn');return;}
+ const t=state.players.find(p=>p.id==s.value);
+ if(!t||!t.alive){showToast('لاعب غير صالح.','error');return;}
+ document.getElementById('bomber-modal').classList.remove('show');
+ if(state._bomberCb){
+  // showBomberModalFor path — _bomberCb handles addToPendingDeath + resolvePendingDeaths
+  state._bomberCb();
+  state._bomberCb=null;
+ } else {
+  // showBomberModal (old) path
+  recordDeath(t,'قدرة المتفجر');
+  addLog('death',`قدرة المتفجر: ${t.name} (${t.role}) — اختاره المتفجر ليموت معه.`,'tag-death');
+  showToast(`💣 ${t.name} مات بقدرة المتفجر.`,'warn');
+  if(!pendingDeaths.some(d=>d.player.id===t.id)){
+   pendingDeaths.push({player:t,publicMsg:'',logMsg:''});
+  }
+  resolvePendingDeaths(()=>{
+   renderSidebar();updateHeader();renderFactionStatus();checkWinConditionsFull();
+  });
+ }
+}
 function showBomberModal(cb,desc){
  const al=state.players.filter(p=>p.alive&&p.roleId!=='bomber');
  if(!al.length){if(cb)cb();return;}
@@ -994,8 +1055,28 @@ function showBomberModal(cb,desc){
  document.getElementById('bomber-modal').classList.add('show');
  state._bomberCb=cb;
 }
-function confirmBomberKill(){const s=document.getElementById('bomber-target-select');if(!s.value){showToast('اختر لاعباً.','warn');return;}const t=state.players.find(p=>p.id==s.value);if(!t||!t.alive){showToast('لاعب غير صالح.','error');return;}recordDeath(t,'قدرة المتفجر');t.alive=false;addLog('death',`قدرة المتفجر: ${t.name} (${t.role}) — اختاره المتفجر ليموت معه.`,'tag-death');showToast(`💣 ${t.name} مات بقدرة المتفجر.`,'warn');document.getElementById('bomber-modal').classList.remove('show');renderSidebar();updateHeader();renderFactionStatus();checkWinConditionsFull();if(state._bomberCb){state._bomberCb();state._bomberCb=null;}}
-// يُستدعى يدوياً من زر "المتفجر يفجّر نفسه" — يعرض تأكيداً أولاً
+function confirmBomberKill(){
+ const s=document.getElementById('bomber-target-select');
+ if(!s.value){showToast('اختر لاعباً.','warn');return;}
+ const t=state.players.find(p=>p.id==s.value);
+ if(!t||!t.alive){showToast('لاعب غير صالح.','error');return;}
+ document.getElementById('bomber-modal').classList.remove('show');
+ recordDeath(t,'قدرة المتفجر');
+ addLog('death',`قدرة المتفجر: ${t.name} (${t.role}) — اختاره المتفجر ليموت معه.`,'tag-death');
+ showToast(`💣 ${t.name} سيُعالَج بقدرة المتفجر.`,'warn');
+ // أضف الضحية لـ pendingDeaths حتى تُفحص قدراتها
+ if(!pendingDeaths.some(d=>d.player.id===t.id)){
+  pendingDeaths.push({player:t,publicMsg:'',logMsg:''});
+ }
+ const cb=state._bomberCb||null;
+ state._bomberCb=null;
+ resolvePendingDeaths(()=>{
+  renderSidebar();updateHeader();renderFactionStatus();
+  checkWinConditionsFull();
+  if(cb) cb();
+ });
+}
+// يُستدعى يدوياً من زر "المتفجر يفجّر نفسه"
 function activateBomberSacrifice(){
  const b=state.players.find(p=>p.alive&&p.roleId==='bomber');
  if(!b){showToast('لا يوجد متفجر حي.','warn');return;}
