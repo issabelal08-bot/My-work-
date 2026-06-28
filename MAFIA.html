@@ -403,7 +403,7 @@ body.hide-colors .fc-num{color:var(--text)!important}
  <div class="modal-box" onclick="event.stopPropagation()">
   <div class="modal-title" id="modal-title"></div>
   <div id="modal-content"></div>
-  <div style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap" id="modal-actions"></div>
+  <div style="margin-top:0.5rem;display:flex;gap:0.3rem;flex-wrap:wrap" id="modal-actions"></div>
  </div>
 </div>
 <!-- ── نافذة تنقل اللاعبين ── -->
@@ -1161,7 +1161,7 @@ function openPlayerModal(id){
  acts.innerHTML+=`<div style="display:flex;flex-direction:column;gap:0.3rem;width:100%">
   <button class="btn btn-ghost" id="nav-next-btn" style="${hasNext?'':'opacity:0.3;pointer-events:none'}" onclick="openNavModal()">التالي / السابق ↕</button>
  </div>`;
- acts.innerHTML+=`<div style="height:1px;background:var(--border);margin:0.5rem 0"></div>`;
+ acts.innerHTML+=`<div style="height:1px;background:var(--border);margin:0.15rem 0"></div>`;
  if(p.alive){
   acts.innerHTML+=`<div style="display:flex;gap:0.5rem;width:100%">
    <button class="btn btn-danger" style="flex:1;justify-content:center" onclick="modalKill()">💀 إعلان وفاة</button>
