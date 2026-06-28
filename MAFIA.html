@@ -1665,7 +1665,7 @@ function activateSaveCode(){
   document.getElementById('quick-log').innerHTML='';
   if(state.log.length>0){
    document.getElementById('log-empty').style.display='none';
-   [...state.log].reverse().forEach(e=>{
+   state.log.forEach(e=>{
     const lm={'tag-death':'وفاة','tag-save':'إنقاذ','tag-vote':'تصويت','tag-night':'ليل','tag-day':'نهار','tag-system':'نظام'};
     const label=lm[e.tagClass]||e.type;
     const h=`<div class="log-entry"><div class="log-time"><div>${e.time}</div><div style="font-size:0.6rem;color:var(--text3);margin-top:2px">${e.phase}</div></div><div class="log-content"><div><span class="log-tag ${e.tagClass}">${label}</span></div><div class="log-text">${e.text}</div></div></div>`;
