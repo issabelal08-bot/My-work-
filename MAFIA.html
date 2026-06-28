@@ -1030,21 +1030,16 @@ function confirmBomberKill(){
  const t=state.players.find(p=>p.id==s.value);
  if(!t||!t.alive){showToast('لاعب غير صالح.','error');return;}
  document.getElementById('bomber-modal').classList.remove('show');
+ recordDeath(t,'قدرة المتفجر');
+ addLog('death',`قدرة المتفجر: ${t.name} (${t.role}) — اختاره المتفجر ليموت معه.`,'tag-death');
+ showToast(`💣 ${t.name} مات بقدرة المتفجر.`,'warn');
+ if(!pendingDeaths.some(d=>d.player.id===t.id)){
+  pendingDeaths.push({player:t,publicMsg:'',logMsg:''});
+ }
  if(state._bomberCb){
-  // showBomberModalFor path — _bomberCb handles addToPendingDeath + resolvePendingDeaths
-  state._bomberCb();
-  state._bomberCb=null;
+  const cb=state._bomberCb; state._bomberCb=null; cb();
  } else {
-  // showBomberModal (old) path
-  recordDeath(t,'قدرة المتفجر');
-  addLog('death',`قدرة المتفجر: ${t.name} (${t.role}) — اختاره المتفجر ليموت معه.`,'tag-death');
-  showToast(`💣 ${t.name} مات بقدرة المتفجر.`,'warn');
-  if(!pendingDeaths.some(d=>d.player.id===t.id)){
-   pendingDeaths.push({player:t,publicMsg:'',logMsg:''});
-  }
-  resolvePendingDeaths(()=>{
-   renderSidebar();updateHeader();renderFactionStatus();checkWinConditionsFull();
-  });
+  resolvePendingDeaths(()=>{renderSidebar();updateHeader();renderFactionStatus();checkWinConditionsFull();});
  }
 }
 function showBomberModal(cb,desc){
@@ -1091,13 +1086,26 @@ function activateBomberSacrifice(){
 // التنفيذ الفعلي — يُستدعى بعد التأكيد اليدوي أو مباشرة من الأحداث الإجبارية
 function triggerBomberSacrifice(b){
  recordDeath(b,'فجّر نفسه');b.alive=false;b.bomberUsed=true;
- addLog('death',`المتفجر ${b.name} فجّر نفسه — ينتهي النهار فوراً.`,'tag-death');
+ addLog('death',`المتفجر ${b.name} فجّر نفسه — تنتهي المرحلة الحالية فوراً.`,'tag-death');
  renderSidebar();updateHeader();
- showBomberModal(()=>{
-  renderSidebar();updateHeader();renderFactionStatus();
-  checkWinConditionsFull();
-  showToast('انتهى النهار. ابدأ الليل التالي.','warn');
- },'المتفجر فجّر نفسه — اختر لاعباً يأخذه معه.');
+ const afterBomber=()=>{
+  // أضف الضحية لـ pendingDeaths ثم أكمل
+  resolvePendingDeaths(()=>{
+   renderSidebar();updateHeader();renderFactionStatus();
+   if(checkWinConditionsFull()) return;
+   if(state.phase==='day'){
+    // انفجر نهاراً → انتقل للليل
+    goToNight();
+   } else {
+    // انفجر ليلاً → انتقل للنهار
+    state.phase='day'; state.day++;
+    renderDayPanel([`المتفجر ${b.name} فجّر نفسه أثناء الليل.`]);
+    updateHeader(); switchTab('day'); setMobileNav('day');
+   }
+  });
+ };
+ // إذا كان المتفجر ضحيته ستُضاف من showBomberModal، نمرر afterBomber كـ callback
+ showBomberModal(afterBomber,'المتفجر فجّر نفسه — اختر لاعباً يأخذه معه.');
 }
 function revealMayorPublic(){
  const mayor=state.players.find(p=>p.alive&&p.roleId==='mayor'&&!p.mayorRevealed);
