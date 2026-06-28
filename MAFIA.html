@@ -1163,12 +1163,17 @@ function openPlayerModal(id){
  </div>`;
  acts.innerHTML+=`<div style="height:1px;background:var(--border);margin:0.5rem 0"></div>`;
  if(p.alive){
-  acts.innerHTML+=`<button class="btn btn-danger" onclick="modalKill()">💀 إعلان وفاة</button>`;
-  if(p.roleId==='mayor'&&!p.mayorRevealed&&state.started) acts.innerHTML+=`<button class="btn btn-ghost" style="border-color:var(--gold-border);color:var(--gold)" onclick="modalRevealMayor()">🏛️ كشف العمدة</button>`;
+  acts.innerHTML+=`<div style="display:flex;gap:0.5rem;width:100%">
+   <button class="btn btn-danger" style="flex:1;justify-content:center" onclick="modalKill()">💀 إعلان وفاة</button>
+   <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="closeModal()">إغلاق</button>
+  </div>`;
+  if(p.roleId==='mayor'&&!p.mayorRevealed&&state.started) acts.innerHTML+=`<button class="btn btn-ghost" style="border-color:var(--gold-border);color:var(--gold);width:100%;justify-content:center" onclick="modalRevealMayor()">🏛️ كشف العمدة</button>`;
  }else{
-  acts.innerHTML+=`<button class="btn btn-success" onclick="modalRevive()">💚 إحياء اللاعب</button>`;
+  acts.innerHTML+=`<div style="display:flex;gap:0.5rem;width:100%">
+   <button class="btn btn-success" style="flex:1;justify-content:center" onclick="modalRevive()">💚 إحياء اللاعب</button>
+   <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="closeModal()">إغلاق</button>
+  </div>`;
  }
- acts.innerHTML+=`<button class="btn btn-ghost" onclick="closeModal()">إغلاق</button>`;
  document.getElementById('player-modal').classList.add('show');
 }
 function openNavModal(){
