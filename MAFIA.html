@@ -355,6 +355,20 @@ body.hide-colors .fc-num{color:var(--text)!important}
   </div>
  </div>
  <div class="panel" id="panel-log">
+  <!-- ── نظام رمز الحفظ والاستعادة ── -->
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;margin-bottom:1rem">
+   <div class="section-title" style="margin-bottom:0.7rem;border:none">💾 رمز حفظ المباراة</div>
+   <div style="display:flex;gap:0.5rem;align-items:stretch">
+    <div style="display:flex;flex-direction:column;gap:0.4rem;flex-shrink:0">
+     <button class="btn btn-ghost" style="padding:0.35rem 0.6rem;font-size:0.72rem;white-space:nowrap;flex:1" onclick="copySaveCode()">📋 نسخ</button>
+     <button class="btn btn-ghost" style="padding:0.35rem 0.6rem;font-size:0.72rem;white-space:nowrap;flex:1" onclick="pasteSaveCode()">📥 لصق</button>
+     <button class="btn btn-primary" style="padding:0.35rem 0.6rem;font-size:0.72rem;white-space:nowrap;flex:1" onclick="activateSaveCode()">⚡ تفعيل</button>
+    </div>
+    <textarea id="save-code-box" readonly
+     style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:0.5rem 0.7rem;color:var(--text2);font-family:monospace;font-size:0.68rem;resize:none;height:100%;min-height:88px;outline:none;line-break:anywhere;word-break:break-all"
+     placeholder="الرمز سيظهر هنا..."></textarea>
+   </div>
+  </div>
   <div class="actions-row">
    <button class="btn btn-ghost" onclick="clearLog()">&#x1F5D1;&#xFE0F; &#x645;&#x633;&#x62D; &#x627;&#x644;&#x633;&#x62C;&#x644;</button>
    <button class="btn btn-ghost" onclick="exportLog()">&#x1F4E4; &#x62A;&#x635;&#x62F;&#x64A;&#x631;</button>
@@ -390,6 +404,16 @@ body.hide-colors .fc-num{color:var(--text)!important}
   <div class="modal-title" id="modal-title"></div>
   <div id="modal-content"></div>
   <div style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap" id="modal-actions"></div>
+ </div>
+</div>
+<!-- ── نافذة تنقل اللاعبين ── -->
+<div class="modal-overlay" id="nav-modal">
+ <div class="modal-box" onclick="event.stopPropagation()" style="max-width:320px">
+  <div style="text-align:center;padding:0.5rem 0 1rem">
+   <div style="font-size:2.5rem;margin-bottom:0.4rem">❓</div>
+   <div style="font-size:0.85rem;color:var(--text2)">انتقل إلى أي لاعب</div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:0.6rem" id="nav-modal-buttons"></div>
  </div>
 </div>
 <div class="modal-overlay" id="hunter-modal">
@@ -1135,9 +1159,7 @@ function openPlayerModal(id){
  const hasNext=state.players.some(x=>x.id>p.id);
  state._navPending=state._navPending||null;
  acts.innerHTML+=`<div style="display:flex;flex-direction:column;gap:0.3rem;width:100%">
-  <button class="btn btn-ghost" id="nav-next-btn" style="${hasNext?'':'opacity:0.3;pointer-events:none'}" onclick="navClickTwo(1)">التالي ←</button>
-  <button class="btn btn-ghost" id="nav-prev-btn" style="${hasPrev?'':'opacity:0.3;pointer-events:none'}" onclick="navClickTwo(-1)">→ السابق</button>
-  <div id="nav-pending-hint" style="font-size:0.72rem;color:var(--gold);text-align:center;min-height:16px;margin-top:0.2rem"></div>
+  <button class="btn btn-ghost" id="nav-next-btn" style="${hasNext?'':'opacity:0.3;pointer-events:none'}" onclick="openNavModal()">التالي / السابق ↕</button>
  </div>`;
  acts.innerHTML+=`<div style="height:1px;background:var(--border);margin:0.5rem 0"></div>`;
  if(p.alive){
@@ -1149,21 +1171,33 @@ function openPlayerModal(id){
  acts.innerHTML+=`<button class="btn btn-ghost" onclick="closeModal()">إغلاق</button>`;
  document.getElementById('player-modal').classList.add('show');
 }
-function navClickTwo(dir){
+function openNavModal(){
  const cur=state.modalTarget;
  const sorted=state.players.map(p=>p.id).sort((a,b)=>a-b);
- const idx=sorted.indexOf(cur);const target=sorted[idx+dir];
- if(target===undefined)return;
- const hint=document.getElementById('nav-pending-hint');
- const targetName=state.players.find(p=>p.id===target)?.name||'';
- if(state._navPending===target){state._navPending=null;openPlayerModal(target);}
- else{
-  state._navPending=target;
-  if(hint) hint.textContent='اضغط مرة ثانية للانتقال إلى: '+targetName;
-  const btn=dir===1?document.getElementById('nav-next-btn'):document.getElementById('nav-prev-btn');
-  if(btn){btn.style.borderColor='var(--gold)';btn.style.color='var(--gold)';}
- }
+ const idx=sorted.indexOf(cur);
+ const nextId=sorted[idx+1];const prevId=sorted[idx-1];
+ const nextP=state.players.find(p=>p.id===nextId);
+ const prevP=state.players.find(p=>p.id===prevId);
+ const btns=document.getElementById('nav-modal-buttons');
+ btns.innerHTML='';
+ if(nextP) btns.innerHTML+=`
+  <div>
+   <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-bottom:0.2rem" onclick="navGo(${nextP.id})">التالي ←</button>
+   <div style="text-align:center;font-size:0.75rem;color:var(--text2)">للانتقال إلى: <strong style="color:var(--text)">${nextP.id}. ${nextP.name}</strong></div>
+  </div>`;
+ if(prevP) btns.innerHTML+=`
+  <div>
+   <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-bottom:0.2rem" onclick="navGo(${prevP.id})">→ السابق</button>
+   <div style="text-align:center;font-size:0.75rem;color:var(--text2)">للانتقال إلى: <strong style="color:var(--text)">${prevP.id}. ${prevP.name}</strong></div>
+  </div>`;
+ btns.innerHTML+=`<button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:0.3rem" onclick="document.getElementById('nav-modal').classList.remove('show')">إلغاء</button>`;
+ document.getElementById('nav-modal').classList.add('show');
 }
+function navGo(id){
+ document.getElementById('nav-modal').classList.remove('show');
+ openPlayerModal(id);
+}
+function navClickTwo(dir){}
 function closeModal(){document.getElementById('player-modal').classList.remove('show');}
 function showResultCard(icon, title, desc, colorVar){
  const color='var(--'+colorVar+')';
@@ -1198,7 +1232,7 @@ function updateHeader(){
  document.getElementById('phase-badge').textContent=state.phase==='night'?`🌙 الليلة ${state.night}`:`☀️ النهار ${state.day}`;}
 function resetGame(){if(!confirm('هل تريد إعادة تعيين اللعبة بالكامل؟'))return;state={started:false,day:0,night:0,phase:'setup',players:[],roles:[],log:[],votes:{},nightResults:{dead:[],saved:[]},usedAbilities:[],modalTarget:null,_hunterCb:null,_bomberCb:null,_confirmCb:null,revealedPlayers:{},_lastWinners:null,_excludedIds:new Set()};document.getElementById('result-overlay').classList.remove('show');document.getElementById('summary-overlay').classList.remove('show');document.getElementById('game-log').innerHTML='';document.getElementById('quick-log').innerHTML='';document.getElementById('log-empty').style.display='block';document.getElementById('players-sidebar').innerHTML='';document.getElementById('hdr-alive').textContent='0';document.getElementById('hdr-dead').textContent='0';document.getElementById('phase-badge').textContent='إعداد اللعبة';// إعادة تفعيل إخفاء الألوان
 document.body.classList.add('hide-colors');const vcb=document.getElementById('vote-color-btn');if(vcb)vcb.textContent='🎨 إظهار الألوان';init();switchTab('setup');setMobileNav('setup');showToast('تم إعادة تعيين اللعبة.','success');}
-function switchTab(tab){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('panel-'+tab).classList.add('active');document.querySelectorAll('.tab').forEach(t=>{if(t.getAttribute('onclick')?.includes(`'${tab}'`))t.classList.add('active');});document.querySelector('.main').scrollTop=0;window.scrollTo(0,0);}
+function switchTab(tab){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('panel-'+tab).classList.add('active');document.querySelectorAll('.tab').forEach(t=>{if(t.getAttribute('onclick')?.includes(`'${tab}'`))t.classList.add('active');});document.querySelector('.main').scrollTop=0;window.scrollTo(0,0);if(tab==='log')updateSaveCodeBox();}
 function setMobileNav(tab){document.querySelectorAll('.mobile-nav-btn').forEach(b=>b.classList.remove('active'));const b=document.getElementById('mnav-'+tab);if(b)b.classList.add('active');}
 function showToast(msg,type='success'){const t=document.getElementById('toast');t.textContent=msg;t.className=`toast ${type} show`;clearTimeout(t._timer);t._timer=setTimeout(()=>t.classList.remove('show'),3000);}
 
@@ -1542,6 +1576,113 @@ function showSunCard(){
  const found=state._sunResult;
  if(found===undefined)return;
  showResultCard(found?'🌙':'❌',found?'وجدت القمر':'ليس القمر','نتيجة قدرة الشمس النهارية',found?'gold':'text3');
+}
+
+// ══════════════════════════════════════════
+// نظام رمز الحفظ والاستعادة
+// ══════════════════════════════════════════
+function generateSaveCode(){
+ const snapshot={
+  v:1, // version
+  started:state.started,
+  day:state.day,
+  night:state.night,
+  phase:state.phase,
+  usedAbilities:[...state.usedAbilities],
+  votes:{...state.votes},
+  players:state.players.map(p=>({
+   id:p.id,name:p.name,role:p.role,faction:p.faction,roleId:p.roleId,
+   alive:p.alive,protected:p.protected,votingBlocked:p.votingBlocked,
+   mayorRevealed:p.mayorRevealed,sniperBullets:p.sniperBullets,
+   bomberUsed:p.bomberUsed,foundPartner:p.foundPartner,
+   bettorTarget:p.bettorTarget,triggerUsed:p.triggerUsed,
+   deathRound:p.deathRound,deathPhase:p.deathPhase,deathCause:p.deathCause
+  })),
+  roles:state.roles.map(r=>({id:r.id,count:r.count})),
+  log:state.log.slice(0,50), // آخر 50 حدث
+  nightResults:{
+   dead:(state.nightResults.dead||[]).map(p=>p.id),
+   saved:(state.nightResults.saved||[]).map(p=>p.id)
+  },
+  revealedPlayers:state.revealedPlayers||{},
+  _excludedIds:[...(state._excludedIds||new Set())]
+ };
+ try{return btoa(unescape(encodeURIComponent(JSON.stringify(snapshot))));}
+ catch(e){return '';}
+}
+
+function updateSaveCodeBox(){
+ const box=document.getElementById('save-code-box');
+ if(box) box.value=generateSaveCode();
+}
+
+function copySaveCode(){
+ const code=generateSaveCode();
+ if(!code){showToast('لا توجد بيانات للنسخ.','warn');return;}
+ navigator.clipboard?.writeText(code).then(()=>showToast('تم نسخ الرمز.','success'))
+  .catch(()=>{const b=document.getElementById('save-code-box');if(b){b.select();document.execCommand('copy');showToast('تم نسخ الرمز.','success');}});
+}
+
+function pasteSaveCode(){
+ if(navigator.clipboard?.readText){
+  navigator.clipboard.readText().then(text=>{
+   const box=document.getElementById('save-code-box');
+   if(box){box.value=text;showToast('تم لصق الرمز.','success');}
+  }).catch(()=>showToast('تعذّر الوصول للحافظة. الصق الرمز يدوياً.','warn'));
+ }else showToast('الصق الرمز يدوياً في المربع.','warn');
+}
+
+function activateSaveCode(){
+ const box=document.getElementById('save-code-box');
+ if(!box||!box.value.trim()){showToast('لا يوجد رمز للتفعيل.','warn');return;}
+ try{
+  const snapshot=JSON.parse(decodeURIComponent(escape(atob(box.value.trim()))));
+  if(!snapshot.v||!snapshot.players){showToast('الرمز غير صالح.','error');return;}
+  if(!confirm('سيتم استعادة حالة المباراة من الرمز. هل أنت متأكد؟'))return;
+  // استعادة الأدوار
+  const roleBase=JSON.parse(JSON.stringify(DEFAULT_ROLES));
+  snapshot.roles.forEach(sr=>{const r=roleBase.find(x=>x.id===sr.id);if(r)r.count=sr.count;});
+  state.roles=roleBase;
+  // استعادة اللاعبين
+  state.players=snapshot.players;
+  state.started=snapshot.started;
+  state.day=snapshot.day;
+  state.night=snapshot.night;
+  state.phase=snapshot.phase;
+  state.usedAbilities=[...snapshot.usedAbilities];
+  state.votes=snapshot.votes||{};
+  state.revealedPlayers=snapshot.revealedPlayers||{};
+  state._excludedIds=new Set(snapshot._excludedIds||[]);
+  state._lastWinners=null;
+  // استعادة nightResults
+  state.nightResults={
+   dead:(snapshot.nightResults?.dead||[]).map(id=>state.players.find(p=>p.id===id)).filter(Boolean),
+   saved:(snapshot.nightResults?.saved||[]).map(id=>state.players.find(p=>p.id===id)).filter(Boolean)
+  };
+  // استعادة السجل
+  state.log=snapshot.log||[];
+  document.getElementById('game-log').innerHTML='';
+  document.getElementById('quick-log').innerHTML='';
+  if(state.log.length>0){
+   document.getElementById('log-empty').style.display='none';
+   [...state.log].reverse().forEach(e=>{
+    const lm={'tag-death':'وفاة','tag-save':'إنقاذ','tag-vote':'تصويت','tag-night':'ليل','tag-day':'نهار','tag-system':'نظام'};
+    const label=lm[e.tagClass]||e.type;
+    const h=`<div class="log-entry"><div class="log-time"><div>${e.time}</div><div style="font-size:0.6rem;color:var(--text3);margin-top:2px">${e.phase}</div></div><div class="log-content"><div><span class="log-tag ${e.tagClass}">${label}</span></div><div class="log-text">${e.text}</div></div></div>`;
+    document.getElementById('game-log').insertAdjacentHTML('beforeend',h);
+   });
+  }
+  // إعادة رسم الواجهة
+  renderSidebar();updateHeader();renderPlayerTable();renderRolesGrid();renderNightOrder();validateRoleCounts();renderFactionStatus();
+  if(state.started){
+   renderRolesReference();
+   if(state.phase==='night') renderNightPanel();
+   else renderDayPanel([]);
+  }
+  showToast('تم استعادة المباراة بنجاح.','success');
+  switchTab(state.phase==='night'?'night':'day');
+  setMobileNav(state.phase==='night'?'night':'day');
+ }catch(e){showToast('خطأ في قراءة الرمز. تأكد من صحته.','error');console.error(e);}
 }
 
 init();renderSidebar();
