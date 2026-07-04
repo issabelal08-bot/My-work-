@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>MAFIA - Automated Test Runner</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;background:#0f1724;color:#e6eef8;padding:1rem}
+    iframe{width:100%;height:700px;border:1px solid #334155;background:#000}
+    #controls{margin:0.8rem 0}
+    #results{width:100%;height:260px;font-family:monospace;background:#071024;color:#dff;padding:0.6rem;border-radius:6px;overflow:auto}
+    .pass{color:#4ade80}
+    .fail{color:#fb7185}
+    button{padding:0.5rem 0.8rem;border-radius:6px;border:1px solid #334155;background:#0b1220;color:#fff}
+  </style>
+</head>
+<body>
+  <h2>MAFIA - Automated Test Runner</h2>
+  <p>This page loads <strong>../MAFIA.html</strong> in an iframe and runs integration tests by calling functions inside the game's window object.
+  You must run this file from the repository root (so the iframe can load ../MAFIA.html). Serve via a local web server (e.g., `npx http-server .` or `python -m http.server`) and open this file from http://localhost:PORT/tests/MAFIA.test.html</p>
+
+  <div id="controls">
+    <button id="run">Run all tests</button>
+    <button id="rerun" disabled>Rerun failed</button>
+    <span id="summary"></span>
+  </div>
+
+  <iframe id="gameFrame" src="../MAFIA.html"></iframe>
+
+  <h3>Results</h3>
+  <div id="results"></div>
+
+<script>
+(function(){
+  const iframe=document.getElementById('gameFrame');
+  const runBtn=document.getElementById('run');
+  const rerunBtn=document.getElementById('rerun');
+  const resultsEl=document.getElementById('results');
+  const summaryEl=document.getElementById('summary');
+
+  function log(msg, cls){
+    const d=document.createElement('div'); d.textContent=msg; if(cls) d.className=cls; resultsEl.appendChild(d); resultsEl.scrollTop = resultsEl.scrollHeight;
+  }
+
+  function safeCall(win, name, ...args){
+    if(!win || !win[name]) throw new Error('Function not found: '+name);
+    return win[name](...args);
+  }
+
+  // Utility to reset iframe by reloading
+  function resetIframe(){ iframe.contentWindow.location.reload(); }
+
+  // Wait until game iframe ready by probing for `state` and `init`
+  function waitForReady(win, timeout=5000){
+    return new Promise((resolve,reject)=>{
+      const start=Date.now();
+      (function check(){
+        try{
+          if(win && win.state!==undefined && typeof win.init==='function') return resolve();
+        }catch(e){}
+        if(Date.now()-start>timeout) return reject(new Error('Game load timeout'));
+        setTimeout(check,100);
+      })();
+    });
+  }
+
+  // Reset game state via functions or direct manipulation
+  function prepareNewGame(win, playerCount=8){
+    // set player count, regenerate
+    const pcEl = win.document.getElementById('player-count');
+    if(pcEl){ pcEl.value = playerCount; }
+    if(typeof win.generatePlayerSlots === 'function') win.generatePlayerSlots();
+    // ensure state.players has default fields
+    win.state.players.forEach(p=>{
+      if(p.alive===undefined) p.alive=true;
+      if(p.roleId===undefined) p.roleId=null;
+      if(p.role===undefined) p.role=null;
+      if(p.bomberUsed===undefined) p.bomberUsed=false;
+      if(p.triggerUsed===undefined) p.triggerUsed=false;
+      if(p.sniperBullets===undefined) p.sniperBullets=1;
+      if(p.bettorTarget===undefined) p.bettorTarget=null;
+    });
+    if(typeof win.renderPlayerTable === 'function') win.renderPlayerTable();
+    if(typeof win.renderSidebar === 'function') { try{ win.renderSidebar(); }catch(e){} }
+  }
+
+  // Helper: assign roles deterministically to first N players
+  function assignRoles(win, mapping){
+    // mapping: [{id:1, roleId:'mafia', role:'مافيا', faction:'mafia'}, ...]
+    mapping.forEach(m=>{
+      const p = win.state.players.find(x=>x.id===m.id);
+      if(p){
+        p.roleId = m.roleId;
+        p.role = m.role || m.roleId;
+        p.faction = m.faction || (m.roleId==='mafia'?'mafia':'city');
+      }
+    });
+    if(typeof win.renderPlayerTable==='function') win.renderPlayerTable();
+    if(typeof win.renderSidebar==='function') win.renderSidebar();
+  }
+
+  // Tests definitions
+  const tests = [];
+
+  tests.push({
+    name: 'Sanity: init and defaults',
+    fn: async (win)=>{
+      // init should be present and set roles
+      if(typeof win.init !== 'function') throw new Error('init() missing');
+      win.init();
+      if(!Array.isArray(win.state.roles) || win.state.roles.length===0) throw new Error('DEFAULT_ROLES missing');
+      return true;
+    }
+  });
+
+  tests.push({
+    name: 'Player slots generation and defaults',
+    fn: async (win)=>{
+      prepareNewGame(win,8);
+      if(!Array.isArray(win.state.players)) throw new Error('state.players missing');
+      if(win.state.players.length!==8) throw new Error('unexpected players count: '+win.state.players.length);
+      // check defaults
+      const p=win.state.players[0];
+      if(p.alive!==true) throw new Error('player.alive not true');
+      if(p.sniperBullets===undefined) throw new Error('sniperBullets not initialised');
+      return true;
+    }
+  });
+
+  tests.push({
+    name: 'startGame blocks when players missing roles',
+    fn: async (win)=>{
+      prepareNewGame(win,6);
+      // ensure no roles assigned
+      win.state.players.forEach(p=>{p.roleId=null;p.role=null;p.faction=null;p.alive=true;});
+      if(typeof win.startGame !== 'function') throw new Error('startGame missing');
+      win.startGame();
+      if(win.state.started) throw new Error('startGame should not start when roles missing');
+      return true;
+    }
+  });
+
+  tests.push({
+    name: 'Distribution: randomAssign assigns roles when counts match',
+    fn: async (win)=>{
+      prepareNewGame(win,6);
+      // set counts: 1 mafia (mafia id), 1 godfather, 1 doctor, rest citizens
+      win.state.roles.forEach(r=>r.count=0);
+      const setRoleCount = (id,cnt)=>{ const r=win.state.roles.find(x=>x.id===id); if(r) r.count=cnt; };
+      setRoleCount('godfather',1); setRoleCount('mafia',1); setRoleCount('doctor',1); setRoleCount('citizen',3);
+      if(typeof win.randomAssign!=='function') throw new Error('randomAssign missing');
+      win.randomAssign();
+      // all players should have roleId
+      const missing = win.state.players.filter(p=>!p.roleId);
+      if(missing.length>0) throw new Error('Some players have no role after randomAssign: '+missing.map(x=>x.id).join(','));
+      return true;
+    }
+  });
+
+  tests.push({
+    name: 'Night resolution: mafia kill blocked by doctor',
+    fn: async (win)=>{
+      prepareNewGame(win,4);
+      // assign roles: player1 mafia, player2 doctor, player3 target, p4 citizen
+      assignRoles(win,[{id:1,roleId:'mafia',role:'مافيا',faction:'mafia'},{id:2,roleId:'doctor',role:'الدكتور',faction:'city'},{id:3,roleId:'citizen',role:'المواطن',faction:'city'},{id:4,roleId:'citizen',role:'المواطن',faction:'city'}]);
+      // set night inputs: mafia targets player3, doctor protects player3
+      win.state._nightInputs = { mafia: 3, doctor: 3 };
+      // call resolveNight
+      if(typeof win.resolveNight!=='function') throw new Error('resolveNight missing');
+      win.resolveNight();
+      // After resolveNight, player3 should be alive and state.nightResults.saved should include it
+      const saved = (win.state.nightResults && win.state.nightResults.saved) || [];
+      if(!saved.find(p=>p.id===3)) throw new Error('Doctor protection failed — target died');
+      return true;
+    }
+  });
+
+  tests.push({
+    name: 'Night resolution: sniper kills mafia target',
+    fn: async (win)=>{
+      prepareNewGame(win,4);
+      assignRoles(win,[{id:1,roleId:'sniper',role:'القناص',faction:'city'},{id:2,roleId:'mafia',role:'المافيا',faction:'mafia'},{id:3,roleId:'citizen',role:'المواطن',faction:'city'},{id:4,roleId:'citizen',role:'المواطن',faction:'city'}]);
+      // ensure sniper has bullets
+      const sn = win.state.players.find(p=>p.roleId==='sniper'); if(!sn) throw new Error('sniper player missing'); sn.sniperBullets = 1;
+      win.state._nightInputs = { sniper: 2 };
+      win.resolveNight();
+      // mafia target should be dead
+      const killed = win.state.players.find(p=>p.id===2 && !p.alive);
+      if(!killed) throw new Error('Sniper failed to kill mafia target');
+      return true;
+    }
+  });
+
+  tests.push({
+    name: 'Night resolution: sniper kills innocent, sniper dies too',
+    fn: async (win)=>{
+      prepareNewGame(win,4);
+      assignRoles(win,[{id:1,roleId:'sniper',role:'القناص',faction:'city'},{id:2,roleId:'citizen',role:'المواطن',faction:'city'},{id:3,roleId:'mafia',role:'المافيا',faction:'mafia'},{id:4,roleId:'citizen',role:'المواطن',faction:'city'}]);
+      const sn = win.state.players.find(p=>p.roleId==='sniper'); sn.sniperBullets = 1;
+      win.state._nightInputs = { sniper: 2 };
+      win.resolveNight();
+      const targetDead = !win.state.players.find(p=>p.id===2).alive;
+      const sniperDead = !win.state.players.find(p=>p.id===sn.id).alive;
+      if(!targetDead || !sniperDead) throw new Error('Sniper innocent shot did not kill both');
+      return true;
+    }
+  });
+
+  tests.push({
+    name: 'Day vote: declareResult excludes target and triggers pending death handling',
+    fn: async (win)=>{
+      prepareNewGame(win,4);
+      assignRoles(win,[{id:1,roleId:'citizen',role:'المواطن',faction:'city'},{id:2,roleId:'citizen',role:'المواطن',faction:'city'},{id:3,roleId:'jester',role:'المهرج',faction:'neutral'},{id:4,roleId:'mafia',role:'المافيا',faction:'mafia'}]);
+      // simulate votes: 2 votes on player3
+      win.state.votes = {};
+      win.state.votes[3] = 2;
+      // call declareResult
+      if(typeof win.declareResult!=='function') throw new Error('declareResult missing');
+      win.declareResult();
+      // Wait a tick for pending deaths resolution if any
+      // Check that player3 is dead
+      const p3 = win.state.players.find(p=>p.id===3);
+      if(p3.alive) throw new Error('declareResult failed to set player dead');
+      // Check jester win handling: state._lastWinners contains jester if handled
+      // Some behavior triggers announceWinners; but we just check that death recorded
+      return true;
+    }
+  });
+
+  tests.push({
+    name: 'Save & Restore: generate save code and activate restores state',
+    fn: async (win)=>{
+      prepareNewGame(win,5);
+      assignRoles(win,[{id:1,roleId:'godfather',role:'العراب',faction:'mafia'},{id:2,roleId:'doctor',role:'الدكتور',faction:'city'},{id:3,roleId:'citizen',role:'المواطن',faction:'city'},{id:4,roleId:'citizen',role:'المواطن',faction:'city'},{id:5,roleId:'citizen',role:'المواطن',faction:'city'}]);
+      // make some state changes
+      win.state.night = 2; win.state.day = 1; win.state.phase='night';
+      win.state.players[2].alive=false; // kill player 3
+      // produce save code if function exists
+      if(typeof win.copySaveCode === 'function'){
+        // copySaveCode likely interacts with clipboard. Instead call any function used to create code if available
+        // fallback: if there is stateToSave function, but we don't know. We'll attempt to read save-code-box value after invoking copySaveCode
+        try{ win.copySaveCode(); }catch(e){}
+      }
+      const box = win.document.getElementById('save-code-box');
+      if(!box) throw new Error('save-code-box textarea not found');
+      const code = box.value || box.textContent || '';
+      if(!code || code.length<10) throw new Error('save code not generated');
+      // Now attempt to reset state and activateSaveCode
+      // Clear players and set different value
+      win.state.players.forEach(p=>p.alive=true);
+      if(typeof win.activateSaveCode === 'function'){
+        try{ win.document.getElementById('save-code-box').value = code; win.activateSaveCode(); }catch(e){ /* continue */ }
+      }
+      // Check that player 3 is dead again
+      const restoredDead = !win.state.players.find(p=>p.id===3).alive;
+      if(!restoredDead) throw new Error('restore did not reapply saved dead player');
+      return true;
+    }
+  });
+
+  // Runner
+  async function runAll(){
+    resultsEl.innerHTML=''; summaryEl.textContent=''; rerunBtn.disabled=true; 
+    log('Waiting for game iframe to be ready...');
+    let win = null;
+    try{
+      await new Promise((res,rej)=>{
+        if(iframe.contentWindow && iframe.contentWindow.state!==undefined) return res();
+        iframe.addEventListener('load', ()=>{ res(); });
+        setTimeout(()=>{
+          if(iframe.contentWindow && iframe.contentWindow.state!==undefined) res();
+        },800);
+      });
+      win = iframe.contentWindow;
+      await waitForReady(win,8000);
+    }catch(e){ log('Game not ready: '+e.message, 'fail'); return; }
+
+    let passed=0, failed=0; const failedList=[];
+    for(const t of tests){
+      log('--- Running: '+t.name);
+      try{
+        const r = await t.fn(win);
+        log('PASS: '+t.name, 'pass'); passed++;
+      }catch(err){
+        log('FAIL: '+t.name+' -- '+(err && err.message?err.message:err), 'fail'); failed++; failedList.push({test:t.name,error:err.message||String(err)});
+      }
+    }
+    const total = tests.length;
+    summaryEl.textContent = `Results: ${total} tests — ${passed} passed, ${failed} failed.`;
+    // Expose failed list for rerun
+    if(failed>0){ rerunBtn.disabled=false; rerunBtn.dataset.failed = JSON.stringify(failedList); }
+    else rerunBtn.disabled=true;
+    log('\nTest run completed.');
+  }
+
+  runBtn.addEventListener('click', ()=>{ runAll(); });
+  rerunBtn.addEventListener('click', ()=>{ // simple rerun of failed only: just rerun all for simplicity
+    runAll();
+  });
+
+})();
+</script>
+</body>
+</html>
