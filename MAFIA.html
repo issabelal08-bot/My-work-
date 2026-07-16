@@ -434,24 +434,30 @@ body.hide-colors .fc-num{color:var(--text)!important}
 </div>
 <div class="modal-overlay" id="hunter-modal">
  <div class="modal-box" onclick="event.stopPropagation()">
-  <div style="text-align:center;margin-bottom:0.8rem">
+  <div style="text-align:center;margin-bottom:1rem">
    <div style="font-size:2.5rem">&#x1F3F9;</div>
-   <div class="modal-title" style="border:none;text-align:center;color:var(--red);margin-bottom:0.3rem">&#x627;&#x644;&#x635;&#x64A;&#x627;&#x62F; &#x645;&#x627;&#x62A;!</div>
-   <div style="font-size:0.85rem;color:var(--text2)" id="hunter-modal-desc">اختر لاعباً يأخذه معه — القدرة إجبارية</div>
+   <div class="modal-title" style="border:none;text-align:center;color:var(--red)">&#x627;&#x644;&#x635;&#x64A;&#x627;&#x62F; &#x645;&#x627;&#x62A;!</div>
+   <div style="font-size:0.85rem;color:var(--text2);margin-bottom:1rem">&#x627;&#x62E;&#x62A;&#x631; &#x644;&#x627;&#x639;&#x628;&#x627;&#x64B; &#x64A;&#x623;&#x62E;&#x630;&#x647; &#x645;&#x639;&#x647; &#x2014; &#x627;&#x644;&#x642;&#x62F;&#x631;&#x629; &#x625;&#x62C;&#x628;&#x627;&#x631;&#x64A;&#x629;</div>
   </div>
-  <div id="hunter-modal-content"></div>
-  <div style="margin-top:0.8rem;display:flex;flex-direction:column;gap:0.5rem" id="hunter-modal-actions"></div>
+  <div class="form-group" style="margin-bottom:1rem">
+   <label class="form-label">&#x627;&#x62E;&#x62A;&#x631; &#x627;&#x644;&#x647;&#x62F;&#x641;</label>
+   <select class="form-input" id="hunter-target-select"></select>
+  </div>
+  <button class="btn btn-danger" style="width:100%" onclick="confirmHunterKill()">&#x1F3F9; &#x62A;&#x623;&#x643;&#x64A;&#x62F; &#x627;&#x644;&#x627;&#x62E;&#x62A;&#x64A;&#x627;&#x631;</button>
  </div>
 </div>
 <div class="modal-overlay" id="bomber-modal">
  <div class="modal-box" onclick="event.stopPropagation()">
-  <div style="text-align:center;margin-bottom:0.8rem">
+  <div style="text-align:center;margin-bottom:1rem">
    <div style="font-size:2.5rem">&#x1F4A3;</div>
-   <div class="modal-title" style="border:none;text-align:center;color:var(--red);margin-bottom:0.3rem">&#x627;&#x644;&#x645;&#x62A;&#x641;&#x62C;&#x631;!</div>
-   <div style="font-size:0.85rem;color:var(--text2)" id="bomber-modal-desc">اختر لاعباً يأخذه معه</div>
+   <div class="modal-title" style="border:none;text-align:center;color:var(--red)">&#x627;&#x644;&#x645;&#x62A;&#x641;&#x62C;&#x631;!</div>
+   <div style="font-size:0.85rem;color:var(--text2);margin-bottom:1rem" id="bomber-modal-desc">اختر لاعباً يأخذه معه</div>
   </div>
-  <div id="bomber-modal-content"></div>
-  <div style="margin-top:0.8rem;display:flex;flex-direction:column;gap:0.5rem" id="bomber-modal-actions"></div>
+  <div class="form-group" style="margin-bottom:1rem">
+   <label class="form-label">اختر الهدف</label>
+   <select class="form-input" id="bomber-target-select"></select>
+  </div>
+  <button class="btn btn-danger" style="width:100%" onclick="confirmBomberKill()">💣 تأكيد</button>
  </div>
 </div>
 <div class="result-overlay" id="result-overlay">
@@ -666,114 +672,41 @@ function resolvePendingDeaths(callback) {
   afterTrigger();
  }
 }
-// ── Hunter/Bomber: Picker-list modal helpers ──────────────────────────
-let _hunterPickerSelected=null;
-let _bomberPickerSelected=null;
-
-function _openHunterPickerModal(players, desc, cb){
- _hunterPickerSelected=null;
- state._hunterCb=cb;
- const descEl=document.getElementById('hunter-modal-desc');
- if(descEl) descEl.textContent=desc||'اختر لاعباً يأخذه معه';
- const content=document.getElementById('hunter-modal-content');
- const actions=document.getElementById('hunter-modal-actions');
- if(!content||!actions){if(cb)cb();return;}
- content.innerHTML=`
-  <div style="font-size:0.8rem;color:var(--text2);margin-bottom:0.8rem">اختر اللاعب الذي سيموت مع الصياد:</div>
-  <div id="hunter-picker-list" style="display:flex;flex-direction:column;gap:0.35rem;max-height:260px;overflow-y:auto">
-   ${players.map(p=>`<button class="btn btn-ghost" id="hpicker-${p.id}" style="justify-content:flex-start;gap:0.6rem" onclick="selectHunterTarget(${p.id})">
-    <span class="player-num" style="flex-shrink:0">${p.id}</span>
-    <span>${p.name}</span>
-    <span style="font-size:0.72rem;color:var(--text3);margin-right:auto">${p.role||''}</span>
-   </button>`).join('')}
-  </div>`;
- actions.innerHTML=`
-  <button id="hunter-confirm-btn" class="btn btn-danger" style="justify-content:center;opacity:0.4;cursor:not-allowed;width:100%" disabled onclick="confirmHunterKill()">🏹 تأكيد الاختيار</button>
-  <button class="btn btn-ghost" style="justify-content:center;width:100%" onclick="clearHunterSelection()">مسح</button>`;
+function showHunterModalFor(hunter, cb) {
+ const al = state.players.filter(p => p.alive && p.id !== hunter.id);
+ if (!al.length) { cb(); return; }
+ document.getElementById('hunter-target-select').innerHTML = al.map(p => `<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');
  document.getElementById('hunter-modal').classList.add('show');
+ state._hunterCb = () => {
+  const sel = document.getElementById('hunter-target-select');
+  if (!sel.value) { showToast('اختر لاعباً.', 'warn'); return; }
+  const t = state.players.find(p => p.id == sel.value);
+  if (!t) { cb(); return; }
+  const msg = `الصياد ${hunter.name} مات واستخدم قدرته — اختار ${t.name} (${t.role}) ليموت معه.`;
+  addToPendingDeath(t, msg, msg);
+  document.getElementById('hunter-modal').classList.remove('show');
+  showToast(`🏹 ${t.name} سيموت بقدرة الصياد.`, 'warn');
+  resolvePendingDeaths(cb);
+ };
 }
-
-function showHunterModalFor(hunter, cb){
- const al=state.players.filter(p=>p.alive&&p.id!==hunter.id);
- if(!al.length){cb();return;}
- _openHunterPickerModal(al,`${hunter.name} (الصياد) — اختر لاعباً يأخذه معه`,cb);
-}
-
-function showHunterModal(cb){
- const al=state.players.filter(p=>p.alive&&p.roleId!=='hunter');
- if(!al.length){if(cb)cb();return;}
- _openHunterPickerModal(al,'الصياد مات — اختر لاعباً يأخذه معه',cb);
-}
-
-function selectHunterTarget(id){
- _hunterPickerSelected=id;
- document.querySelectorAll('#hunter-picker-list .btn').forEach(b=>{b.style.borderColor='';b.style.color='';});
- const sel=document.getElementById('hpicker-'+id);
- if(sel){sel.style.borderColor='var(--gold)';sel.style.color='var(--gold)';}
- const btn=document.getElementById('hunter-confirm-btn');
- if(btn){btn.disabled=false;btn.style.opacity='1';btn.style.cursor='';}
-}
-
-function confirmHunterKill(){
- if(!_hunterPickerSelected){showToast('اختر لاعباً.','warn');return;}
- const t=state.players.find(p=>p.id===_hunterPickerSelected);
- if(!t||!t.alive){showToast('لاعب غير صالح.','error');return;}
- document.getElementById('hunter-modal').classList.remove('show');
- const cb=state._hunterCb; state._hunterCb=null;
- _hunterPickerSelected=null;
- recordDeath(t,'قدرة الصياد');
- const msg=`قدرة الصياد: ${t.name} (${t.role}) — اختاره الصياد ليموت معه.`;
- addLog('death',msg,'tag-death');
- showToast(`🏹 ${t.name} مات بقدرة الصياد.`,'warn');
- if(!pendingDeaths.some(d=>d.player.id===t.id)){
-  pendingDeaths.push({player:t,publicMsg:'',logMsg:msg});
- }
- resolvePendingDeaths(cb||function(){renderSidebar();updateHeader();renderFactionStatus();checkWinConditionsFull();});
-}
-
-function skipHunterKill(){
- document.getElementById('hunter-modal').classList.remove('show');
- const cb=state._hunterCb; state._hunterCb=null;
- _hunterPickerSelected=null;
- addLog('system','الصياد لم يستخدم قدرته.','tag-system');
- if(cb) cb();
-}
-function clearHunterSelection(){
- _hunterPickerSelected=null;
- document.querySelectorAll('#hunter-picker-list .btn').forEach(b=>{b.style.borderColor='';b.style.color='';});
- const btn=document.getElementById('hunter-confirm-btn');
- if(btn){btn.disabled=true;btn.style.opacity='0.4';btn.style.cursor='not-allowed';}
-}
-
-function _openBomberPickerModal(players, desc, cb){
- _bomberPickerSelected=null;
- state._bomberCb=cb;
- const descEl=document.getElementById('bomber-modal-desc');
- if(descEl) descEl.textContent=desc||'اختر لاعباً يأخذه معه';
- const content=document.getElementById('bomber-modal-content');
- const actions=document.getElementById('bomber-modal-actions');
- if(!content||!actions){if(cb)cb();return;}
- content.innerHTML=`
-  <div style="font-size:0.8rem;color:var(--text2);margin-bottom:0.8rem">اختر اللاعب الذي سيموت مع المتفجر:</div>
-  <div id="bomber-picker-list" style="display:flex;flex-direction:column;gap:0.35rem;max-height:260px;overflow-y:auto">
-   ${players.map(p=>`<button class="btn btn-ghost" id="bpicker-${p.id}" style="justify-content:flex-start;gap:0.6rem" onclick="selectBomberTarget(${p.id})">
-    <span class="player-num" style="flex-shrink:0">${p.id}</span>
-    <span>${p.name}</span>
-    <span style="font-size:0.72rem;color:var(--text3);margin-right:auto">${p.role||''}</span>
-   </button>`).join('')}
-  </div>`;
- actions.innerHTML=`
-  <button id="bomber-confirm-btn" class="btn btn-danger" style="justify-content:center;opacity:0.4;cursor:not-allowed;width:100%" disabled onclick="confirmBomberKill()">💣 تأكيد الاختيار</button>
-  <button class="btn btn-ghost" style="justify-content:center;width:100%" onclick="clearBomberSelection()">مسح</button>`;
+function showBomberModalFor(bomber, cb) {
+ const al = state.players.filter(p => p.alive && p.id !== bomber.id);
+ if (!al.length) { cb(); return; }
+ document.getElementById('bomber-modal-desc').textContent = `${bomber.name} (المتفجر) — اختر لاعباً يأخذه معه`;
+ document.getElementById('bomber-target-select').innerHTML = al.map(p => `<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');
  document.getElementById('bomber-modal').classList.add('show');
+ state._bomberCb = () => {
+  const sel = document.getElementById('bomber-target-select');
+  if (!sel.value) { showToast('اختر لاعباً.', 'warn'); return; }
+  const t = state.players.find(p => p.id == sel.value);
+  if (!t) { cb(); return; }
+  const msg = `المتفجر ${bomber.name} مات واستخدم قدرته — اختار ${t.name} (${t.role}) ليموت معه.`;
+  addToPendingDeath(t, msg, msg);
+  document.getElementById('bomber-modal').classList.remove('show');
+  showToast(`💣 ${t.name} سيموت بقدرة المتفجر.`, 'warn');
+  resolvePendingDeaths(cb);
+ };
 }
-
-function showBomberModalFor(bomber, cb){
- const al=state.players.filter(p=>p.alive&&p.id!==bomber.id);
- if(!al.length){cb();return;}
- _openBomberPickerModal(al,`${bomber.name} (المتفجر) — اختر لاعباً يأخذه معه`,cb);
-}
-
 function getNightInput(key){
  if(state._nightInputs!==undefined&&state._nightInputs!==null){
   const map={'mafia':'mafia','doctor':'doctor','guard':'guard','witch-heal':'witch-heal','witch-kill':'witch-kill','detective':'detective','gangster':'gangster','sniper':'sniper','moon':'moon','bettor':'bettor'};
@@ -937,18 +870,13 @@ function declareResult(){
  addLog('vote',`أُقصي ${tgt.name} (${tgt.role}) بالتصويت النهاري بـ${top.count} صوت.`,'tag-vote');
  showToast(`⚖️ تم إقصاء ${tgt.name} — ${tgt.role}.`,'warn');
  renderSidebar();updateHeader();renderFactionStatus();renderVoteList();renderPlayerTable();
- // لا نفحص الفوز هنا — ننتظر انتهاء جميع القدرات المرتبطة بالموت أولاً
+ const winners=gatherWinners(tgt);
+ if(winners.length>0){announceWinners(winners);return;}
  clearPendingDeaths();
  addToPendingDeath(tgt, null, `إقصاء: ${tgt.name} (${tgt.role}) — أُقصي بالتصويت`);
  resolvePendingDeaths(()=>{
   state.day++;
   renderSidebar();updateHeader();renderVoteList();
-  // فحص فوز المهرج/المراهن (مرتبطان بالإقصاء تحديداً)
-  const postWins=[];
-  if(tgt.roleId==='jester') postWins.push({emoji:'🤡',name:'المهرج',detail:'أُقصي بالتصويت وحقق هدفه'});
-  const bettor=state.players.find(p=>p.roleId==='bettor'&&p.bettorTarget===tgt.id);
-  if(bettor) postWins.push({emoji:'🎰',name:'المراهن',detail:`${bettor.name} راهن على طرد هذا اللاعب وتحقق الرهان`});
-  if(postWins.length>0){announceWinners(postWins);return;}
   checkWinConditionsFull();
  });
 }
@@ -1080,50 +1008,81 @@ function showGameSummary(){
 
  document.getElementById('summary-overlay').classList.add('show');
 }
+function showHunterModal(cb){
+ const al=state.players.filter(p=>p.alive&&p.roleId!=='hunter');
+ if(!al.length){if(cb)cb();return;}
+ document.getElementById('hunter-target-select').innerHTML=al.map(p=>`<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');
+ document.getElementById('hunter-modal').classList.add('show');
+ state._hunterCb=cb;
+}
+function confirmHunterKill(){
+ const s=document.getElementById('hunter-target-select');
+ if(!s.value){showToast('اختر لاعباً.','warn');return;}
+ const t=state.players.find(p=>p.id==s.value);
+ if(!t||!t.alive){showToast('لاعب غير صالح.','error');return;}
+ document.getElementById('hunter-modal').classList.remove('show');
+ if(state._hunterCb){
+  // المسار من showHunterModalFor — يتولى إضافة الضحية و resolvePendingDeaths
+  const cb=state._hunterCb; state._hunterCb=null; cb();
+ } else {
+  // المسار المباشر — أضف الضحية لـ pendingDeaths ثم أعد التشغيل
+  recordDeath(t,'قدرة الصياد');
+  addLog('death',`قدرة الصياد: ${t.name} (${t.role}) — اختاره الصياد ليموت معه.`,'tag-death');
+  showToast(`🏹 ${t.name} مات بقدرة الصياد.`,'warn');
+  if(!pendingDeaths.some(d=>d.player.id===t.id)){
+   pendingDeaths.push({player:t,publicMsg:'',logMsg:''});
+  }
+  resolvePendingDeaths(()=>{
+   renderSidebar();updateHeader();renderFactionStatus();checkWinConditionsFull();
+  });
+ }
+}
+function confirmBomberKill(){
+ const s=document.getElementById('bomber-target-select');
+ if(!s.value){showToast('اختر لاعباً.','warn');return;}
+ const t=state.players.find(p=>p.id==s.value);
+ if(!t||!t.alive){showToast('لاعب غير صالح.','error');return;}
+ document.getElementById('bomber-modal').classList.remove('show');
+ recordDeath(t,'قدرة المتفجر');
+ addLog('death',`قدرة المتفجر: ${t.name} (${t.role}) — اختاره المتفجر ليموت معه.`,'tag-death');
+ showToast(`💣 ${t.name} مات بقدرة المتفجر.`,'warn');
+ if(!pendingDeaths.some(d=>d.player.id===t.id)){
+  pendingDeaths.push({player:t,publicMsg:'',logMsg:''});
+ }
+ if(state._bomberCb){
+  const cb=state._bomberCb; state._bomberCb=null; cb();
+ } else {
+  resolvePendingDeaths(()=>{renderSidebar();updateHeader();renderFactionStatus();checkWinConditionsFull();});
+ }
+}
 function showBomberModal(cb,desc){
  const al=state.players.filter(p=>p.alive&&p.roleId!=='bomber');
  if(!al.length){if(cb)cb();return;}
- _openBomberPickerModal(al,desc||'المتفجر مات — اختر لاعباً يأخذه معه',cb);
+ document.getElementById('bomber-modal-desc').textContent=desc||'اختر لاعباً يأخذه معه — القدرة إجبارية';
+ document.getElementById('bomber-target-select').innerHTML=al.map(p=>`<option value="${p.id}">${p.id}. ${p.name}</option>`).join('');
+ document.getElementById('bomber-modal').classList.add('show');
+ state._bomberCb=cb;
 }
-
-function selectBomberTarget(id){
- _bomberPickerSelected=id;
- document.querySelectorAll('#bomber-picker-list .btn').forEach(b=>{b.style.borderColor='';b.style.color='';});
- const sel=document.getElementById('bpicker-'+id);
- if(sel){sel.style.borderColor='var(--gold)';sel.style.color='var(--gold)';}
- const btn=document.getElementById('bomber-confirm-btn');
- if(btn){btn.disabled=false;btn.style.opacity='1';btn.style.cursor='';}
-}
-
 function confirmBomberKill(){
- if(!_bomberPickerSelected){showToast('اختر لاعباً.','warn');return;}
- const t=state.players.find(p=>p.id===_bomberPickerSelected);
+ const s=document.getElementById('bomber-target-select');
+ if(!s.value){showToast('اختر لاعباً.','warn');return;}
+ const t=state.players.find(p=>p.id==s.value);
  if(!t||!t.alive){showToast('لاعب غير صالح.','error');return;}
  document.getElementById('bomber-modal').classList.remove('show');
- const cb=state._bomberCb; state._bomberCb=null;
- _bomberPickerSelected=null;
  recordDeath(t,'قدرة المتفجر');
- const msg=`قدرة المتفجر: ${t.name} (${t.role}) — اختاره المتفجر ليموت معه.`;
- addLog('death',msg,'tag-death');
- showToast(`💣 ${t.name} مات بقدرة المتفجر.`,'warn');
+ addLog('death',`قدرة المتفجر: ${t.name} (${t.role}) — اختاره المتفجر ليموت معه.`,'tag-death');
+ showToast(`💣 ${t.name} سيُعالَج بقدرة المتفجر.`,'warn');
+ // أضف الضحية لـ pendingDeaths حتى تُفحص قدراتها
  if(!pendingDeaths.some(d=>d.player.id===t.id)){
-  pendingDeaths.push({player:t,publicMsg:'',logMsg:msg});
+  pendingDeaths.push({player:t,publicMsg:'',logMsg:''});
  }
- resolvePendingDeaths(cb||function(){renderSidebar();updateHeader();renderFactionStatus();checkWinConditionsFull();});
-}
-
-function skipBomberKill(){
- document.getElementById('bomber-modal').classList.remove('show');
- const cb=state._bomberCb; state._bomberCb=null;
- _bomberPickerSelected=null;
- addLog('system','المتفجر لم يستخدم قدرته.','tag-system');
- if(cb) cb();
-}
-function clearBomberSelection(){
- _bomberPickerSelected=null;
- document.querySelectorAll('#bomber-picker-list .btn').forEach(b=>{b.style.borderColor='';b.style.color='';});
- const btn=document.getElementById('bomber-confirm-btn');
- if(btn){btn.disabled=true;btn.style.opacity='0.4';btn.style.cursor='not-allowed';}
+ const cb=state._bomberCb||null;
+ state._bomberCb=null;
+ resolvePendingDeaths(()=>{
+  renderSidebar();updateHeader();renderFactionStatus();
+  checkWinConditionsFull();
+  if(cb) cb();
+ });
 }
 // يُستدعى يدوياً من زر "المتفجر يفجّر نفسه"
 function activateBomberSacrifice(){
@@ -1246,10 +1205,8 @@ function killPlayer(){
    </button>`).join('')}
   </div>`;
  document.getElementById('modal-actions').innerHTML=`
-  <div style="display:flex;flex-direction:column;gap:0.5rem;width:100%">
-   <button id="picker-confirm-btn" class="btn btn-danger" style="justify-content:center;opacity:0.4;cursor:not-allowed" disabled onclick="execPickerAction()">💀 تأكيد الوفاة</button>
-   <button class="btn btn-ghost" style="justify-content:center" onclick="closeModal()">إلغاء</button>
-  </div>`;
+  <button id="picker-confirm-btn" class="btn btn-danger" style="flex:1;justify-content:center;opacity:0.4;cursor:not-allowed" disabled onclick="execPickerAction()">💀 تأكيد الوفاة</button>
+  <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="closeModal()">إلغاء</button>`;
  document.getElementById('player-modal').classList.add('show');
 }
 function revivePlayer(){
@@ -1267,10 +1224,8 @@ function revivePlayer(){
    </button>`).join('')}
   </div>`;
  document.getElementById('modal-actions').innerHTML=`
-  <div style="display:flex;flex-direction:column;gap:0.5rem;width:100%">
-   <button id="picker-confirm-btn" class="btn btn-success" style="justify-content:center;opacity:0.4;cursor:not-allowed" disabled onclick="execPickerAction()">💚 تأكيد الإحياء</button>
-   <button class="btn btn-ghost" style="justify-content:center" onclick="closeModal()">إلغاء</button>
-  </div>`;
+  <button id="picker-confirm-btn" class="btn btn-success" style="flex:1;justify-content:center;opacity:0.4;cursor:not-allowed" disabled onclick="execPickerAction()">💚 تأكيد الإحياء</button>
+  <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="closeModal()">إلغاء</button>`;
  document.getElementById('player-modal').classList.add('show');
 }
 let _pickerSelected=null;let _pickerMode=null;
