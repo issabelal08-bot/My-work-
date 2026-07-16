@@ -17,44 +17,38 @@
       --off-red-dim: rgba(122,51,70,0.4);
     }
     *{ box-sizing: border-box; }
-    html,body{ height:100%; margin:0; }
+    html,body{ height:100%; margin:0; overflow:hidden; }
     body{
       font-family: 'Cairo', sans-serif;
-      min-height:100vh;
+      height:100vh; height:100dvh;
+      width:100vw;
       display:flex; flex-direction:column; align-items:center; justify-content:center;
-      gap: 34px;
-      padding: 32px 20px;
+      gap: 4.5vmin;
+      padding: 3vmin 3vmin;
       background:
         radial-gradient(circle at 50% 0%, rgba(242,184,75,0.06), transparent 55%),
         linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-deep-2) 100%);
       color: var(--cream);
-      overflow-x:hidden;
     }
 
     /* ---------- Title ---------- */
-    header{ text-align:center; }
+    header{ text-align:center; flex-shrink:0; }
     .title{
       font-family: 'Lalezar', 'Cairo', sans-serif;
       font-weight:400;
-      font-size: clamp(2rem, 6vw, 3.1rem);
+      font-size: clamp(2rem, 8vmin, 3.4rem);
       letter-spacing: 2px;
       color: var(--amber);
       text-shadow: 0 0 30px rgba(242,184,75,0.35);
       margin:0;
     }
-    .eyebrow{
-      font-size: 12px;
-      letter-spacing: 4px;
-      color: var(--cream-dim);
-      margin: 0 0 6px;
-      text-transform: uppercase;
-    }
 
     /* ---------- Main split-flap card ---------- */
     .board{
       position: relative;
-      width: min(78vw, 300px);
+      width: min(46vmin, 260px);
       aspect-ratio: 1 / 1.05;
+      flex-shrink:0;
       background: var(--panel);
       border-radius: 18px;
       box-shadow:
@@ -82,7 +76,7 @@
       position: relative;
       font-family: 'Lalezar', 'Cairo', sans-serif;
       font-weight:400;
-      font-size: clamp(6rem, 24vw, 9.5rem);
+      font-size: clamp(3.4rem, 22vmin, 7.5rem);
       line-height: 1;
       color: var(--cream);
       transform-style: preserve-3d;
@@ -102,61 +96,182 @@
     }
 
     /* ---------- Lever button ---------- */
-    .lever-wrap{ display:flex; flex-direction:column; align-items:center; gap:10px; }
+    .lever-wrap{ display:flex; flex-direction:row; align-items:center; gap:2vmin; flex-shrink:0; }
     #gen-btn{
       font-family:'Cairo', sans-serif;
       font-weight:800;
-      font-size: 19px;
+      font-size: clamp(0.85rem, 2.4vmin, 1.15rem);
       color: var(--bg-deep);
       background: linear-gradient(180deg, #ffd27a, var(--amber));
       border: none;
-      padding: 16px 52px;
+      padding: 1.4vmin 4.5vmin;
       border-radius: 999px;
       cursor:pointer;
       box-shadow:
-        0 8px 0 #b8842b,
-        0 16px 26px rgba(242,184,75,0.25);
+        0 6px 0 #b8842b,
+        0 12px 20px rgba(242,184,75,0.25);
       transition: transform 0.08s ease, box-shadow 0.08s ease;
       letter-spacing: 0.5px;
     }
     #gen-btn:active{
-      transform: translateY(6px);
+      transform: translateY(5px);
       box-shadow:
-        0 2px 0 #b8842b,
-        0 6px 14px rgba(242,184,75,0.2);
+        0 1px 0 #b8842b,
+        0 4px 10px rgba(242,184,75,0.2);
     }
     #gen-btn:disabled{
       opacity:0.6;
       cursor:default;
     }
 
+    /* ---------- Tool row (delete mode / open all) ---------- */
+    .tool-row{ display:flex; flex-direction:row; align-items:center; justify-content:center; gap:2vmin; flex-shrink:0; }
+    .tool-btn{
+      font-family:'Cairo', sans-serif;
+      font-weight:700;
+      font-size: clamp(0.7rem, 1.9vmin, 0.95rem);
+      color: var(--cream);
+      background: transparent;
+      border: 1.5px solid rgba(242,236,217,0.3);
+      padding: 1.1vmin 3vmin;
+      border-radius: 999px;
+      cursor:pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.08s ease, color 0.15s ease;
+    }
+    .tool-btn:hover{ background: rgba(242,236,217,0.08); border-color: rgba(242,236,217,0.5); }
+    .tool-btn:active{ transform: translateY(2px); }
+    .tool-btn.active{
+      background: var(--off-red-dim);
+      border-color: rgba(122,51,70,0.9);
+      color: #ffd7de;
+    }
+
+    /* ---------- Log ---------- */
+    .log-wrap{
+      width: min(90vw, 88vmin, 420px);
+      background: var(--panel);
+      border-radius: 12px;
+      padding: 1.4vmin 1.8vmin;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
+      flex-shrink:1;
+      min-height:0;
+    }
+    .log-header{
+      display:flex; align-items:center; justify-content:space-between;
+      margin-bottom: 0.8vmin;
+    }
+    .log-title{
+      font-size: clamp(0.65rem, 1.7vmin, 0.85rem);
+      color: var(--cream-dim);
+      letter-spacing: 0.5px;
+    }
+    #copy-btn{
+      font-family:'Cairo', sans-serif;
+      font-size: clamp(0.6rem, 1.6vmin, 0.8rem);
+      font-weight:700;
+      color: var(--amber);
+      background: var(--amber-dim);
+      border: none;
+      border-radius: 999px;
+      padding: 0.5vmin 2vmin;
+      cursor:pointer;
+      transition: background 0.15s ease;
+    }
+    #copy-btn:hover{ background: rgba(242,184,75,0.5); }
+    #log{
+      width:100%;
+      height: 8vmin;
+      min-height: 44px;
+      resize:none;
+      border:none;
+      outline:none;
+      background:transparent;
+      color: var(--cream);
+      font-family:'Cairo', sans-serif;
+      font-size: clamp(0.7rem, 1.8vmin, 0.95rem);
+      line-height:1.5;
+      overflow-y:auto;
+      direction: rtl;
+      display:block;
+    }
+    #log::placeholder{ color: var(--cream-dim); opacity:0.6; }
+
+    /* ---------- Confirm modal ---------- */
+    .modal-overlay{
+      position: fixed; inset: 0;
+      background: rgba(10,11,16,0.75);
+      display:flex; align-items:center; justify-content:center;
+      padding: 6vmin;
+      z-index: 50;
+    }
+    .modal-overlay.hidden{ display:none; }
+    .modal-box{
+      width: min(85vw, 78vmin, 340px);
+      background: var(--panel);
+      border-radius: 14px;
+      padding: 3.2vmin 3vmin;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.06);
+      text-align:center;
+    }
+    .modal-text{
+      font-size: clamp(0.85rem, 2.2vmin, 1.05rem);
+      color: var(--cream);
+      line-height:1.7;
+      margin: 0 0 2.6vmin;
+    }
+    .modal-actions{
+      display:flex; gap: 1.6vmin;
+      justify-content:center;
+    }
+    .modal-btn{
+      font-family:'Cairo', sans-serif;
+      font-weight:700;
+      font-size: clamp(0.75rem, 2vmin, 0.95rem);
+      border-radius: 999px;
+      padding: 1.1vmin 4vmin;
+      cursor:pointer;
+      border: none;
+      transition: transform 0.08s ease, opacity 0.15s ease;
+    }
+    .modal-btn:active{ transform: translateY(2px); }
+    .modal-confirm{
+      background: var(--amber);
+      color: var(--bg-deep);
+    }
+    .modal-cancel{
+      background: transparent;
+      color: var(--cream);
+      border: 1.5px solid rgba(242,236,217,0.3);
+    }
+
     /* ---------- Letter tile grid ---------- */
-    .grid-wrap{ width: min(92vw, 460px); display:flex; flex-direction:column; align-items:center; gap:10px; }
+    .grid-wrap{ width: min(90vw, 88vmin, 420px); display:flex; flex-direction:column; align-items:center; gap:1.2vmin; flex-shrink:1; }
     #letter-grid{
-      display:flex; flex-wrap:wrap; justify-content:center; gap:7px;
+      display:flex; flex-wrap:wrap; justify-content:center; gap:1.8vmin 1.6vmin;
     }
     .letter-toggle{
       position:relative;
-      width: 38px; height: 38px;
-      border-radius: 6px;
+      width: clamp(36px, 7.2vmin, 52px); height: clamp(36px, 7.2vmin, 52px);
+      border-radius: 9px;
       font-family:'Cairo', sans-serif;
-      font-size: 1.05rem;
+      font-size: clamp(1rem, 3vmin, 1.4rem);
       font-weight: 700;
       display:flex; align-items:center; justify-content:center;
-      cursor:pointer;
+      cursor: default;
       border: none;
       background: var(--panel);
       color: var(--cream);
       box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06), 0 2px 0 rgba(0,0,0,0.35);
       transition: transform 0.12s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
     }
+    #letter-grid.delete-mode .letter-toggle{ cursor:pointer; }
+    #letter-grid.delete-mode .letter-toggle:hover{ transform: translateY(-2px); }
     .letter-toggle::after{
       content:"";
       position:absolute; left:4px; right:4px; top:50%;
       height:1px; background: rgba(0,0,0,0.4);
       transform: translateY(-50%);
     }
-    .letter-toggle:hover{ transform: translateY(-2px); }
     .letter-toggle.disabled{
       background: var(--off-red-dim);
       color: #cfa7b1;
@@ -173,20 +288,40 @@
     .hint{
       font-size: 12px;
       color: var(--cream-dim);
-      opacity: 0.6;
+      opacity: 0;
       letter-spacing: 0.3px;
       margin: 0;
       text-align:center;
+      height:0;
+      overflow:hidden;
+      transition: opacity 0.2s ease;
     }
+    .hint.visible{
+      opacity: 0.6;
+      height:auto;
+    }
+
+    @keyframes wiggle{
+      0%, 100% { transform: rotate(-2deg); }
+      50% { transform: rotate(2deg); }
+    }
+    #letter-grid.delete-mode .letter-toggle{
+      animation: wiggle 0.22s ease-in-out infinite;
+    }
+    #letter-grid.delete-mode .letter-toggle.disabled{
+      animation: none;
+    }
+    #letter-grid.delete-mode .letter-toggle:nth-child(2n){ animation-delay: 0.05s; }
+    #letter-grid.delete-mode .letter-toggle:nth-child(3n){ animation-delay: 0.09s; }
+    #letter-grid.delete-mode .letter-toggle:nth-child(5n){ animation-delay: 0.13s; }
   </style>
  </head>
  <body>
   <header>
-   <p class="eyebrow">اسم • حيوان • نبات • جماد</p>
    <h1 class="title">مولد الحروف</h1>
   </header>
 
-  <main style="display:flex; flex-direction:column; align-items:center; gap:30px;">
+  <main style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4.5vmin; width:100%; min-height:0; flex:1;">
    <div class="board">
     <div id="letter" class="letter-display">؟</div>
    </div>
@@ -197,9 +332,32 @@
 
    <div class="grid-wrap">
     <div id="letter-grid"></div>
-    <p class="hint">اضغط على الحرف لإيقافه</p>
+    <p class="hint" id="delete-hint">اضغط على الحرف لإزالته...</p>
+   </div>
+
+   <div class="tool-row">
+    <button id="delete-btn" type="button" class="tool-btn">حذف حرف</button>
+    <button id="reset-btn" type="button" class="tool-btn">فتح الكل</button>
+   </div>
+
+   <div class="log-wrap">
+    <div class="log-header">
+     <span class="log-title">السجل</span>
+     <button id="copy-btn" type="button">نسخ</button>
+    </div>
+    <textarea id="log" rows="2" readonly placeholder="ستُسجَّل هنا الحروف التي تظهر..."></textarea>
    </div>
   </main>
+
+  <div class="modal-overlay hidden" id="confirm-modal">
+   <div class="modal-box">
+    <p class="modal-text">هل أنت متأكد إنك عايز تفتح كل الحروف وتمسح السجل؟</p>
+    <div class="modal-actions">
+     <button type="button" class="modal-btn modal-confirm" id="confirm-yes">تأكيد</button>
+     <button type="button" class="modal-btn modal-cancel" id="confirm-no">إلغاء</button>
+    </div>
+   </div>
+  </div>
 
   <script>
     const allLetters = 'أبتثجحخدذرزسشصضطظعغفقكلمنهوي'.split('');
@@ -207,8 +365,40 @@
     const display = document.getElementById('letter');
     const grid = document.getElementById('letter-grid');
     const genBtn = document.getElementById('gen-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const deleteBtn = document.getElementById('delete-btn');
+    const logBox = document.getElementById('log');
+    const deleteHint = document.getElementById('delete-hint');
+    const copyBtn = document.getElementById('copy-btn');
+    const confirmModal = document.getElementById('confirm-modal');
+    const confirmYes = document.getElementById('confirm-yes');
+    const confirmNo = document.getElementById('confirm-no');
 
     const letterBtns = new Map();
+    const history = [];
+    let deleteMode = false;
+
+    function renderLog() {
+      logBox.value = history
+        .map((l, i) => `${i + 1}. ${l}`)
+        .join('   ');
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    function addToHistory(letter) {
+      const idx = history.indexOf(letter);
+      if (idx !== -1) history.splice(idx, 1);
+      history.push(letter);
+      renderLog();
+    }
+
+    function removeFromHistory(letter) {
+      const idx = history.indexOf(letter);
+      if (idx !== -1) {
+        history.splice(idx, 1);
+        renderLog();
+      }
+    }
 
     allLetters.forEach(l => {
       const btn = document.createElement('button');
@@ -218,17 +408,67 @@
       btn.setAttribute('aria-pressed', 'true');
       letterBtns.set(l, btn);
       btn.addEventListener('click', () => {
+        if (!deleteMode) return;
         if (excluded.has(l)) {
           excluded.delete(l);
           btn.classList.remove('disabled');
           btn.setAttribute('aria-pressed', 'true');
+          removeFromHistory(l);
         } else {
           excluded.add(l);
           btn.classList.add('disabled');
           btn.setAttribute('aria-pressed', 'false');
+          addToHistory(l);
         }
       });
       grid.appendChild(btn);
+    });
+
+    deleteBtn.addEventListener('click', () => {
+      deleteMode = !deleteMode;
+      deleteBtn.classList.toggle('active', deleteMode);
+      deleteBtn.textContent = deleteMode ? 'إنهاء الحذف' : 'حذف حرف';
+      grid.classList.toggle('delete-mode', deleteMode);
+      deleteHint.classList.toggle('visible', deleteMode);
+    });
+
+    resetBtn.addEventListener('click', () => {
+      confirmModal.classList.remove('hidden');
+    });
+
+    confirmYes.addEventListener('click', () => {
+      excluded.clear();
+      letterBtns.forEach(btn => {
+        btn.classList.remove('disabled');
+        btn.setAttribute('aria-pressed', 'true');
+      });
+      history.length = 0;
+      renderLog();
+      deleteMode = false;
+      deleteBtn.classList.remove('active');
+      deleteBtn.textContent = 'حذف حرف';
+      grid.classList.remove('delete-mode');
+      deleteHint.classList.remove('visible');
+      confirmModal.classList.add('hidden');
+    });
+
+    confirmNo.addEventListener('click', () => {
+      confirmModal.classList.add('hidden');
+    });
+
+    copyBtn.addEventListener('click', async () => {
+      const text = logBox.value;
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (e) {
+        logBox.removeAttribute('readonly');
+        logBox.select();
+        document.execCommand('copy');
+        logBox.setAttribute('readonly', 'true');
+      }
+      const original = copyBtn.textContent;
+      copyBtn.textContent = 'تم النسخ';
+      setTimeout(() => { copyBtn.textContent = original; }, 1200);
     });
 
     let spinning = false;
@@ -275,6 +515,7 @@
             excluded.add(lastLetter);
             letterBtns.get(lastLetter).classList.add('disabled');
             letterBtns.get(lastLetter).setAttribute('aria-pressed', 'false');
+            addToHistory(lastLetter);
           }
           setTimeout(() => {
             display.classList.add('pop');
